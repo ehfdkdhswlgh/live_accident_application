@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "937100990832",
+    "project_id": "live-accident",
+    "storage_bucket": "live-accident.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:937100990832:android:5b8b0479badd37202ad7b5",
+        "android_client_info": {
+          "package_name": "com.d447.liveaccident"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "937100990832-9g4uibr3lj04dt203vtb8fk1g1fgr6pu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDifM8JcEj-UdkhAoQaAjSJuG4REsXsFDg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "937100990832-9g4uibr3lj04dt203vtb8fk1g1fgr6pu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
