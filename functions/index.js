@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
-const cors = require('cors')({origin: true});
-const request = require('request');
-const converter = require("xml-js");
+const cors = require("cors")({origin: true});
+const request = require("request");
+// const converter = require("xml-js");
 
 // firebase deploy --only "functions:함수이름"
 // 줄바꿈 2줄이상 금지
@@ -22,11 +22,10 @@ exports.helloJihoon = functions.https.onRequest((request, response) => {
   response.send("Hello from Firebase!");
 });
 
-
 exports.getRSS = functions.https.onRequest((req, response) => {
   cors(req, response, () => {
-    request(`https://news.google.com/rss/search?q=%EC%82%AC%EA%B1%B4%EC%82%AC%EA%B3%A0&hl=ko&gl=KR&ceid=KR%3Ako`, function (error, res, body) {
+    request("https://news.google.com/rss/search?q=%EC%82%AC%EA%B1%B4%EC%82%AC%EA%B3%A0&hl=ko&gl=KR&ceid=KR%3Ako", function(error, res, body) {
       response.send(res);
     });
-  })
+  });
 });
