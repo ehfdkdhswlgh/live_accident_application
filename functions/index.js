@@ -7,3 +7,11 @@ exports.helloWorld = functions.https.onRequest((request, response) => {
   functions.logger.info("Hello logs!", {structuredData: true});
   response.send("Hello from Firebase!");
 });
+
+
+exports.helloJihwan = functions.https.onRequest((request, response) => {
+  functions.logger.info("Hello jihwan!", {structuredData: true});
+  response.send("Hello from Firebase!");
+});
+
+//firebase deploy --only "functions:함수이름"
