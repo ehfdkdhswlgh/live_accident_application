@@ -79,8 +79,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.blue,
-                    onPrimary: Colors.white,
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blue,
                   ),
                   onPressed: _submitForm,
                   child: Text('로그인'),
