@@ -55,9 +55,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
         //child: ReportScreen(name : "출근하기 귀찮네"), //게시글 신고
 
-        //child: ReportManagementScreen(),
+        //child: ReportManagementScreen(), //제보글 관리 화면
 
-        child: ReportWriteScreen(),
+        child: ReportWriteScreen(), //제보글 작성 화면
         //애뮬레이터 실행시 오류날 시 https://www.youtube.com/watch?v=bTyLehofqvk
         //https://www.flutterbeads.com/change-android-minsdkversion-in-flutter/
 
