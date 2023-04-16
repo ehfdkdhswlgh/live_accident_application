@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:live_accident_application/hojun/post.dart';
+import 'package:provider/provider.dart';
 import 'haechan/login.dart' as login;
 import 'haechan/report.dart' as report;
 import 'hojun/feed.dart';
 import 'hojun/store.dart';
-import 'package:provider/provider.dart';
+import 'hojun/top_rank.dart';
+
 
 void main() {
   runApp(
@@ -54,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: [Post()][0],
+      body: [Post(),Post(),Post(),Rank(),Post()][_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
