@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'tags.dart';
-import 'main_post.dart';
+import 'feed.dart';
 
 class Post extends StatefulWidget {
   const Post({Key? key}) : super(key: key);
@@ -10,16 +10,13 @@ class Post extends StatefulWidget {
 }
 
 class _PostState extends State<Post> {
-
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Tags(),
-        MainPost(),
-
+        Expanded(child: Feed()),
       ],
     );
   }
 }
-

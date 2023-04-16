@@ -88,7 +88,8 @@ class _TagsState extends State<Tags> {
               orderTags(_ord[1], 1),
               orderTags(_ord[2], 2),
             ],
-          )
+          ),
+          Divider(thickness: 2.0),
         ],
       )
     );
