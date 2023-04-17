@@ -18,8 +18,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       appBar: AppBar(
         title: Text("계정 관리"),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
+      resizeToAvoidBottomInset : false,
+      body: SingleChildScrollView(
         child: Column(
           children: [
             TextField(
