@@ -51,13 +51,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
         //-------------------------------------------------------------------여기를 교체-----------------------------------------------------------------------
 
-        //child: News(),   //보도자료 조회
+        child: News(),   //보도자료 조회
 
-        //child: ReportScreen(name : "출근하기 귀찮네"), //게시글 신고
+        //child: ReportScreen(name : "출근하기 귀찮네"), //게시글 신고 (입력값 : 게시글ID)
 
-        //child: ReportManagementScreen(), //제보글 관리 화면
+        // child: ReportManagementScreen(), //제보글 관리 화면
 
-        child: ReportWriteScreen(), //제보글 작성 화면
+        //child: ReportWriteScreen(), //제보글 작성 화면
         //애뮬레이터 실행시 오류날 시 https://www.youtube.com/watch?v=bTyLehofqvk
         //https://www.flutterbeads.com/change-android-minsdkversion-in-flutter/
 
