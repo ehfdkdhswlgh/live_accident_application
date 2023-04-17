@@ -16,7 +16,7 @@ class ProfileScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  radius: 64.0,
+                  radius: 32.0,
                   backgroundImage: AssetImage('images/profile1.png'), // 프로필 이미지
                 ),
                 SizedBox(width: 16.0),
