@@ -24,7 +24,7 @@ class _ReportManagementScreenState extends State<ReportManagementScreen> {
       'reason': '저작권 침해',
     },
   ];
-
+//
   void _deleteReport(int index, bool isCanceled) {
     setState(() {
       reports.removeAt(index);

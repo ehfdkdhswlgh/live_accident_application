@@ -49,7 +49,7 @@ class News extends StatelessWidget {
       'link': 'https://news.google.com/rss/articles/CBMiOGh0dHBzOi8vd3d3LmthZG8ubmV0L25ld3MvYXJ0aWNsZVZpZXcuaHRtbD9pZHhubz0xMTc4NDg40gEA?oc=5'
     },
   ];
-
+//
   @override
   Widget build(BuildContext context) {
     return Scaffold(
