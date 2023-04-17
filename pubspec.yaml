@@ -30,6 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  google_maps_flutter: ^2.0.1
   http: ^0.13.5
   xml: ^5.0.2
 #  dart_rss: ^2.0.1
