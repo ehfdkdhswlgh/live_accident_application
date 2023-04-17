@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:live_accident_application/hojun/post.dart';
+import 'package:provider/provider.dart';
 import 'haechan/login.dart' as login;
 import 'haechan/report.dart' as report;
+import 'hojun/feed.dart';
+import 'hojun/store.dart';
+import 'hojun/top_rank.dart';
+
 
 void main() {
   runApp(
-      MaterialApp(
-          home: MyHomePage()
-      )
+    MultiProvider( // privider를 위해 추가함 - 호준 4/16
+      providers: [
+        ChangeNotifierProvider(create: (c) => Store()),
+      ],
+      child: MaterialApp(
+        home: MyHomePage()
+      ),
+    )
+
   );
 }
 class MyHomePage extends StatefulWidget {
@@ -44,9 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: Container(
-        // 내용 부분
-      ),
+      body: [Post(),Post(),Post(),Rank(),Post()][_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
