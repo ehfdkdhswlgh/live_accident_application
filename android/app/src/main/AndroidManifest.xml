@@ -2,6 +2,7 @@
     package="com.example.live_accident_application">
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
    <application
         android:label="live_accident_application"
         android:name="${applicationName}"

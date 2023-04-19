@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:live_accident_application/hojun/post.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 import 'haechan/login.dart' as login;
 import 'haechan/report.dart' as report;
 import 'haechan/profile.dart' as profile;
 import 'haechan/account_management.dart' as account_management;
-import 'hojun/feed.dart';
+import 'hojun/post.dart' as post;
 import 'hojun/store.dart';
 import 'hojun/top_rank.dart';
 import 'jihwan/news.dart';
@@ -15,7 +19,11 @@ import 'jihwan/write_report.dart';
 import 'jihoon/map_sample.dart';
 
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized(); //
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
       MultiProvider( // privider를 위해 추가함 - 호준 4/16
         providers: [
@@ -63,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [ReportWriteScreen(),ReportManagementScreen(),ReportScreen(name: 'asds',),MapSample(),News()][_currentIndex],
+      body: [ReportWriteScreen(),post.Post(),ReportScreen(name: 'asds',),MapSample(),News()][_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,

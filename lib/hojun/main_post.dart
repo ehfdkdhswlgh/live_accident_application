@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'store.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-
+import 'package:firebase_storage/firebase_storage.dart';
 
 class MainPost extends StatefulWidget {
   const MainPost({Key? key}) : super(key: key);
@@ -12,6 +12,7 @@ class MainPost extends StatefulWidget {
 }
 
 class _MainPostState extends State<MainPost> {
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -84,10 +85,28 @@ class Thumbnail extends StatefulWidget {
 class _ThumbnailState extends State<Thumbnail> {
   int _current = 0;
   final CarouselController _controller = CarouselController();
-  List imageList = [
-    "assets/pepe1.jpg",
-    "assets/pepe2.jpg",
-  ];
+  var imageList = [];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final FirebaseStorage storage = FirebaseStorage.instance;
+    // 경로 지정
+    final String path = '';
+
+    // Firebase Storage에서 해당 경로의 모든 파일 가져오기
+    storage.ref().child(path).listAll().then((result) {
+      // 모든 파일 URL 가져와서 imageList에 추가
+      result.items.forEach((ref) {
+        ref.getDownloadURL().then((url) {
+          setState(() {
+            imageList.add(url);
+          });
+        });
+      });
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
