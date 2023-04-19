@@ -5,6 +5,7 @@ import 'tags.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:google_maps_webservice/src/places.dart';
+import 'tags.dart';
 
 class MapSample extends StatefulWidget {
   @override
@@ -69,23 +70,12 @@ class _MapSampleState extends State<MapSample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          decoration: InputDecoration(
-            hintText: '장소를 검색하세요...',
-            hintStyle: TextStyle(color: Colors.white),
-          ),
-          style: TextStyle(color: Colors.white),
-          onSubmitted: (value) {
-            // searchAndNavigate(value);
-          },
-        ),
-      ),
-
       body:
       Column(
         children : <Widget> [
-         Container(
+          Flexible(flex:1, child: Tags()),
+          Flexible(flex: 4,
+            child: Container(
             height: double.infinity,
             width: double.infinity,
             child: GoogleMap(
@@ -97,22 +87,11 @@ class _MapSampleState extends State<MapSample> {
               myLocationButtonEnabled: true,
             ),
           ),
+          ),
       ],
+
     ),
     );
   }
 }
-
-// void searchAndNavigate(String address) {
-//   GeocodingPlatform.instance.locationFromAddress(address).then((result) {
-//     _controller.animateCamera(CameraUpdate.newCameraPosition(
-//       CameraPosition(
-//         target: LatLng(result[0].latitude, result[0].longitude),
-//         zoom: 14.0,
-//       ),
-//     ));
-//     _addMarker(LatLng(result[0].latitude, result[0].longitude), address);
-//   });
-// }
-
 
