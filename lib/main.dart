@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_accident_application/hojun/post.dart';
+import 'package:live_accident_application/hojun/post_main_document.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,6 +13,7 @@ import 'haechan/account_management.dart' as account_management;
 import 'hojun/post.dart' as post;
 import 'hojun/store.dart';
 import 'hojun/top_rank.dart';
+import 'hojun/comment.dart';
 import 'jihwan/news.dart';
 import 'jihwan/post_report.dart';
 import 'jihwan/post_report_management.dart';
@@ -71,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [ReportWriteScreen(),post.Post(),ReportScreen(name: 'asds',),MapSample(),News()][_currentIndex],
+      body: [ReportWriteScreen(),PostDocument(),ReportScreen(name: 'asds',),MapSample(),News()][_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
