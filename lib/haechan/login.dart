@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 
 void main() => runApp(MyApp());
 
@@ -24,10 +26,13 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+
 class _MyHomePageState extends State<MyHomePage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -35,6 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // ...
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +109,18 @@ class _MyHomePageState extends State<MyHomePage> {
                     );
                   },
                   child: Text('회원가입'),
+                ),
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.red,
+                  ),
+                  icon: Icon(Icons.account_circle_outlined), // 아이콘
+                  label: Text('구글 로그인'),
+                  onPressed: () {  },
                 ),
               ),
             ],
@@ -206,10 +224,23 @@ class RegisterPage extends StatelessWidget {
                   child: Text('회원가입'),
                 ),
               ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.red,
+                  ),
+                  icon: Icon(Icons.account_circle_outlined), // 아이콘
+                  label: Text('구글 회원가입'),
+                  onPressed: () {  },
+                ),
+              )
             ],
           ),
         ),
       ),
     );
   }
+
 }

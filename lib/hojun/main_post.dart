@@ -23,7 +23,9 @@ class _MainPostState extends State<MainPost> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Profile(),
-              Thumbnail(),
+              GestureDetector(
+                child: Thumbnail(),
+              ),
               Preview(),
               Divider(thickness: 2.0),
             ],
