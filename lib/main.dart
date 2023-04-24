@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [ReportWriteScreen(),PostDocument(),ReportScreen(name: 'asds',),MapSample(),News()][_currentIndex],
+      body: [ReportWriteScreen(),post.Post(),ReportScreen(name: 'asds',),MapSample(),News()][_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,

@@ -23,7 +23,7 @@ class _TagsState extends State<Tags> {
       },
       child: Text(txt),
       style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 14),
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(15))
           ),
@@ -64,7 +64,6 @@ class _TagsState extends State<Tags> {
   Widget build(BuildContext context) {
     return Container(
       width: 600,
-      height: 80,
       padding: EdgeInsets.only(left: 10),
       margin: EdgeInsets.all(5),
       child: Column(
