@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'store.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'post_main_document.dart';
 
 class MainPost extends StatefulWidget {
   const MainPost({Key? key}) : super(key: key);
@@ -25,6 +26,15 @@ class _MainPostState extends State<MainPost> {
               Profile(),
               GestureDetector(
                 child: Thumbnail(),
+                onTap: () {
+                  Navigator.push(context,
+                      PageRouteBuilder(
+                          pageBuilder: (c, a1, a2) => PostDocument(postId: '950KJmoL4sK1viwfbBA8'),
+                          transitionsBuilder: (c, a1, a2, child) =>
+                              FadeTransition(opacity: a1, child: child)
+                      )
+                  );
+                },
               ),
               Preview(),
               Divider(thickness: 2.0),

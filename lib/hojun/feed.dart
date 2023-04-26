@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'main_post.dart';
-import 'tags.dart';
 
 class Feed extends StatefulWidget {
   const Feed({Key? key}) : super(key: key);

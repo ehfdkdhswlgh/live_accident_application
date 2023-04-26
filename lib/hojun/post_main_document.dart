@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'main_post.dart';
-import 'comment.dart';
 import 'package:provider/provider.dart';
 import 'store.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -13,25 +12,27 @@ class PostDocument extends StatefulWidget {
   PostDocument({required this.postId});
 
   @override
-  State<PostDocument> createState() => _PostDocumentState();
+  State<PostDocument> createState() => _PostDocumentState(postId: postId);
 }
 
 class _PostDocumentState extends State<PostDocument> {
   final TextEditingController _commentController = TextEditingController();
-  var postId;
+  late final String postId;
+
+  _PostDocumentState({required this.postId});
 
   @override
   Widget build(BuildContext context) {
 
-    return
-      ListView(
+    return Scaffold(
+      body: ListView(
           children: [
             Profile(),
             Thumbnail(),
             MainDocument(),
             Divider(thickness: 2.0),
             StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('coments')
+              stream: FirebaseFirestore.instance.collection('comments')
                   .where('post_id', isEqualTo: postId)
                   .orderBy('timestamp', descending: true)
                   .snapshots(),
@@ -46,6 +47,7 @@ class _PostDocumentState extends State<PostDocument> {
 
                 return ListView(
                   shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(), // 스크롤 기능 없에주는 것
                   children: snapshot.data!.docs.map((DocumentSnapshot document) {
                     Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
                     return ListTile(
@@ -74,7 +76,8 @@ class _PostDocumentState extends State<PostDocument> {
               ],
             ),
           ]
-      );
+      ),
+    );
   }
 
 }
