@@ -1,30 +1,85 @@
 import 'package:flutter/material.dart';
 import 'main_post.dart';
-import 'comment.dart';
 import 'package:provider/provider.dart';
 import 'store.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class PostDocument extends StatelessWidget {
-  const PostDocument({Key? key}) : super(key: key);
+class PostDocument extends StatefulWidget {
+  final String postId;
 
+  PostDocument({required this.postId});
 
+  @override
+  State<PostDocument> createState() => _PostDocumentState(postId: postId);
+}
+
+class _PostDocumentState extends State<PostDocument> {
+  final TextEditingController _commentController = TextEditingController();
+  late final String postId;
+
+  _PostDocumentState({required this.postId});
 
   @override
   Widget build(BuildContext context) {
-    return
-      ListView(
+
+    return Scaffold(
+      body: ListView(
           children: [
             Profile(),
             Thumbnail(),
             MainDocument(),
             Divider(thickness: 2.0),
-            CommentPage(postId: "950KJmoL4sK1viwfbBA8"),
-          ]
-      );
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('comments')
+                  .where('post_id', isEqualTo: postId)
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Something went wrong');
+                }
 
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Text("Loading");
+                }
+
+                return ListView(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(), // 스크롤 기능 없에주는 것
+                  children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                    Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+                    return ListTile(
+                      title: Text(data['comment']),
+                      subtitle: Text(data['username']),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+            Divider(thickness: 1.0),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    decoration: InputDecoration(
+                      hintText: '댓글을 입력해주세요.',
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: (){},
+                  icon: Icon(Icons.send),
+                ),
+              ],
+            ),
+          ]
+      ),
+    );
   }
+
 }
 
 class MainDocument extends StatelessWidget {

@@ -16,7 +16,7 @@ class _ReportManagementScreenState extends State<ReportManagementScreen> {
       'reason': '음란물 게시',
     },
     {
-      'title': 'ㅅㅂ',
+      'title': '시*',
       'reason': '부적절한 언어 사용',
     },
     {

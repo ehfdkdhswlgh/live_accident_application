@@ -13,7 +13,6 @@ import 'haechan/account_management.dart' as account_management;
 import 'hojun/post.dart' as post;
 import 'hojun/store.dart';
 import 'hojun/top_rank.dart';
-import 'hojun/comment.dart';
 import 'jihwan/news.dart';
 import 'jihwan/post_report.dart';
 import 'jihwan/post_report_management.dart';

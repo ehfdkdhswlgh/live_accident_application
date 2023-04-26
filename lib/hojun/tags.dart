@@ -63,7 +63,6 @@ class _TagsState extends State<Tags> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 600,
       padding: EdgeInsets.only(left: 10),
       margin: EdgeInsets.all(5),
       child: Column(
