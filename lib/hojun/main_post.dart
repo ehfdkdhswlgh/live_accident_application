@@ -20,25 +20,25 @@ class _MainPostState extends State<MainPost> {
       width: 400,
       child: Column(
         children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Profile(),
-              GestureDetector(
-                child: Thumbnail(),
-                onTap: () {
-                  Navigator.push(context,
-                      PageRouteBuilder(
-                          pageBuilder: (c, a1, a2) => PostDocument(postId: '950KJmoL4sK1viwfbBA8'),
-                          transitionsBuilder: (c, a1, a2, child) =>
-                              FadeTransition(opacity: a1, child: child)
-                      )
-                  );
-                },
-              ),
-              Preview(),
-              Divider(thickness: 2.0),
-            ],
+          GestureDetector(
+            child:  Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Profile(),
+                Thumbnail(),
+                Preview(),
+                Divider(thickness: 2.0),
+              ],
+            ),
+            onTap: () {
+              Navigator.push(context,
+                PageRouteBuilder(
+                  pageBuilder: (c, a1, a2) => PostDocument(postId: '950KJmoL4sK1viwfbBA8'),
+                  transitionsBuilder: (c, a1, a2, child) =>
+                  FadeTransition(opacity: a1, child: child)
+                )
+              );
+            },
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -78,7 +78,31 @@ class Profile extends StatelessWidget {
         ),
         Column(
           children: [
-            IconButton(onPressed: (){}, icon: Icon(Icons.more_horiz)), // 아이콘
+            IconButton(
+              onPressed: (){
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context){
+                    return Container(
+                        height: 300, // 모달 높이 크기
+                        margin: const EdgeInsets.only(
+                          left: 25,
+                          right: 25,
+                          bottom: 40,
+                        ), // 모달 좌우하단 여백 크기
+                        decoration: const BoxDecoration(
+                          color: Colors.white, // 모달 배경색
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20), // 모달 전체 라운딩 처리
+                          ),
+                        ),
+                        child: [Container()][0], // 모달 내부 디자인 영역
+                    );
+                  },
+                );
+              },
+              icon: Icon(Icons.more_horiz)
+            ), // 아이콘
             Text('203일전'), // 업로드 날짜
           ],
         )
