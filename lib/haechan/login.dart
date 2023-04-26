@@ -9,6 +9,7 @@ import '../jihoon/map_sample.dart';
 void main() => runApp(Login());
 
 class Login extends StatelessWidget {
+  static bool checker = false;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -98,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
       }
-
+      Login.checker = true;
     }
   }
 

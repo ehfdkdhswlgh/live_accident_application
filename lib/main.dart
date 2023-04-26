@@ -42,6 +42,9 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+
+
+
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
 
@@ -51,8 +54,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    Widget checker_widget;
+
+    if (login.Login.checker == false) {
+      checker_widget = login.Login();
+    } else {
+      checker_widget = MapSample();
+    }
+
     return Scaffold(
       // appBar: AppBar(
       //   title: Text("Live돌발사고"),
@@ -72,7 +85,10 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [ReportWriteScreen(),post.Post(),ReportScreen(name: 'asds',),MapSample(),News()][_currentIndex],
+      body: [
+        checker_widget, post.Post(),ReportWriteScreen(),TopMember(),News()
+      ]
+      [_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
@@ -102,4 +118,23 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+
+
+}
+
+Widget build(BuildContext context) {
+  return Scaffold(
+      body: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (BuildContext context, snapshot) {
+          if (!snapshot.hasData) {
+            // 데이터가 있는 경우
+            return MapSample();
+          } else {
+            return MapSample();
+          }
+        },
+      )
+  );
 }
