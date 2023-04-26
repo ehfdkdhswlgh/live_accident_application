@@ -40,6 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  String my_email = 'hae507@gmail.com';
+  String my_pw = '123456';
 
 
   _login() async {
@@ -117,6 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: <Widget>[
               TextFormField(
                 controller: _emailController,
+                // initialValue: 'hae507@gmail.com',
                 decoration: InputDecoration(
                   labelText: '이메일',
                 ),
@@ -129,6 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               TextFormField(
                 controller: _passwordController,
+                // initialValue: '123456',
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: '비밀번호',
@@ -171,18 +175,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('회원가입'),
                 ),
               ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.red,
-                  ),
-                  icon: Icon(Icons.account_circle_outlined), // 아이콘
-                  label: Text('구글 로그인'),
-                  onPressed: () { signInWithGoogle(); },
-                ),
-              ),
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: ElevatedButton.icon(
+              //     style: ElevatedButton.styleFrom(
+              //       foregroundColor: Colors.white,
+              //       backgroundColor: Colors.red,
+              //     ),
+              //     icon: Icon(Icons.account_circle_outlined), // 아이콘
+              //     label: Text('구글 로그인'),
+              //     onPressed: () { signInWithGoogle(); },
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -297,18 +301,20 @@ class RegisterPage extends StatelessWidget {
                   child: Text('회원가입'),
                 ),
               ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.red,
-                  ),
-                  icon: Icon(Icons.account_circle_outlined), // 아이콘
-                  label: Text('구글 회원가입'),
-                  onPressed: () { signInWithGoogle(); },
-                ),
-              )
+              // SizedBox(
+              //   width: double.infinity,
+              //   child:
+              //   ElevatedButton.icon(
+              //
+              //     style: ElevatedButton.styleFrom(
+              //       foregroundColor: Colors.white,
+              //       backgroundColor: Colors.red,
+              //     ),
+              //     icon: Icon(Icons.account_circle_outlined), // 아이콘
+              //     label: Text('구글 회원가입'),
+              //     onPressed: () { signInWithGoogle(); },
+              //   ),
+              // )
             ],
           ),
         ),
