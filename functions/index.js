@@ -16,7 +16,7 @@ const apiURL = "http://www.utic.go.kr/guide/imsOpenData.do?key=0cAz80l1BdSUmAIVQ
 // 고정 IP 할당하기 : https://acver.tistory.com/entry/GCP-Cloud-Functions%EC%97%90-%EA%B3%A0%EC%A0%95-IP-%ED%95%A0%EB%8B%B9%ED%95%98%EA%B8%B0 에서 마지막 코드에서 --router-region=us-central1 추가해줘야함
 // 고정 IP : 34.170.151.250 (us-central1)
 
-exports.rssFeed = functions.pubsub.schedule("0 1 * * *") // 매일 새벽 1시에 업데이트
+exports.rssFeed = functions.pubsub.schedule("every 12 hours")
     .timeZone("Asia/Seoul")
     .onRun((context) => {
       const db = admin.firestore();
@@ -46,60 +46,159 @@ exports.rssFeed = functions.pubsub.schedule("0 1 * * *") // 매일 새벽 1시�
       return null;
     });
 
-exports.getOpenData = functions.pubsub.schedule("every 1 minutes") // 함수 업데이트 할 때마다 gcp에서 vpc연결 설정해줘야함!
+exports.getOpenData = functions.pubsub.schedule("every 12 hours") // 함수 업데이트 할 때마다 gcp에서 vpc연결 설정해줘야함!
     .timeZone("Asia/Seoul")
     .onRun((context) => {
       const db = admin.firestore();
       (async () => {
+        await tools.firestore.delete("/opendatas",
+            {project: process.env.GCLOUD_PROJECT,
+              recursive: true,
+              yes: true,
+              force: true,
+            });
+
         await request(apiURL, (err, response, body) => {
           if (err) throw err;
           parseString(body, (err, result) => {
             if (err) throw err;
-            // result는 JSON 객체임 (String 타입이 아님!!!)
-            // const jdata = result["response"]["body"]["items"]; // 오류남
-            // const jstr = JSON.stringify(result["response"]["body"]);
-            // const jdata = JSON.parse(jstr);
-            // const items2 = jdata.items; // 오류남 jdata["items"] 도 오류남
+            // result는 JSON 객체임 (String 타입이 아님)
 
-            // let category = "err";
-            // let fcstValue = "err";
+            const records = result["result"]["record"];
+            const len = Object.keys(records).length;
 
-            // ------------------------------------------------- 데이터 불러오기 성공 , 파싱작업만 하면됨 (수정할때마다 vpc설정해야함)---------------------------------------------
+            let incidenteTypeCd = "NULL";
+            let incidenteSubTypeCd = "NULL";
+            let addressJibun = "NULL";
+            let locationDataX = "NULL";
+            let locationDataY = "NULL";
+            let incidentTitle = "NULL";
+            let startDate = "NULL";
+            let endDate = "NULL";
+            let roadName = "NULL";
 
-            // 시도해볼거 : xml 바로 파싱하는 방법 사용, xml2js 말고 다른거? 사용..
-            // json 객체자체는 오류안남.. 문제는 items를 접근하는게 안됨..
-            // 정안되면 xml을 바로 파싱하자
+            for (let i = 0; i < len; i++) {
+              incidenteTypeCd = records[i]["incidenteTypeCd"];
+              incidenteSubTypeCd = records[i]["incidenteSubTypeCd"];
+              addressJibun = records[i]["addressJibun"];
+              locationDataX = records[i]["locationDataX"];
+              locationDataY = records[i]["locationDataY"];
+              incidentTitle = records[i]["incidentTitle"];
+              startDate = records[i]["startDate"];
+              endDate = records[i]["endDate"];
+              roadName = records[i]["roadName"];
 
-            const tem = {
-              type: typeof(result),
-              json: result,
-            };
+              const tem = {
+                incidenteTypeCd: incidenteTypeCd,
+                incidenteSubTypeCd: incidenteSubTypeCd,
+                addressJibun: addressJibun,
+                locationDataX: locationDataX,
+                locationDataY: locationDataY,
+                incidentTitle: incidentTitle,
+                startDate: startDate,
+                endDate: endDate,
+                roadName: roadName,
+              };
 
-            db.collection("opendatas").add(tem).then(() => {
-              console.log("added order");
-            }, (error) => {
-              console.error("Failed to add order");
-            });
-
-            // for (let k = 0; k < jdata.length; k++) {
-            //   category = jdata[k].category;
-            //   fcstValue = jdata[k].fcstValue;
-
-            //   const tem = {
-            //     category: category,
-            //     fcstValue: fcstValue,
-            //   };
-
-            //   db.collection("opendatas").add(tem).then(() => {
-            //     console.log("added order");
-            //   }, (error) => {
-            //     console.error("Failed to add order");
-            //   });
-            // }
+              db.collection("opendatas").add(tem).then(() => {
+                console.log("added order");
+              }, (error) => {
+                console.error("Failed to add order");
+              });
+            }
           });
         });
       })();
       return null;
     });
+
+exports.rssFeedManual = functions.https.onRequest((request, response) => {
+  const db = admin.firestore();
+  (async () => {
+    await tools.firestore.delete("/rss",
+        {project: process.env.GCLOUD_PROJECT,
+          recursive: true,
+          yes: true,
+          force: true,
+        });
+
+    const feed = await parser.parseURL(RSS);
+
+    feed.items.forEach((item) => {
+      const tem = {
+        title: item.title,
+        link: item.link,
+      };
+      db.collection("rss").add(tem).then(() => {
+        console.log("added order");
+      }, (error) => {
+        console.error("Failed to add order");
+      });
+    });
+  })();
+});
+
+exports.getOpenDataManual = functions.https.onRequest((req, resp) => { // 안에 request랑 이름이 겹쳐서 이름을 다르게 설정해야함
+  const db = admin.firestore();
+  (async () => {
+    await tools.firestore.delete("/opendatas",
+        {project: process.env.GCLOUD_PROJECT,
+          recursive: true,
+          yes: true,
+          force: true,
+        });
+
+    await request(apiURL, (err, response, body) => {
+      if (err) throw err;
+      parseString(body, (err, result) => {
+        if (err) throw err;
+        // result는 JSON 객체임 (String 타입이 아님)
+
+        const records = result["result"]["record"];
+        const len = Object.keys(records).length;
+
+        let incidenteTypeCd = "NULL";
+        let incidenteSubTypeCd = "NULL";
+        let addressJibun = "NULL";
+        let locationDataX = "NULL";
+        let locationDataY = "NULL";
+        let incidentTitle = "NULL";
+        let startDate = "NULL";
+        let endDate = "NULL";
+        let roadName = "NULL";
+
+        for (let i = 0; i < len; i++) {
+          incidenteTypeCd = records[i]["incidenteTypeCd"];
+          incidenteSubTypeCd = records[i]["incidenteSubTypeCd"];
+          addressJibun = records[i]["addressJibun"];
+          locationDataX = records[i]["locationDataX"];
+          locationDataY = records[i]["locationDataY"];
+          incidentTitle = records[i]["incidentTitle"];
+          startDate = records[i]["startDate"];
+          endDate = records[i]["endDate"];
+          roadName = records[i]["roadName"];
+
+          const tem = {
+            incidenteTypeCd: incidenteTypeCd,
+            incidenteSubTypeCd: incidenteSubTypeCd,
+            addressJibun: addressJibun,
+            locationDataX: locationDataX,
+            locationDataY: locationDataY,
+            incidentTitle: incidentTitle,
+            startDate: startDate,
+            endDate: endDate,
+            roadName: roadName,
+          };
+
+          db.collection("opendatas").add(tem).then(() => {
+            console.log("added order");
+          }, (error) => {
+            console.error("Failed to add order");
+          });
+        }
+      });
+    });
+  })();
+});
 
 // 마지막 줄에 반드시 엔터 ㄱㄱ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
