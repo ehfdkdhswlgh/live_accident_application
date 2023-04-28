@@ -23,7 +23,7 @@ class _TagsState extends State<Tags> {
       },
       child: Text(txt),
       style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 14),
+          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8.0),
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(15))
           ),
@@ -46,7 +46,7 @@ class _TagsState extends State<Tags> {
       },
       child: Text(txt),
       style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8.0),
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(15))
           ),
@@ -63,13 +63,12 @@ class _TagsState extends State<Tags> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(left: 10),
       margin: EdgeInsets.all(5),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               accTags(_acc[0], 0),
               accTags(_acc[1], 1),
