@@ -16,101 +16,8 @@ const apiURL = "http://www.utic.go.kr/guide/imsOpenData.do?key=0cAz80l1BdSUmAIVQ
 // 고정 IP 할당하기 : https://acver.tistory.com/entry/GCP-Cloud-Functions%EC%97%90-%EA%B3%A0%EC%A0%95-IP-%ED%95%A0%EB%8B%B9%ED%95%98%EA%B8%B0 에서 마지막 코드에서 --router-region=us-central1 추가해줘야함
 // 고정 IP : 34.170.151.250 (us-central1)
 
-exports.rssFeed = functions.pubsub.schedule("every 12 hours")
-    .timeZone("Asia/Seoul")
-    .onRun((context) => {
-      const db = admin.firestore();
-      (async () => {
-        await tools.firestore.delete("/rss",
-            {project: process.env.GCLOUD_PROJECT,
-              recursive: true,
-              yes: true,
-              force: true,
-            });
-
-        const feed = await parser.parseURL(RSS);
-
-        feed.items.forEach((item) => {
-          const tem = {
-            title: item.title,
-            link: item.link,
-          };
-          db.collection("rss").add(tem).then(() => {
-            console.log("added order");
-          }, (error) => {
-            console.error("Failed to add order");
-          });
-        });
-      })();
-
-      return null;
-    });
-
-exports.getOpenData = functions.pubsub.schedule("every 12 hours") // 함수 업데이트 할 때마다 gcp에서 vpc연결 설정해줘야함!
-    .timeZone("Asia/Seoul")
-    .onRun((context) => {
-      const db = admin.firestore();
-      (async () => {
-        await tools.firestore.delete("/opendatas",
-            {project: process.env.GCLOUD_PROJECT,
-              recursive: true,
-              yes: true,
-              force: true,
-            });
-
-        await request(apiURL, (err, response, body) => {
-          if (err) throw err;
-          parseString(body, (err, result) => {
-            if (err) throw err;
-            // result는 JSON 객체임 (String 타입이 아님)
-
-            const records = result["result"]["record"];
-            const len = Object.keys(records).length;
-
-            let incidenteTypeCd = "NULL";
-            let incidenteSubTypeCd = "NULL";
-            let addressJibun = "NULL";
-            let locationDataX = "NULL";
-            let locationDataY = "NULL";
-            let incidentTitle = "NULL";
-            let startDate = "NULL";
-            let endDate = "NULL";
-            let roadName = "NULL";
-
-            for (let i = 0; i < len; i++) {
-              incidenteTypeCd = records[i]["incidenteTypeCd"];
-              incidenteSubTypeCd = records[i]["incidenteSubTypeCd"];
-              addressJibun = records[i]["addressJibun"];
-              locationDataX = records[i]["locationDataX"];
-              locationDataY = records[i]["locationDataY"];
-              incidentTitle = records[i]["incidentTitle"];
-              startDate = records[i]["startDate"];
-              endDate = records[i]["endDate"];
-              roadName = records[i]["roadName"];
-
-              const tem = {
-                incidenteTypeCd: incidenteTypeCd,
-                incidenteSubTypeCd: incidenteSubTypeCd,
-                addressJibun: addressJibun,
-                locationDataX: locationDataX,
-                locationDataY: locationDataY,
-                incidentTitle: incidentTitle,
-                startDate: startDate,
-                endDate: endDate,
-                roadName: roadName,
-              };
-
-              db.collection("opendatas").add(tem).then(() => {
-                console.log("added order");
-              }, (error) => {
-                console.error("Failed to add order");
-              });
-            }
-          });
-        });
-      })();
-      return null;
-    });
+// Cloud Scheduler 사용함 -> https://console.cloud.google.com/cloudscheduler?hl=ko&project=live-accident
+// 최종실행상태가 실패라고 떠있는것은 정상적인 반응임
 
 exports.rssFeedManual = functions.https.onRequest((request, response) => {
   const db = admin.firestore();
@@ -138,7 +45,9 @@ exports.rssFeedManual = functions.https.onRequest((request, response) => {
   })();
 });
 
-exports.getOpenDataManual = functions.https.onRequest((req, resp) => { // 안에 request랑 이름이 겹쳐서 이름을 다르게 설정해야함
+// 안에 request랑 이름이 겹쳐서 이름을 다르게 설정해야함
+// 업데이트마다 vpc 다시 설정해줘야 함
+exports.getOpenDataManual = functions.https.onRequest((req, resp) => {
   const db = admin.firestore();
   (async () => {
     await tools.firestore.delete("/opendatas",
