@@ -70,7 +70,9 @@ class _PostDocumentState extends State<PostDocument> {
                   ),
                 ),
                 IconButton(
-                  onPressed: (){},
+                  onPressed: (){
+                    _postComment(widget.postId);
+                  },
                   icon: Icon(Icons.send),
                 ),
               ],
@@ -79,7 +81,20 @@ class _PostDocumentState extends State<PostDocument> {
       ),
     );
   }
+  void _postComment(String postId) async { //댓글 등록 함수
+    String comment = _commentController.text;
 
+    if (comment.isNotEmpty) {
+      FirebaseFirestore.instance.collection('comments').add({
+        'post_id': postId,
+        'comment': comment,
+        'username': 'User', // Replace with actual username
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      _commentController.clear();
+    }
+  }
 }
 
 class MainDocument extends StatelessWidget {
@@ -147,3 +162,4 @@ class PostComment extends StatelessWidget {
     );;
   }
 }
+
