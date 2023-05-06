@@ -3,6 +3,11 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 
+import 'package:path/path.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:uuid/uuid.dart';
+
 //애뮬레이터 실행시 오류날 시 https://www.youtube.com/watch?v=bTyLehofqvk
 //https://www.flutterbeads.com/change-android-minsdkversion-in-flutter/
 
@@ -21,6 +26,8 @@ class _ReportScreenState extends State<ReportWriteScreen> {
   final List<XFile?> _pickedImages = [];
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _mainController = TextEditingController();
+
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +153,8 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                       ),
                       onPressed: () {
-                        // '제보하기' 버튼 클릭 시 실행될 코드
+                        Future<List<String>> str = uploadImages(_pickedImages);
+                        str.then((value) => print(value));
                       },
                       child: Text('제보하기'),
                     ),
@@ -405,6 +413,23 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     );
   }
 
+  //이미지 업로드용
+  Future<List<String>> uploadImages(List<XFile?> images) async {
+    List<String> imageUrls = [];
+
+    for (var image in images) {
+      // Firebase Storage에 저장될 경로 지정
+      Reference storageReference = FirebaseStorage.instance.ref().child('images/${Uuid().v4()}');
+      // 이미지 파일 업로드
+      UploadTask uploadTask = storageReference.putFile(File(image!.path));
+      TaskSnapshot storageTaskSnapshot = await uploadTask.whenComplete(() => null);
+      // 업로드한 이미지 URL 반환
+      String downloadUrl = await storageTaskSnapshot.ref.getDownloadURL();
+      imageUrls.add(downloadUrl);
+    }
+
+    return imageUrls;
+  }
 
 }
 
