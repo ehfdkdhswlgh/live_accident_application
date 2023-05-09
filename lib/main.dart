@@ -47,6 +47,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
+  bool checker = login.Login.checker;
 
   void _onTabTapped(int index) {
     setState(() {
@@ -62,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (login.Login.checker == false) {
       checker_widget = login.Login();
+      checker = true;
     } else {
       checker_widget = MapSample();
     }
@@ -89,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
         checker_widget, post.Post(),ReportWriteScreen(),TopMember(),News()
       ]
       [_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: checker ? BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
@@ -115,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
             label: '보도자료',
           ),
         ],
-      ),
+      ) : null,
     );
   }
 
@@ -123,18 +125,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
 }
 
-Widget build(BuildContext context) {
-  return Scaffold(
-      body: StreamBuilder(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (BuildContext context, snapshot) {
-          if (!snapshot.hasData) {
-            // 데이터가 있는 경우
-            return MapSample();
-          } else {
-            return MapSample();
-          }
-        },
-      )
-  );
-}
+// Widget build(BuildContext context) {
+//   return Scaffold(
+//       body: StreamBuilder(
+//         stream: FirebaseAuth.instance.authStateChanges(),
+//         builder: (BuildContext context, snapshot) {
+//           if (!snapshot.hasData) {
+//             // 데이터가 있는 경우
+//             return MapSample();
+//           } else {
+//             return MapSample();
+//           }
+//         },
+//       )
+//   );
+// }

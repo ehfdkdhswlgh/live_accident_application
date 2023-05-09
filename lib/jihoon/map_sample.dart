@@ -5,6 +5,7 @@ import 'tags.dart';
 
 import 'package:google_places_flutter/google_places_flutter.dart';
 import 'package:google_places_flutter/model/prediction.dart';
+import '../haechan/profile.dart' as profile;
 
 
 class MapSample extends StatefulWidget {
@@ -84,7 +85,10 @@ class _MapSampleState extends State<MapSample> {
           IconButton(
             icon: Icon(Icons.account_circle),
             onPressed: () {
-              // 내정보 아이콘 클릭 시 동작 정의
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => profile.ProfileScreen()),
+              );
             },
           ),
         ],
