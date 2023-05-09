@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 import 'package:get/get.dart';
 import '../jihoon/map_sample.dart';
+import '../UserImfomation.dart';
 
 
 void main() => runApp(Login());
@@ -41,6 +42,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  String uid = UserImfomation.uid;
+
   String my_email = 'hae507@gmail.com';
   String my_pw = '123456';
 
@@ -52,10 +55,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // Firebase 사용자 인증, 사용자 등록
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
+
+        uid = userCredential.user!.uid;
+
+        print("UID : " + uid);
 
         Navigator.pushAndRemoveUntil(
             context, MaterialPageRoute(builder: (context) => MapSample()),
