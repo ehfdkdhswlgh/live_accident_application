@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'location_service.dart';
 import 'tags.dart';
-
-import 'package:google_places_flutter/google_places_flutter.dart';
-import 'package:google_places_flutter/model/prediction.dart';
 import '../haechan/profile.dart' as profile;
 
 
@@ -15,7 +13,7 @@ class MapSample extends StatefulWidget {
 
 class _MapSampleState extends State<MapSample> {
   Completer<GoogleMapController> _controller = Completer();
-  TextEditingController controller = TextEditingController();
+  TextEditingController _searchController = TextEditingController();
 
   // 이 값은 지도가 시작될 때 첫 번째 위치입니다.
   CameraPosition _currentPosition = CameraPosition(
@@ -95,11 +93,27 @@ class _MapSampleState extends State<MapSample> {
       ),
       body:
       Column(
-        children : <Widget> [
+        children : [
           Container(
             child: Tags(), height: 80,
           ),
-          placesAutoCompleteTextField(),
+          Row(
+            children: [
+              Expanded(child: TextFormField(
+                controller: _searchController,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(hintText: "장소를 입력하세요."),
+                onChanged: (value) {
+                  print(value);
+                },
+              )),
+              IconButton(onPressed: () async{
+                var place = await LocationService().getPlace(_searchController.text);
+                _goToPlace(place);
+              },
+                icon: Icon(Icons.search),)
+            ],
+          ),
           Expanded(
             child: Container(
             height: double.infinity,
@@ -120,28 +134,16 @@ class _MapSampleState extends State<MapSample> {
     );
   }
 
+  Future<void> _goToPlace(Map<String, dynamic> place) async{
+    final double lat = place['geometry']['location']['lat'];
+    final double lng = place['geometry']['location']['lng'];
 
-placesAutoCompleteTextField() {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 20),
-    child: GooglePlaceAutoCompleteTextField(
-        textEditingController: controller,
-        googleAPIKey: "AIzaSyDWq89VaEKZdEWpv6VoHQ8EVM5JSqE4JJs",
-        inputDecoration: InputDecoration(hintText: "위치를 입력하세요."),
-        debounceTime: 800,
-        countries: ["in", "fr"],
-        isLatLngRequired: true,
-        getPlaceDetailWithLatLng: (Prediction prediction) {
-          print("placeDetails" + prediction.lng.toString());
-        },
-        itmClick: (Prediction prediction) {
-          controller.text = prediction.description!;
+    print(lat);
+    print(lng);
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(target: LatLng(lat,lng), zoom: 12)
+    ));
 
-          controller.selection = TextSelection.fromPosition(
-              TextPosition(offset: prediction.description!.length));
-        }
-      // default 600 ms ,
-    ),
-  );
-}
+  }
 }
