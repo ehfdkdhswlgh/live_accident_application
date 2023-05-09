@@ -96,7 +96,8 @@ class Profile extends StatelessWidget {
                             Radius.circular(20), // 모달 전체 라운딩 처리
                           ),
                         ),
-                        child: [Container()][0], // 모달 내부 디자인 영역
+                        child: [
+                        ][0], // 모달 내부 디자인 영역
                     );
                   },
                 );
