@@ -1,10 +1,12 @@
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:live_accident_application/jihoon/location_service.dart';
 import 'tags.dart';
+import 'package:place_picker/place_picker.dart';
 
-import 'package:google_places_flutter/google_places_flutter.dart';
-import 'package:google_places_flutter/model/prediction.dart';
+
 
 
 class MapSample extends StatefulWidget {
@@ -13,8 +15,13 @@ class MapSample extends StatefulWidget {
 }
 
 class _MapSampleState extends State<MapSample> {
+
+  final TextEditingController _searchController = TextEditingController();
+
   Completer<GoogleMapController> _controller = Completer();
-  TextEditingController controller = TextEditingController();
+  List<Marker> markers = [];
+
+
 
   // 이 값은 지도가 시작될 때 첫 번째 위치입니다.
   CameraPosition _currentPosition = CameraPosition(
@@ -25,7 +32,6 @@ class _MapSampleState extends State<MapSample> {
   var address = "한강로 1가";
   List<String> postTitle = ["실시간 한강로 상황", "한강로 집회 사람 많네 ㄷㄷ ", "집회 현황 ㅎㄷㄷ", "출근길 조심하세요!!"];
 
-  List<Marker> markers = [];
   @override
   void initState() {
     super.initState();
@@ -50,7 +56,8 @@ class _MapSampleState extends State<MapSample> {
                     child: Scaffold(
                       appBar: AppBar(title: Text(address)),
                     body:
-                        ListView.builder(
+                        SingleChildScrollView(
+                          child : ListView.builder(
                         itemCount: postTitle.length,
                         itemBuilder: (c,i){
                           return ListTile(
@@ -60,13 +67,13 @@ class _MapSampleState extends State<MapSample> {
                             title: Text(postTitle[i]));
                         }),
                   )
+                )
                 );
               });
         },
         position: LatLng(37.382782, 127.1189054)));
 
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -92,10 +99,22 @@ class _MapSampleState extends State<MapSample> {
       body:
       Column(
         children : <Widget> [
+          Row(children: [
+            Expanded(child: TextFormField(
+              controller: _searchController,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(hintText: '장소를 검색하세요.'),
+              onChanged: (value) {
+              },
+            )),
+            IconButton(onPressed: () async {
+              var place = await LocationService().getPlace(_searchController.text);
+              _goToPlace(place);
+            }, icon: Icon(Icons.search),),
+          ],),
           Container(
             child: Tags(), height: 80,
           ),
-          placesAutoCompleteTextField(),
           Expanded(
             child: Container(
             height: double.infinity,
@@ -108,6 +127,7 @@ class _MapSampleState extends State<MapSample> {
               },
               myLocationButtonEnabled: true,
             ),
+
           ),
           ),
       ],
@@ -115,29 +135,20 @@ class _MapSampleState extends State<MapSample> {
     ),
     );
   }
+    Future<void> _goToPlace(Map<String, dynamic> place) async {
+      final double lat = place['geometry']['location']['lat'];
+      final double lng = place['geometry']['location']['lng'];
+
+      print(lat);
+      print(lng);
+      final GoogleMapController controller = await _controller.future;
+
+      controller.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(target: LatLng(lat, lng), zoom: 12),
+        ),
+      );
+    }
 
 
-placesAutoCompleteTextField() {
-  return Container(
-    padding: EdgeInsets.symmetric(horizontal: 20),
-    child: GooglePlaceAutoCompleteTextField(
-        textEditingController: controller,
-        googleAPIKey: "AIzaSyDWq89VaEKZdEWpv6VoHQ8EVM5JSqE4JJs",
-        inputDecoration: InputDecoration(hintText: "위치를 입력하세요."),
-        debounceTime: 800,
-        countries: ["in", "fr"],
-        isLatLngRequired: true,
-        getPlaceDetailWithLatLng: (Prediction prediction) {
-          print("placeDetails" + prediction.lng.toString());
-        },
-        itmClick: (Prediction prediction) {
-          controller.text = prediction.description!;
-
-          controller.selection = TextSelection.fromPosition(
-              TextPosition(offset: prediction.description!.length));
-        }
-      // default 600 ms ,
-    ),
-  );
 }
-}
+
