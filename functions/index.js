@@ -79,15 +79,15 @@ exports.getOpenDataManual = functions.https.onRequest((req, resp) => {
         let roadName = "NULL";
 
         for (let i = 0; i < len; i++) {
-          incidenteTypeCd = records[i]["incidenteTypeCd"];
-          incidenteSubTypeCd = records[i]["incidenteSubTypeCd"];
-          addressJibun = records[i]["addressJibun"];
-          locationDataX = records[i]["locationDataX"];
-          locationDataY = records[i]["locationDataY"];
-          incidentTitle = records[i]["incidentTitle"];
-          startDate = records[i]["startDate"];
-          endDate = records[i]["endDate"];
-          roadName = records[i]["roadName"];
+          incidenteTypeCd = records[i]["incidenteTypeCd"][0];
+          incidenteSubTypeCd = records[i]["incidenteSubTypeCd"][0];
+          addressJibun = records[i]["addressJibun"][0];
+          locationDataX = records[i]["locationDataX"][0];
+          locationDataY = records[i]["locationDataY"][0];
+          incidentTitle = records[i]["incidentTitle"][0];
+          startDate = records[i]["startDate"][0];
+          endDate = records[i]["endDate"][0];
+          roadName = records[i]["roadName"][0];
 
           const tem = {
             incidenteTypeCd: incidenteTypeCd,
