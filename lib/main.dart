@@ -13,6 +13,7 @@ import 'haechan/account_management.dart' as account_management;
 import 'hojun/post.dart' as post;
 import 'hojun/store.dart';
 import 'hojun/top_rank.dart';
+import 'hojun/write_report_demo.dart' as test;
 import 'jihwan/news.dart';
 import 'jihwan/post_report.dart';
 import 'jihwan/post_report_management.dart';
@@ -87,9 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [
-        checker_widget, post.Post(),ReportWriteScreen(),TopMember(),News()
-      ]
+      body: [checker_widget, post.Post(),test.ReportWriteScreen(),TopMember(),News()]
       [_currentIndex],
       bottomNavigationBar: checker ? BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

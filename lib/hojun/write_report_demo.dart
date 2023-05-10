@@ -154,7 +154,11 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                       ),
                       onPressed: () {
                         Future<List<String>> str = uploadImages(_pickedImages);
-                        str.then((value) => print(value));
+                        str.then((List<String> strList) {
+                          String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
+                          _uploadPost('useruseruser', str);
+                        });
+
                       },
                       child: Text('제보하기'),
                     ),
@@ -431,6 +435,25 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     return imageUrls;
   }
 
+  void _uploadPost(String userId, String url) async { //댓글 등록 함수
+    String title = _titleController.text;
+    String main = _mainController.text;
+
+    if (title.isNotEmpty) {
+      _firestore.collection('posts').add({
+        'user_id': userId,
+        'post_id': '${userId}123',
+        'title': title,
+        'post_content': main,
+        'images': url,
+        'is_visible': true,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      _titleController.clear();
+      _mainController.clear();
+    }
+  }
 }
 
 class MyButton extends StatefulWidget {
