@@ -1,55 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class News extends StatelessWidget {
-  final List<Map<String, String>> items = [
-    {
-      'title': '【경북 사건사고】 4차선 건너던 80대 여성 차에 치여 숨져...도내 강풍 ... - 안동인터넷뉴스',
-      'date': 'Tue, 11 Apr 2023 04:15:36 GMT',
-      'link': 'https://news.google.com/rss/articles/CBMiOmh0dHA6Ly93d3cuYWRpbmV3cy5jby5rci9uZXdzL2FydGljbGVWaWV3Lmh0bWw_aWR4bm89NjEzNTPSAQA?oc=5'
-    },
-    {
-      'title': '경찰·국과수, 충주 사고버스 원인 규명 합동 감식 - 충청매일',
-      'date': 'Fri, 14 Apr 2023 05:00:03 GMT',
-      'link': 'https://news.google.com/rss/articles/CBMiOWh0dHBzOi8vd3d3LmNjZG4uY28ua3IvbmV3cy9hcnRpY2xlVmlldy5odG1sP2lkeG5vPTkwOTU5MNIBPGh0dHBzOi8vd3d3LmNjZG4uY28ua3IvbmV3cy9hcnRpY2xlVmlld0FtcC5odG1sP2lkeG5vPTkwOTU5MA?oc=5'
-    },
-    {
-      'title': '원주서 굴삭기 전도 70대 숨져 < 사건/사고 < 사회 < 기사본문 - 강원도민일보',
-      'date': 'Thu, 13 Apr 2023 15:36:07 GMT',
-      'link': 'https://news.google.com/rss/articles/CBMiOGh0dHBzOi8vd3d3LmthZG8ubmV0L25ld3MvYXJ0aWNsZVZpZXcuaHRtbD9pZHhubz0xMTc4NDg40gEA?oc=5'
-    },
-    {
-      'title': '【경북 사건사고】 4차선 건너던 80대 여성 차에 치여 숨져...도내 강풍 ... - 안동인터넷뉴스',
-      'date': 'Tue, 11 Apr 2023 04:15:36 GMT',
-      'link': 'https://news.google.com/rss/articles/CBMiOmh0dHA6Ly93d3cuYWRpbmV3cy5jby5rci9uZXdzL2FydGljbGVWaWV3Lmh0bWw_aWR4bm89NjEzNTPSAQA?oc=5'
-    },
-    {
-      'title': '경찰·국과수, 충주 사고버스 원인 규명 합동 감식 - 충청매일',
-      'date': 'Fri, 14 Apr 2023 05:00:03 GMT',
-      'link': 'https://news.google.com/rss/articles/CBMiOWh0dHBzOi8vd3d3LmNjZG4uY28ua3IvbmV3cy9hcnRpY2xlVmlldy5odG1sP2lkeG5vPTkwOTU5MNIBPGh0dHBzOi8vd3d3LmNjZG4uY28ua3IvbmV3cy9hcnRpY2xlVmlld0FtcC5odG1sP2lkeG5vPTkwOTU5MA?oc=5'
-    },
-    {
-      'title': '원주서 굴삭기 전도 70대 숨져 < 사건/사고 < 사회 < 기사본문 - 강원도민일보',
-      'date': 'Thu, 13 Apr 2023 15:36:07 GMT',
-      'link': 'https://news.google.com/rss/articles/CBMiOGh0dHBzOi8vd3d3LmthZG8ubmV0L25ld3MvYXJ0aWNsZVZpZXcuaHRtbD9pZHhubz0xMTc4NDg40gEA?oc=5'
-    },
-    {
-      'title': '【경북 사건사고】 4차선 건너던 80대 여성 차에 치여 숨져...도내 강풍 ... - 안동인터넷뉴스',
-      'date': 'Tue, 11 Apr 2023 04:15:36 GMT',
-      'link': 'https://news.google.com/rss/articles/CBMiOmh0dHA6Ly93d3cuYWRpbmV3cy5jby5rci9uZXdzL2FydGljbGVWaWV3Lmh0bWw_aWR4bm89NjEzNTPSAQA?oc=5'
-    },
-    {
-      'title': '경찰·국과수, 충주 사고버스 원인 규명 합동 감식 - 충청매일',
-      'date': 'Fri, 14 Apr 2023 05:00:03 GMT',
-      'link': 'https://news.google.com/rss/articles/CBMiOWh0dHBzOi8vd3d3LmNjZG4uY28ua3IvbmV3cy9hcnRpY2xlVmlldy5odG1sP2lkeG5vPTkwOTU5MNIBPGh0dHBzOi8vd3d3LmNjZG4uY28ua3IvbmV3cy9hcnRpY2xlVmlld0FtcC5odG1sP2lkeG5vPTkwOTU5MA?oc=5'
-    },
-    {
-      'title': '원주서 굴삭기 전도 70대 숨져 < 사건/사고 < 사회 < 기사본문 - 강원도민일보',
-      'date': 'Thu, 13 Apr 2023 15:36:07 GMT',
-      'link': 'https://news.google.com/rss/articles/CBMiOGh0dHBzOi8vd3d3LmthZG8ubmV0L25ld3MvYXJ0aWNsZVZpZXcuaHRtbD9pZHhubz0xMTc4NDg40gEA?oc=5'
-    },
-  ];
-//
+class News extends StatefulWidget {
+  @override
+  _NewsState createState() => _NewsState();
+}
+
+class _NewsState extends State<News> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, String>> items = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRssItems();
+  }
+
+  Future<void> _fetchRssItems() async {
+    List<Map<String, String>> rssItems = [];
+
+    QuerySnapshot querySnapshot = await _firestore.collection('rss').get();
+    querySnapshot.docs.forEach((doc) {
+      rssItems.add({
+        'title': doc['title'],
+        'date': doc['pubDate'],
+        'link': doc['link'],
+      });
+    });
+
+    setState(() {
+      items = rssItems;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,13 +80,12 @@ class News extends StatelessWidget {
   }
 
   Future<void> _launchUrl(str_url) async {
-
     var _url = Uri.parse(str_url);
 
-    if (!await launchUrl(_url)) {
+    if (!await canLaunch(_url.toString())) {
       throw Exception('Could not launch $_url');
+    } else {
+      await launch(_url.toString());
     }
   }
-
-
 }
