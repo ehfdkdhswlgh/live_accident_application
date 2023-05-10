@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'location_service.dart';
 import 'tags.dart';
 import '../haechan/profile.dart' as profile;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 class MapSample extends StatefulWidget {
@@ -14,6 +15,10 @@ class MapSample extends StatefulWidget {
 }
 
 class _MapSampleState extends State<MapSample> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  List<Map<String, String>> items = [];
+
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
 
@@ -31,6 +36,9 @@ class _MapSampleState extends State<MapSample> {
   @override
   void initState() {
     super.initState();
+
+    _fetchOpendatasItems();
+
     //marker 추가
     markers.add(Marker(
         markerId: MarkerId("1"),
@@ -68,6 +76,7 @@ class _MapSampleState extends State<MapSample> {
         position: LatLng(37.382782, 127.1189054)));
 
   }
+
 
 
   @override
@@ -146,4 +155,34 @@ class _MapSampleState extends State<MapSample> {
     ));
 
   }
+
+
+  Future<void> _fetchOpendatasItems() async {
+    List<Map<String, String>> opendatasItems = [];
+
+    QuerySnapshot querySnapshot = await _firestore.collection('opendatas').get();
+    querySnapshot.docs.forEach((doc) {
+      opendatasItems.add({
+        'incidenteTypeCd': doc['incidenteTypeCd'],
+        'incidenteSubTypeCd': doc['incidenteSubTypeCd'],
+        'addressJibun': doc['addressJibun'],
+        'locationDataX': doc['locationDataX'],
+        'locationDataY': doc['locationDataY'],
+        'incidentTitle': doc['incidentTitle'],
+        'startDate': doc['startDate'],
+        'endDate': doc['endDate'],
+        'roadName': doc['roadName'],
+      });
+    });
+
+    setState(() {
+      items = opendatasItems;
+    });
+
+    print('Items length: ${items.length}');
+    print('Items contents:');
+    items.forEach((item) => print(item));
+  }
+
+
 }
