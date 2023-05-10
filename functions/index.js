@@ -19,6 +19,7 @@ const apiURL = "http://www.utic.go.kr/guide/imsOpenData.do?key=0cAz80l1BdSUmAIVQ
 // Cloud Scheduler 사용함 -> https://console.cloud.google.com/cloudscheduler?hl=ko&project=live-accident
 // 최종실행상태가 실패라고 떠있는것은 정상적인 반응임
 
+// rss함수도 유동IP사용시 오류가 자주 발생함 -> 고정IP사용할  것
 exports.rssFeedManual = functions.https.onRequest((request, response) => {
   const db = admin.firestore();
   (async () => {
