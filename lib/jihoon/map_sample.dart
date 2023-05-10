@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'location_service.dart';
 import 'tags.dart';
@@ -7,12 +8,13 @@ import '../haechan/profile.dart' as profile;
 
 
 class MapSample extends StatefulWidget {
-  @override
+  const MapSample({super.key});
+
   _MapSampleState createState() => _MapSampleState();
 }
 
 class _MapSampleState extends State<MapSample> {
-  Completer<GoogleMapController> _controller = Completer();
+  Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
 
   // 이 값은 지도가 시작될 때 첫 번째 위치입니다.
@@ -20,6 +22,7 @@ class _MapSampleState extends State<MapSample> {
     target: LatLng(37.382782, 127.1189054),
     zoom: 14,
   );
+
 
   var address = "한강로 1가";
   List<String> postTitle = ["실시간 한강로 상황", "한강로 집회 사람 많네 ㄷㄷ ", "집회 현황 ㅎㄷㄷ", "출근길 조심하세요!!"];
@@ -103,9 +106,6 @@ class _MapSampleState extends State<MapSample> {
                 controller: _searchController,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(hintText: "장소를 입력하세요."),
-                onChanged: (value) {
-                  print(value);
-                },
               )),
               IconButton(onPressed: () async{
                 var place = await LocationService().getPlace(_searchController.text);
@@ -115,19 +115,17 @@ class _MapSampleState extends State<MapSample> {
             ],
           ),
           Expanded(
-            child: Container(
-            height: double.infinity,
-            width: double.infinity,
             child: GoogleMap(
+              mapType: MapType.normal,
               initialCameraPosition: _currentPosition,
               markers: Set.from(markers), //마커 저장.
               onMapCreated: (GoogleMapController controller) {
-                _controller.complete();
+                _controller.complete(controller);
               },
               myLocationButtonEnabled: true,
             ),
           ),
-          ),
+
       ],
 
     ),
@@ -140,9 +138,11 @@ class _MapSampleState extends State<MapSample> {
 
     print(lat);
     print(lng);
+
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(target: LatLng(lat,lng), zoom: 12)
+      CameraPosition(target: LatLng(lat,lng),
+      zoom: 14)
     ));
 
   }
