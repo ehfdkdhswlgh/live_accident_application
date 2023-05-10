@@ -145,6 +145,11 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                       ),
                       onPressed: () {
                         // '제보하기' 버튼 클릭 시 실행될 코드
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('제보하기화면에서 제보하기버튼 누름'),
+                          ),
+                        );
                       },
                       child: Text('제보하기'),
                     ),
@@ -155,7 +160,11 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
                       ),
                       onPressed: () {
-                        // '취소' 버튼 클릭 시 실행될 코드
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('제보하기화면에서 취소버튼 누름'),
+                          ),
+                        );
                       },
                       child: Text('취소'),
                     ),
@@ -215,7 +224,11 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                       ),
                       onPressed: () {
-                        // '제보하기' 버튼 클릭 시 실행될 코드
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('긴급제보화면에서 제보하기버튼 누름'),
+                          ),
+                        );
                       },
                       child: Text('제보하기'),
                     ),
@@ -226,7 +239,11 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
                       ),
                       onPressed: () {
-                        // '취소' 버튼 클릭 시 실행될 코드
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('긴급제보화면에서 취소버튼 누름'),
+                          ),
+                        );
                       },
                       child: Text('취소'),
                     ),
