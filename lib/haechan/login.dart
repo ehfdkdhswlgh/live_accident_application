@@ -5,9 +5,18 @@ import 'package:logger/logger.dart';
 import 'package:get/get.dart';
 import '../jihoon/map_sample.dart';
 import '../UserImfomation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 
-void main() => runApp(Login());
+
+void main() {
+  // Firebase 초기화 코드
+  WidgetsFlutterBinding.ensureInitialized();
+  Firebase.initializeApp();
+
+  runApp(Login());
+}
 
 class Login extends StatelessWidget {
   static bool checker = false;
@@ -211,22 +220,95 @@ class RegisterPage extends StatelessWidget {
   final TextEditingController _confirmPasswordController =
   TextEditingController();
 
-
   void create_account(BuildContext context) async  {
-    try {
-      var result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-      result.user?.updateDisplayName(_nameController.text);
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Login()), // LoginPage로 화면 전환
-      );
-      // print(result.user);            //유저 정보 나중에 따로 처리
-    } catch (e) {
-      print(e);
+    String message = '';
+    bool isNicknameExist = await checkNicknameExist(_nameController.text);
+
+    if(_nameController.text.isEmpty){
+      message = '닉네임을 입력해주세요';
+    }else if (_passwordController.text.isEmpty){
+      message = '비밀번호를 입력해주세요';
+    }else if (_emailController.text.isEmpty){
+      message = '이메일를 입력해주세요';
+    }else if (_passwordController.text != _confirmPasswordController.text) {
+      message = '비밀번호 확인과 비밀번호가 다릅니다';
+    }else if (isNicknameExist) {
+      message = '이미 존재하는 닉네임입니다.';
     }
+    else {
+      try {
+        var result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+        String? uid = result.user?.uid;
+
+        CollectionReference users = FirebaseFirestore.instance.collection('user');
+
+        // Firestore에 사용자 정보 저장
+        await users.doc(uid).set({
+          'name': _nameController.text,
+          'uid': uid,
+          'authority': 'user',
+        });
+
+        result.user?.updateDisplayName(_nameController.text);
+
+
+        if (message == '') {
+          ScaffoldMessenger
+              .of(context)
+              .showSnackBar(
+            SnackBar(
+              content: Text('${_nameController.text}님 회원가입에 성공하셨습니다.'),
+              backgroundColor: Colors.deepOrange,
+              duration: Duration(seconds: 1),
+            ),
+          )
+              .closed
+              .then((_) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => Login()), // LoginPage로 화면 전환
+            );
+          });
+        }
+
+
+        // print(result.user);            //유저 정보 나중에 따로 처리
+      } on FirebaseAuthException catch (e) {
+        logger.e(e);
+
+
+        if (e.code == 'email-already-in-use') {
+          message = '이미 존재하는 이메일입니다';
+        } else if (e.code == 'weak-password') {
+          message = '비밀번호는 최소 6자이상이여야 합니다';
+        } else if (e.code == 'invalid-email') {
+          message = '이메일 형식이 올바르지 않습니다';
+        } else if (e.code == 'unkown') {
+          message = '빠진 내용이 있습니다';
+        }
+      }
+
+
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.deepOrange,
+      ),
+    );
+  }// create_account
+
+  Future<bool> checkNicknameExist(String nickname) async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('user')
+        .where('name', isEqualTo: nickname)
+        .get();
+
+    return querySnapshot.docs.isNotEmpty;
   }
 
   @override
@@ -246,11 +328,11 @@ class RegisterPage extends StatelessWidget {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: '이름',
+                  labelText: '닉네임',
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
-                    return '이름을 입력해주세요.';
+                    return '닉네임을 입력해주세요.';
                   }
                   return null;
                 },
@@ -328,6 +410,7 @@ class RegisterPage extends StatelessWidget {
         ),
       ),
     );
+
   }
 
 }
