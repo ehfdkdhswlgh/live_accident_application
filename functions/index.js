@@ -35,6 +35,7 @@ exports.rssFeedManual = functions.https.onRequest((request, response) => {
       const tem = {
         title: item.title,
         link: item.link,
+        pubDate: item.pubDate,
       };
       db.collection("rss").add(tem).then(() => {
         console.log("added order");
