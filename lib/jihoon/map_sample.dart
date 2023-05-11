@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'location_service.dart';
 import 'tags.dart';
@@ -14,6 +15,7 @@ class MapSample extends StatefulWidget {
   _MapSampleState createState() => _MapSampleState();
 }
 
+
 class _MapSampleState extends State<MapSample> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -24,56 +26,64 @@ class _MapSampleState extends State<MapSample> {
 
   // 이 값은 지도가 시작될 때 첫 번째 위치입니다.
   CameraPosition _currentPosition = CameraPosition(
-    target: LatLng(37.382782, 127.1189054),
+    target: LatLng(37.233637,127.292995),
     zoom: 14,
   );
 
 
   var address = "한강로 1가";
   List<String> postTitle = ["실시간 한강로 상황", "한강로 집회 사람 많네 ㄷㄷ ", "집회 현황 ㅎㄷㄷ", "출근길 조심하세요!!"];
-
+  int i = 0;
   List<Marker> markers = [];
+
+
   @override
   void initState() {
     super.initState();
-
     _fetchOpendatasItems();
 
-    //marker 추가
-    markers.add(Marker(
-        markerId: MarkerId("1"),
-        draggable: false,
-        infoWindow: InfoWindow(title: address, snippet: postTitle.length.toString() + "건"),
-        onTap: () {
-          showModalBottomSheet(
-              context: context,
-              builder: (BuildContext context) {
-                return Container(
-                  height: 1000,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(0),
-                      topRight: Radius.circular(0)
-                    )
-                  ),
-                    child: Scaffold(
-                      appBar: AppBar(title: Text(address)),
-                    body:
-                        ListView.builder(
-                        itemCount: postTitle.length,
-                        itemBuilder: (c,i){
-                          return ListTile(
-                            leading: Icon(
-                              Icons.favorite, weight: 10,
-                            ),
-                            title: Text(postTitle[i]));
-                        }),
-                  )
-                );
-              });
-        },
-        position: LatLng(37.382782, 127.1189054)));
+
+    // for(int i = 0; i< items.length; i++) {
+    //   print(items[i]['locationDataX']);
+    //   print(items[i]['locationDataY']);
+    //   markers.add(Marker(
+    //       markerId: MarkerId("$i"),
+    //       draggable: false,
+    //       position: LatLng(items[i]['locationDataX'] as double, items[i]['locationDataY'] as double),
+    //       infoWindow: InfoWindow(
+    //           title: items[i]['incidentTitle'], snippet: postTitle.length.toString() + "건"),
+    //
+    //       onTap: () {
+    //         showModalBottomSheet(
+    //             context: context,
+    //             builder: (BuildContext context) {
+    //               return Container(
+    //                   height: 1000,
+    //                   decoration: const BoxDecoration(
+    //                       color: Colors.white,
+    //                       borderRadius: BorderRadius.only(
+    //                           topLeft: Radius.circular(0),
+    //                           topRight: Radius.circular(0)
+    //                       )
+    //                   ),
+    //                   child: Scaffold(
+    //                     appBar: AppBar(title: Text(address)),
+    //                     body:
+    //                     ListView.builder(
+    //                         itemCount: postTitle.length,
+    //                         itemBuilder: (c, i) {
+    //                           return ListTile(
+    //                               leading: Icon(
+    //                                 Icons.favorite, weight: 10,
+    //                               ),
+    //                               title: Text(postTitle[i]));
+    //                         }),
+    //                   )
+    //               );
+    //             });
+    //       },
+    //      ));
+    // }
 
   }
 
@@ -126,8 +136,28 @@ class _MapSampleState extends State<MapSample> {
           Expanded(
             child: GoogleMap(
               mapType: MapType.normal,
+
               initialCameraPosition: _currentPosition,
-              markers: Set.from(markers), //마커 저장.
+              markers: Set<Marker>.from(items.map((data) {
+                String latitude = data['locationDataX'] as String;
+                String longitude = data['locationDataY'] as String;
+                String title = data['addressJibun'] as String;
+                String description = data['incidentTitle'] as String;
+                String tagType = description.substring(1,3);
+                i++;
+
+                return Marker(
+                  markerId: MarkerId(i.toString()),
+                  position: LatLng(double.parse(longitude), double.parse(latitude)),
+                  infoWindow: InfoWindow(
+                    title: title,
+                    snippet: description,
+                  ),
+
+                );
+
+              })), //마커 저장.
+
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
               },
@@ -181,8 +211,17 @@ class _MapSampleState extends State<MapSample> {
 
     print('Items length: ${items.length}');
     print('Items contents:');
-    items.forEach((item) => print(item));
+    for(int i = 0; i < items.length; i++) {
+      print(items[i]);
+    }
   }
 
+
+  Future<Position> getCurrentLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    return position;
+  }
 
 }
