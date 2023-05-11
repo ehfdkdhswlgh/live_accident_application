@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_accident_application/UserImfomation.dart';
 import 'package:live_accident_application/hojun/post.dart';
 import 'package:live_accident_application/hojun/post_main_document.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +14,7 @@ import 'haechan/account_management.dart' as account_management;
 import 'hojun/post.dart' as post;
 import 'hojun/store.dart';
 import 'hojun/top_rank.dart';
+import 'hojun/write_report_demo.dart' as test;
 import 'jihwan/news.dart';
 import 'jihwan/post_report.dart';
 import 'jihwan/post_report_management.dart';
@@ -47,7 +49,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
-  bool checker = login.Login.checker;
+  bool checker = UserImfomation.checker;
 
   void _onTabTapped(int index) {
     setState(() {
@@ -60,10 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     Widget checker_widget;
+    Widget bottomNavigationBarWidget;
 
-    if (login.Login.checker == false) {
+    if (UserImfomation.checker == false) {
       checker_widget = login.Login();
-      checker = true;
     } else {
       checker_widget = MapSample();
     }
@@ -87,11 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [
-        checker_widget, post.Post(),ReportWriteScreen(),TopMember(),News()
-      ]
+      body: [checker_widget, post.Post(),test.ReportWriteScreen(),TopMember(),News()]
       [_currentIndex],
-      bottomNavigationBar: checker ? BottomNavigationBar(
+        bottomNavigationBar: UserImfomation.checker ? BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
             label: '보도자료',
           ),
         ],
-      ) : null,
+      ): null,
     );
   }
 

@@ -7,6 +7,7 @@ import '../jihoon/map_sample.dart';
 import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import '../main.dart' as main2;
 
 
 
@@ -19,7 +20,6 @@ void main() {
 }
 
 class Login extends StatelessWidget {
-  static bool checker = false;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -73,8 +73,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
         print("UID : " + uid);
 
+        UserImfomation.checker = true;
+
         Navigator.pushAndRemoveUntil(
-            context, MaterialPageRoute(builder: (context) => MapSample()),
+            context, MaterialPageRoute(builder: (context) => main2.MyHomePage()),
               (Route<dynamic> route) => false,
         );
 
@@ -115,7 +117,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
       }
-      Login.checker = true;
     }
   }
 
@@ -302,7 +303,7 @@ class RegisterPage extends StatelessWidget {
     );
   }// create_account
 
-  Future<bool> checkNicknameExist(String nickname) async {
+  Future<bool> checkNicknameExist(String nickname) async {  //name이 존재하는지 확인
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('user')
         .where('name', isEqualTo: nickname)
