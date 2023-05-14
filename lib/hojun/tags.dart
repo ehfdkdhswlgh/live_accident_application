@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'store.dart';
 
 class Tags extends StatefulWidget {
   const Tags({Key? key}) : super(key: key);
@@ -19,6 +21,7 @@ class _TagsState extends State<Tags> {
       onPressed: (){
         setState(() {
           _selectedAccIndex = index;
+          context.read<Store>().setReadPostType(index);
         });
       },
       child: Text(txt),
@@ -42,6 +45,7 @@ class _TagsState extends State<Tags> {
       onPressed: (){
         setState(() {
           _selectedOrdIndex = index;
+          context.read<Store>().setReadPostOrder(index);
         });
       },
       child: Text(txt),

@@ -1,18 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'store.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'post_main_document.dart';
 
 class MainPost extends StatefulWidget {
-  const MainPost({Key? key}) : super(key: key);
-
+  const MainPost({Key? key, required this.postId}) : super(key: key);
+  final String postId;
   @override
   State<MainPost> createState() => _MainPostState();
 }
 
 class _MainPostState extends State<MainPost> {
+  @override
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  late DocumentSnapshot<Map<String, dynamic>> _document;
+  late String url;
+
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _fetchPost();
+
+  }
+
+  _fetchPost() async{
+    var snapshot = await _db.collection('posts').where('post_id', isEqualTo: widget.postId).get();
+    if (snapshot.docs.isNotEmpty) {
+      setState(() {
+        _document = snapshot.docs[0];
+        url = _document.data()!['images'];
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +48,7 @@ class _MainPostState extends State<MainPost> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Profile(),
-                Thumbnail(),
+                Thumbnail(url: url),
                 Preview(),
                 Divider(thickness: 2.0),
               ],
@@ -33,7 +56,7 @@ class _MainPostState extends State<MainPost> {
             onTap: () {
               Navigator.push(context,
                 PageRouteBuilder(
-                  pageBuilder: (c, a1, a2) => PostDocument(postId: '950KJmoL4sK1viwfbBA8'),
+                  pageBuilder: (c, a1, a2) => PostDocument(postId: widget.postId),
                   transitionsBuilder: (c, a1, a2, child) =>
                   FadeTransition(opacity: a1, child: child)
                 )
@@ -113,8 +136,8 @@ class Profile extends StatelessWidget {
 }
 
 class Thumbnail extends StatefulWidget {
-  const Thumbnail({Key? key}) : super(key: key);
-
+  const Thumbnail({Key? key, required this.url}) : super(key: key);
+  final url;
   @override
   State<Thumbnail> createState() => _ThumbnailState();
 }
@@ -127,21 +150,10 @@ class _ThumbnailState extends State<Thumbnail> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    final FirebaseStorage storage = FirebaseStorage.instance;
-    // 경로 지정
-    final String path = '';
-
     // Firebase Storage에서 해당 경로의 모든 파일 가져오기
-    storage.ref().child(path).listAll().then((result) {
-      // 모든 파일 URL 가져와서 imageList에 추가
-      result.items.forEach((ref) {
-        ref.getDownloadURL().then((url) {
-          setState(() {
-            imageList.add(url);
-          });
-        });
-      });
-    });
+    print(widget.url);
+    imageList = widget.url.split(',');
+    print('b${imageList[0]}');
   }
 
 

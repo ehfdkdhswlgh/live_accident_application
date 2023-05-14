@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
+import 'store.dart';
+import 'package:provider/provider.dart';
 
 import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -50,13 +51,13 @@ class _ReportScreenState extends State<ReportWriteScreen> {
       ),
       body: Container(
           padding: EdgeInsets.all(16.0),
-        child: _buildContainer(_selectedIndex)
+        child: _buildContainer(_selectedIndex, context)
       ),
     );
   }
 
 
-  Widget _buildContainer(int index){
+  Widget _buildContainer(int index, BuildContext context){
     if(index == 0){
       return SingleChildScrollView(
           child : Container(
@@ -156,7 +157,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         Future<List<String>> str = uploadImages(_pickedImages);
                         str.then((List<String> strList) {
                           String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
-                          _uploadPost('useruseruser', str);
+                          _uploadPost('useruseruser', str, context.read<Store>().postType);
                         });
 
                       },
@@ -435,7 +436,8 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     return imageUrls;
   }
 
-  void _uploadPost(String userId, String url) async { //댓글 등록 함수
+  //제봇글 업로드 함수
+  void _uploadPost(String userId, String url, int postType) async {
     String title = _titleController.text;
     String main = _mainController.text;
 
@@ -445,7 +447,9 @@ class _ReportScreenState extends State<ReportWriteScreen> {
         'post_id': '${userId}123',
         'title': title,
         'post_content': main,
+        'post_type': postType,
         'images': url,
+        'address_name': '경상북도 구미시 대학로 42-10',
         'is_visible': true,
         'timestamp': FieldValue.serverTimestamp(),
       });
@@ -484,11 +488,11 @@ class _MyButtonState extends State<MyButton> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildButton('사고'),
-              _buildButton('공사'),
-              _buildButton('행사/시위'),
-              _buildButton('통제'),
-              _buildButton('기타'),
+              _buildButton('사고', context),
+              _buildButton('공사', context),
+              _buildButton('행사/시위', context),
+              _buildButton('통제', context),
+              _buildButton('기타', context),
             ],
           ),
         ],
@@ -496,12 +500,13 @@ class _MyButtonState extends State<MyButton> {
     );
   }
 
-  Widget _buildButton(String text) {
+  Widget _buildButton(String text, BuildContext context) {
     bool isSelected = text == _selectedItem;
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedItem = text;
+          context.read<Store>().setPostType(text);
         });
       },
       child: Container(

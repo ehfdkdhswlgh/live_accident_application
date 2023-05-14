@@ -21,6 +21,26 @@ class _PostDocumentState extends State<PostDocument> {
 
   _PostDocumentState({required this.postId});
 
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  late DocumentSnapshot<Map<String, dynamic>> _document;
+  late String url;
+
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _fetchPost();
+  }
+
+  _fetchPost() async{
+    var snapshot = await _db.collection('posts').where('post_id', isEqualTo: widget.postId).get();
+    if (snapshot.docs.isNotEmpty) {
+      setState(() {
+        _document = snapshot.docs[0];
+      });
+    }
+    url = _document.data()!['images'];
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -28,7 +48,7 @@ class _PostDocumentState extends State<PostDocument> {
       body: ListView(
           children: [
             Profile(),
-            Thumbnail(),
+            Thumbnail(url: url),
             MainDocument(),
             Divider(thickness: 2.0),
             StreamBuilder<QuerySnapshot>(
