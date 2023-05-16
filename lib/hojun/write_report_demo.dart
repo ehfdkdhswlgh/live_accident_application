@@ -14,6 +14,10 @@ import 'package:uuid/uuid.dart';
 
 
 class ReportWriteScreen extends StatefulWidget {
+  final VoidCallback onReportSubmitted;
+
+  ReportWriteScreen({required this.onReportSubmitted});
+
   @override
   _ReportScreenState createState() => _ReportScreenState();
 }
@@ -27,6 +31,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
   final List<XFile?> _pickedImages = [];
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _mainController = TextEditingController();
+
 
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -159,6 +164,9 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                           String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
                           _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
                         });
+
+                        widget.onReportSubmitted();
+
 
                       },
                       child: Text('제보하기'),

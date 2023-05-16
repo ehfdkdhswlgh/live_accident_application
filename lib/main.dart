@@ -57,7 +57,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-
+  void _goToPostScreen() {
+    setState(() {
+      _currentIndex = 1; // '제보글' 화면의 인덱스는 1입니다.
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [checker_widget, post.Post(),test.ReportWriteScreen(),TopMember(),News()]
+      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(),News()]
       [_currentIndex],
         bottomNavigationBar: UserImfomation.checker ? BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
