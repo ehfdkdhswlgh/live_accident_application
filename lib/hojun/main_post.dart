@@ -11,90 +11,46 @@ import 'post_main_document.dart';
 class MainPost extends StatefulWidget {
   const MainPost({Key? key, required this.postContent}) : super(key: key);
   final Post postContent;
-
   @override
   State<MainPost> createState() => _MainPostState();
 }
 
 class _MainPostState extends State<MainPost> {
   @override
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       width: 400,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: GestureDetector(
-              child: Profile(),
-              onTap: () {
-                // '제보하기' 버튼 클릭 시 실행될 코드
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('프로필 누름'),
-                  ),
-                );
-              },
-            ),
-          ),
           GestureDetector(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child:  Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                Profile(),
                 Thumbnail(url: widget.postContent.imageLinks),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 4.0),
-                      Text(
-                        widget.postContent.postMain,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
+                Preview(),
+                Divider(thickness: 2.0),
               ],
             ),
             onTap: () {
-              Navigator.push(
-                context,
+              Navigator.push(context,
                 PageRouteBuilder(
-                  pageBuilder: (c, a1, a2) => PostDocument(
-                    postId: widget.postContent.postId,
-                    imageUrl: widget.postContent.imageLinks,
-                    postMain: widget.postContent.postMain,
-                  ),
+                  pageBuilder: (c, a1, a2) => PostDocument(postId: widget.postContent.postId, imageUrl: widget.postContent.imageLinks),
                   transitionsBuilder: (c, a1, a2, child) =>
-                      FadeTransition(opacity: a1, child: child),
-                ),
+                  FadeTransition(opacity: a1, child: child)
+                )
               );
             },
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.favorite_border),
-                    SizedBox(width: 4.0),
-                    Text('Like'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.comment_outlined),
-                    SizedBox(width: 4.0),
-                    Text('Comment'),
-                  ],
-                ),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Like(),
+              Comment(),
+            ],
           ),
           Divider(thickness: 2.0),
         ],
@@ -102,6 +58,7 @@ class _MainPostState extends State<MainPost> {
     );
   }
 }
+
 class Profile extends StatelessWidget {
   const Profile({Key? key}) : super(key: key);
 
@@ -116,9 +73,7 @@ class Profile extends StatelessWidget {
               radius: 30,
               backgroundColor: Colors.grey, // 프사를 넣을 경우 backgroundImage
             ),
-            SizedBox(width: 8.0), // Add some spacing between the avatar and text
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('제보날씨'), // 닉네임 위치
                 Text('홍천교'), // 제보 위치
@@ -129,35 +84,34 @@ class Profile extends StatelessWidget {
         Column(
           children: [
             IconButton(
-              onPressed: () {
+              onPressed: (){
                 showModalBottomSheet(
                   context: context,
-                  builder: (BuildContext context) {
+                  builder: (BuildContext context){
                     return Container(
-                      height: 300, // 모달 높이 크기
-                      margin: const EdgeInsets.only(
-                        left: 25,
-                        right: 25,
-                        bottom: 40,
-                      ), // 모달 좌우하단 여백 크기
-                      decoration: const BoxDecoration(
-                        color: Colors.white, // 모달 배경색
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(20), // 모달 전체 라운딩 처리
+                        height: 300, // 모달 높이 크기
+                        margin: const EdgeInsets.only(
+                          left: 25,
+                          right: 25,
+                          bottom: 40,
+                        ), // 모달 좌우하단 여백 크기
+                        decoration: const BoxDecoration(
+                          color: Colors.white, // 모달 배경색
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20), // 모달 전체 라운딩 처리
+                          ),
                         ),
-                      ),
-                      child: [
-                        // 모달 내부 디자인 영역
-                      ][0],
+                        child: [
+                        ][0], // 모달 내부 디자인 영역
                     );
                   },
                 );
               },
-              icon: Icon(Icons.more_horiz),
+              icon: Icon(Icons.more_horiz)
             ), // 아이콘
             Text('203일전'), // 업로드 날짜
           ],
-        ),
+        )
       ],
     );
   }
@@ -257,8 +211,8 @@ class _ThumbnailState extends State<Thumbnail> {
 }
 
 class Preview extends StatelessWidget {
-  const Preview({Key? key, this.content}) : super(key: key);
-  final content;
+  const Preview({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -273,7 +227,7 @@ class Preview extends StatelessWidget {
               strutStyle: StrutStyle(fontSize: 12.0),
               text: TextSpan(
                 text:
-                 content,
+                "세계문자 가운데 한글,즉 훈민정음은 흔히들 신비로운 문자라 부르곤 합니다. 그것은 세계 문자 가운데 유일하게 한글만이 그것을 만든 사람과 반포일을 알며, 글자를 만든 원리까지 알기 때문입니다. 세계에 이런 문자는 없습니다. 그래서 한글은, 정확히 말해 [훈민정음 해례본](국보 70호)은 진즉에 유네스코 세계기록유산으로 등재되었습니다. ‘한글’이라는 이름은 1910년대 초에 주시경 선생을 비롯한 한글학자들이 쓰기 시작한 것입니다. 여기서 ‘한’이란 크다는 것을 뜻하니, 한글은 ‘큰 글’을 말한다고 하겠습니다.[네이버 지식백과] 한글 - 세상에서 가장 신비한 문자 (위대한 문화유산, 최준식)",
                 style: TextStyle(
                   color: Colors.black,
                   height: 1.4,

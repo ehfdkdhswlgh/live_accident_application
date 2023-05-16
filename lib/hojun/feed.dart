@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart';
 import 'main_post.dart';
 
 class Feed extends StatefulWidget {
@@ -69,8 +68,7 @@ class _FeedState extends State<Feed> {
     final newPosts = querySnapshot.docs.map((doc) {
       final postId = doc.get('post_id').toString();
       final imageLinks = doc.get('images').toString();
-      final postMain = doc.get('post_content').toString();
-      return Post(postId: postId, imageLinks: imageLinks, postMain: postMain);
+      return Post(postId: postId, imageLinks: imageLinks);
     }).toList();
 
     setState(() {
@@ -98,6 +96,6 @@ class _FeedState extends State<Feed> {
 class Post {
   final String postId;
   final String imageLinks;
-  final String postMain;
-  Post({required this.postId, required this.imageLinks, required this. postMain});
+
+  Post({required this.postId, required this.imageLinks});
 }
