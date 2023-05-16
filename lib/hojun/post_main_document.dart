@@ -7,39 +7,17 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PostDocument extends StatefulWidget {
+  PostDocument({required this.postId, required this.imageUrl});
   final String postId;
+  final String imageUrl;
 
-  PostDocument({required this.postId});
 
   @override
-  State<PostDocument> createState() => _PostDocumentState(postId: postId);
+  State<PostDocument> createState() => _PostDocumentState();
 }
 
 class _PostDocumentState extends State<PostDocument> {
   final TextEditingController _commentController = TextEditingController();
-  late final String postId;
-
-  _PostDocumentState({required this.postId});
-
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  late DocumentSnapshot<Map<String, dynamic>> _document;
-  late String url;
-
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _fetchPost();
-  }
-
-  _fetchPost() async{
-    var snapshot = await _db.collection('posts').where('post_id', isEqualTo: widget.postId).get();
-    if (snapshot.docs.isNotEmpty) {
-      setState(() {
-        _document = snapshot.docs[0];
-      });
-    }
-    url = _document.data()!['images'];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,23 +26,21 @@ class _PostDocumentState extends State<PostDocument> {
       body: ListView(
           children: [
             Profile(),
-            Thumbnail(url: url),
+            Thumbnail(url: widget.imageUrl),
             MainDocument(),
             Divider(thickness: 2.0),
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('comments')
-                  .where('post_id', isEqualTo: postId)
+                  .where('post_id', isEqualTo: widget.postId)
                   .orderBy('timestamp', descending: true)
                   .snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
                   return Text('Something went wrong');
                 }
-
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Text("Loading");
                 }
-
                 return ListView(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(), // 스크롤 기능 없에주는 것

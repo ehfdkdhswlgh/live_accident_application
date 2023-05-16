@@ -10,7 +10,7 @@ class Feed extends StatefulWidget {
 
 class _FeedState extends State<Feed> {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  List<String> _postIds = [];
+  List<Post> _posts = [];
   bool _isLoading = false;
   bool _hasMoreData = true;
 
@@ -22,11 +22,10 @@ class _FeedState extends State<Feed> {
     super.initState();
     _fetchData();
     scroll.addListener(() {
-      if(scroll.position.pixels == scroll.position.maxScrollExtent){
-        print('addData');
-        print(_postIds);
+      if(scroll.position.pixels > scroll.position.maxScrollExtent - 50){
         _fetchData();
       }
+      print(scroll.position.pixels);
     });
   }
 
@@ -38,14 +37,14 @@ class _FeedState extends State<Feed> {
     });
 
     QuerySnapshot querySnapshot;
-    if (_postIds.isEmpty) {
+    if (_posts.isEmpty) {
       querySnapshot = await _db
           .collection('posts')
           .orderBy('timestamp', descending: true)
           .limit(5)
           .get();
     } else {
-      final lastPostId = _postIds.last;
+      final lastPostId = _posts.last.postId;
       final lastDocSnapshot = await _db
           .collection('posts')
           .where('post_id', isEqualTo: lastPostId)
@@ -58,7 +57,6 @@ class _FeedState extends State<Feed> {
           .limit(5)
           .get();
     }
-
     if (querySnapshot.docs.isEmpty) {
       setState(() {
         _isLoading = false;
@@ -67,20 +65,25 @@ class _FeedState extends State<Feed> {
       return;
     }
 
-    final newPostIds = querySnapshot.docs.map((doc) => doc.get('post_id').toString()).toList();
+    final newPosts = querySnapshot.docs.map((doc) {
+      final postId = doc.get('post_id').toString();
+      final imageLinks = doc.get('images').toString();
+      return Post(postId: postId, imageLinks: imageLinks);
+    }).toList();
+
     setState(() {
       _isLoading = false;
-      _postIds.addAll(newPostIds);
+      _posts.addAll(newPosts);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if(_postIds.isNotEmpty){
-      return ListView.builder(itemCount: _postIds.length, controller: scroll, itemBuilder: (c, i){
+    if(_posts.isNotEmpty){
+      return ListView.builder(itemCount: _posts.length, controller: scroll, itemBuilder: (c, i){
         return Column(
           children: [
-            MainPost(postId: _postIds[i]),
+            MainPost(postContent: _posts[i]),
           ],
         );
       });
@@ -88,4 +91,11 @@ class _FeedState extends State<Feed> {
       return Text("로딩중");
     }
   }
+}
+
+class Post {
+  final String postId;
+  final String imageLinks;
+
+  Post({required this.postId, required this.imageLinks});
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:live_accident_application/hojun/feed.dart';
 import 'package:provider/provider.dart';
 import 'store.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -8,8 +9,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'post_main_document.dart';
 
 class MainPost extends StatefulWidget {
-  const MainPost({Key? key, required this.postId}) : super(key: key);
-  final String postId;
+  const MainPost({Key? key, required this.postContent}) : super(key: key);
+  final Post postContent;
   @override
   State<MainPost> createState() => _MainPostState();
 }
@@ -17,25 +18,6 @@ class MainPost extends StatefulWidget {
 class _MainPostState extends State<MainPost> {
   @override
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  late DocumentSnapshot<Map<String, dynamic>> _document;
-  late String url;
-
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _fetchPost();
-
-  }
-
-  _fetchPost() async{
-    var snapshot = await _db.collection('posts').where('post_id', isEqualTo: widget.postId).get();
-    if (snapshot.docs.isNotEmpty) {
-      setState(() {
-        _document = snapshot.docs[0];
-        url = _document.data()!['images'];
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +30,7 @@ class _MainPostState extends State<MainPost> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Profile(),
-                Thumbnail(url: url),
+                Thumbnail(url: widget.postContent.imageLinks),
                 Preview(),
                 Divider(thickness: 2.0),
               ],
@@ -56,7 +38,7 @@ class _MainPostState extends State<MainPost> {
             onTap: () {
               Navigator.push(context,
                 PageRouteBuilder(
-                  pageBuilder: (c, a1, a2) => PostDocument(postId: widget.postId),
+                  pageBuilder: (c, a1, a2) => PostDocument(postId: widget.postContent.postId, imageUrl: widget.postContent.imageLinks),
                   transitionsBuilder: (c, a1, a2, child) =>
                   FadeTransition(opacity: a1, child: child)
                 )
@@ -151,9 +133,7 @@ class _ThumbnailState extends State<Thumbnail> {
     // TODO: implement initState
     super.initState();
     // Firebase Storage에서 해당 경로의 모든 파일 가져오기
-    print(widget.url);
     imageList = widget.url.split(',');
-    print('b${imageList[0]}');
   }
 
 
