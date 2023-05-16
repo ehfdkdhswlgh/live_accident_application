@@ -13,7 +13,7 @@ class _TagsState extends State<Tags> {
 
   final List<String> _acc = ['전체','사고','공사','행사','통제','기타'];
   final List<String> _ord = ['거리순','최신순','추천순'];
-  int _selectedAccIndex = 0;
+  var _selectedAccIndex = 0;
   int _selectedOrdIndex = 0;
 
   Widget accTags(String txt, int index){
@@ -40,6 +40,9 @@ class _TagsState extends State<Tags> {
     );
   }
 
+  int get index {
+    return this._selectedAccIndex;
+}
   Widget orderTags(String txt, int index){
     return TextButton(
       onPressed: (){

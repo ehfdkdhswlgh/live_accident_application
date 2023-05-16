@@ -4,10 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'location_service.dart';
-import 'tags.dart';
+import 'tags.dart' as tag;
 import '../haechan/profile.dart' as profile;
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:provider/provider.dart';
+import 'package:live_accident_application/hojun/store.dart';
 
 class MapSample extends StatefulWidget {
   const MapSample({super.key});
@@ -20,9 +21,12 @@ class _MapSampleState extends State<MapSample> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<Map<String, String>> items = [];
+  List<String> _acc = ['전체','사고','공사','행사','통제','기타'];
+  String tagType ="";
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
+  late Position currentPosition;
 
   // 이 값은 지도가 시작될 때 첫 번째 위치입니다.
   CameraPosition _currentPosition = CameraPosition(
@@ -30,6 +34,7 @@ class _MapSampleState extends State<MapSample> {
     zoom: 14,
   );
 
+  var selectedPostType = 1;
 
   var address = "한강로 1가";
   List<String> postTitle = ["실시간 한강로 상황", "한강로 집회 사람 많네 ㄷㄷ ", "집회 현황 ㅎㄷㄷ", "출근길 조심하세요!!"];
@@ -41,6 +46,7 @@ class _MapSampleState extends State<MapSample> {
   void initState() {
     super.initState();
     _fetchOpendatasItems();
+    getCurrentLocation();
 
 
     // for(int i = 0; i< items.length; i++) {
@@ -91,6 +97,9 @@ class _MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
+    selectedPostType = context.read<Store>().selectedPostType;
+    print("지금 선택된 위치는? : $selectedPostType");
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Live돌발사고"),
@@ -116,9 +125,7 @@ class _MapSampleState extends State<MapSample> {
       body:
       Column(
         children : [
-          Container(
-            child: Tags(), height: 80,
-          ),
+          tag.Tags(),
           Row(
             children: [
               Expanded(child: TextFormField(
@@ -134,17 +141,25 @@ class _MapSampleState extends State<MapSample> {
             ],
           ),
           Expanded(
+
             child: GoogleMap(
               mapType: MapType.normal,
 
-              initialCameraPosition: _currentPosition,
+              initialCameraPosition: CameraPosition(
+                target:  LatLng(
+                  currentPosition.latitude,
+                  currentPosition.longitude,
+                ),
+                zoom: 15,
+              ),
               markers: Set<Marker>.from(items.map((data) {
                 String latitude = data['locationDataX'] as String;
                 String longitude = data['locationDataY'] as String;
                 String title = data['addressJibun'] as String;
                 String description = data['incidentTitle'] as String;
-                String tagType = description.substring(1,3);
+                tagType = description.substring(1,3);
                 i++;
+
 
                 return Marker(
                   markerId: MarkerId(i.toString()),
@@ -153,7 +168,35 @@ class _MapSampleState extends State<MapSample> {
                     title: title,
                     snippet: description,
                   ),
-
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: 200,
+                          child: ListView(
+                            children: [
+                              ListTile(
+                                title: Text('항목 1'),
+                                onTap: () {
+                                  // 선택된 항목에 대한 처리 로직
+                                  Navigator.pop(context); // Bottom sheet 닫기
+                                },
+                              ),
+                              ListTile(
+                                title: Text('항목 2'),
+                                onTap: () {
+                                  // 선택된 항목에 대한 처리 로직
+                                  Navigator.pop(context); // Bottom sheet 닫기
+                                },
+                              ),
+                              // 추가적인 항목w들...
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }
                 );
 
               })), //마커 저장.
@@ -161,6 +204,7 @@ class _MapSampleState extends State<MapSample> {
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
               },
+              myLocationEnabled: true,
               myLocationButtonEnabled: true,
             ),
           ),
@@ -168,6 +212,7 @@ class _MapSampleState extends State<MapSample> {
       ],
 
     ),
+
     );
   }
 
@@ -216,12 +261,15 @@ class _MapSampleState extends State<MapSample> {
     }
   }
 
-
-  Future<Position> getCurrentLocation() async {
+  void getCurrentLocation() async {
     Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+      desiredAccuracy: LocationAccuracy.high,
+    );
 
-    return position;
+    setState(() {
+      currentPosition = position;
+    });
   }
+
 
 }
