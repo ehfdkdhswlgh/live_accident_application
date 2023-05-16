@@ -10,6 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:live_accident_application/hojun/store.dart';
 
+
 class MapSample extends StatefulWidget {
   const MapSample({super.key});
 
@@ -26,7 +27,7 @@ class _MapSampleState extends State<MapSample> {
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
-  late Position currentPosition;
+  Position? currentPosition;
 
   // 이 값은 지도가 시작될 때 첫 번째 위치입니다.
   CameraPosition _currentPosition = CameraPosition(
@@ -45,8 +46,9 @@ class _MapSampleState extends State<MapSample> {
   @override
   void initState() {
     super.initState();
-    _fetchOpendatasItems();
     getCurrentLocation();
+    _fetchOpendatasItems();
+
 
 
     // for(int i = 0; i< items.length; i++) {
@@ -97,8 +99,8 @@ class _MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
-    selectedPostType = context.read<Store>().selectedPostType;
-    print("지금 선택된 위치는? : $selectedPostType");
+    // selectedPostType = context.read<Store>().selectedPostType;
+    // print("지금 선택된 위치는? : $selectedPostType");
 
     return Scaffold(
       appBar: AppBar(
@@ -142,13 +144,13 @@ class _MapSampleState extends State<MapSample> {
           ),
           Expanded(
 
-            child: GoogleMap(
+            child:  GoogleMap(
               mapType: MapType.normal,
 
               initialCameraPosition: CameraPosition(
                 target:  LatLng(
-                  currentPosition.latitude,
-                  currentPosition.longitude,
+                  currentPosition!.latitude,
+                  currentPosition!.longitude,
                 ),
                 zoom: 15,
               ),
@@ -270,6 +272,8 @@ class _MapSampleState extends State<MapSample> {
       currentPosition = position;
     });
   }
+
+
 
 
 }
