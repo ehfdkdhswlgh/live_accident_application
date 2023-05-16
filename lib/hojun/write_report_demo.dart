@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'store.dart';
 import 'package:provider/provider.dart';
-
+import '../UserImfomation.dart';
 import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -51,7 +51,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
       ),
       body: Container(
           padding: EdgeInsets.all(16.0),
-        child: _buildContainer(_selectedIndex, context)
+          child: _buildContainer(_selectedIndex, context)
       ),
     );
   }
@@ -157,7 +157,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         Future<List<String>> str = uploadImages(_pickedImages);
                         str.then((List<String> strList) {
                           String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
-                          _uploadPost('useruseruser', str, context.read<Store>().postType);
+                          _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
                         });
 
                       },
@@ -190,67 +190,67 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     {
       return SingleChildScrollView(
           child : Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-                Text(
-                  '제보 내용',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18.0,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  maxLines: null,
-                  maxLength: 500, // 글자수 20자 제한
-                  textAlign: TextAlign.left, // 텍스트 왼쪽 정렬
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.0), // 좌우 패딩 16.0
-                    filled: true, // 배경 색상 채우기
-                    fillColor: Colors.grey[200], // 배경 회색 색상
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none, // 외곽선 없음
-                      borderRadius: BorderRadius.circular(8.0), // 모서리 둥글게 처리
-                    ),
-                    hintText: '본문을 입력해주세요', // 입력 안내 메시지
-                    hintStyle: TextStyle(color: Colors.grey[400]), // 입력 안내 메시지 색상
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SwitchButton(),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
-                        foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                    const SizedBox(height: 10),
+                    Text(
+                      '제보 내용',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18.0,
                       ),
-                      onPressed: () {
-                        // '제보하기' 버튼 클릭 시 실행될 코드
-                      },
-                      child: Text('제보하기'),
                     ),
-                    SizedBox(width: 10),
-                    OutlinedButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
-                        foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                    const SizedBox(height: 10),
+                    TextField(
+                      maxLines: null,
+                      maxLength: 500, // 글자수 20자 제한
+                      textAlign: TextAlign.left, // 텍스트 왼쪽 정렬
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.0), // 좌우 패딩 16.0
+                        filled: true, // 배경 색상 채우기
+                        fillColor: Colors.grey[200], // 배경 회색 색상
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none, // 외곽선 없음
+                          borderRadius: BorderRadius.circular(8.0), // 모서리 둥글게 처리
+                        ),
+                        hintText: '본문을 입력해주세요', // 입력 안내 메시지
+                        hintStyle: TextStyle(color: Colors.grey[400]), // 입력 안내 메시지 색상
                       ),
-                      onPressed: () {
-                        // '취소' 버튼 클릭 시 실행될 코드
-                      },
-                      child: Text('취소'),
                     ),
-                  ],
-                )
+                    const SizedBox(height: 20),
+                    SwitchButton(),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                          ),
+                          onPressed: () {
+                            // '제보하기' 버튼 클릭 시 실행될 코드
+                          },
+                          child: Text('제보하기'),
+                        ),
+                        SizedBox(width: 10),
+                        OutlinedButton(
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
+                            foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                          ),
+                          onPressed: () {
+                            // '취소' 버튼 클릭 시 실행될 코드
+                          },
+                          child: Text('취소'),
+                        ),
+                      ],
+                    )
 //
 
-              ]
-            )
+                  ]
+              )
           )
       );
     }
@@ -444,7 +444,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     if (title.isNotEmpty) {
       _firestore.collection('posts').add({
         'user_id': userId,
-        'post_id': '${userId}123',
+        'post_id': '${userId}${DateTime.now().microsecondsSinceEpoch}',
         'title': title,
         'post_content': main,
         'post_type': postType,
