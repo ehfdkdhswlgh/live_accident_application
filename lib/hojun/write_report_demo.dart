@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'store.dart';
 import 'package:provider/provider.dart';
-
+import '../UserImfomation.dart';
 import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -157,7 +157,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         Future<List<String>> str = uploadImages(_pickedImages);
                         str.then((List<String> strList) {
                           String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
-                          _uploadPost('useruseruser', str, context.read<Store>().postType);
+                          _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
                         });
 
                       },
@@ -444,7 +444,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     if (title.isNotEmpty) {
       _firestore.collection('posts').add({
         'user_id': userId,
-        'post_id': '${userId}123',
+        'post_id': '${userId}${DateTime.now().microsecondsSinceEpoch}',
         'title': title,
         'post_content': main,
         'post_type': postType,
