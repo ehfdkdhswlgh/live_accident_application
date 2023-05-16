@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  String uid = UserImfomation.uid;
+  // String uid = UserImfomation.uid;
 
   String my_email = 'hae507@gmail.com';
   String my_pw = '123456';
@@ -69,9 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
           password: _passwordController.text,
         );
 
-        uid = userCredential.user!.uid;
+        UserImfomation.uid = userCredential.user!.uid;
 
-        print("UID : " + uid);
+        // print("UID : " + uid+ "\n" );
+        print("UID : " + UserImfomation.uid);
 
         UserImfomation.checker = true;
 
