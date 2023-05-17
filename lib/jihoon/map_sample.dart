@@ -58,8 +58,12 @@ class _MapSampleState extends State<MapSample> {
     if (currentPosition == null) {
       // 위치 정보가 아직 가져와지지 않았을 경우에 대한 처리
       print("로딩중...");
-      return Stack(
-        fit: StackFit.loose,
+      return Center(
+          child: SizedBox(
+          width: 150,
+          height: 150,
+          child: Stack(
+        fit: StackFit.expand,
         children: const [
           SizedBox(
               width: 30, height: 30,
@@ -74,10 +78,11 @@ class _MapSampleState extends State<MapSample> {
                 style: TextStyle(fontSize: 10),
               )),
         ],
+          )
+         )
       );
     }
     else {
-
       print("로딩 완료...");
       return Scaffold(
         appBar: AppBar(
@@ -122,7 +127,6 @@ class _MapSampleState extends State<MapSample> {
               ],
             ),
             Expanded(
-
               child: GoogleMap(
                 mapType: MapType.normal,
 
@@ -135,7 +139,7 @@ class _MapSampleState extends State<MapSample> {
                   String longitude = data['locationDataY'] as String;
                   String title = data['addressJibun'] as String;
                   String description = data['incidentTitle'] as String;
-                  tagType = description.substring(1, 3);
+                  String incidenteTypeCd = data['incidenteTypeCd'] as String;
                   i++;
 
 
@@ -273,19 +277,17 @@ class _MapSampleState extends State<MapSample> {
 
   Future<void> getCurrentLocation() async {
 
-    print("11111");
-    LocationPermission permission = await Geolocator.requestPermission();
-    print("222222");
+    // print("11111");
+    // LocationPermission permission = await Geolocator.requestPermission();
+
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.medium,
     );
 
-    print("3333333");
     setState(() {
       currentPosition = LatLng(position.latitude, position.longitude);
     });
 
-    print("4444444");
     print(position.latitude);
     print(position.longitude);
 

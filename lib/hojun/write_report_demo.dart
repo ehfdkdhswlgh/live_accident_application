@@ -54,22 +54,28 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     if (currentPosition == null) {
       // 위치 정보가 아직 가져와지지 않았을 경우에 대한 처리
       print("로딩중...");
-      return Stack(
-        fit: StackFit.loose,
-        children: const [
-          SizedBox(
-              width: 30, height: 30,
-              child: CircularProgressIndicator(
-                strokeWidth: 10,
-                backgroundColor: Colors.black,
-                color: Colors.green,
-              )),
-          Center(
-              child: Text(
-                'Loading....',
-                style: TextStyle(fontSize: 10),
-              )),
-        ],
+      return Center(
+          child: SizedBox(
+              width: 150,
+              height: 150,
+              child: Stack(
+                fit: StackFit.expand,
+                children: const [
+                  SizedBox(
+                      width: 30, height: 30,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 10,
+                        backgroundColor: Colors.black,
+                        color: Colors.green,
+                      )),
+                  Center(
+                      child: Text(
+                        'Loading....',
+                        style: TextStyle(fontSize: 10),
+                      )),
+                ],
+              )
+          )
       );
     }
     else {
