@@ -689,7 +689,7 @@ class _SwitchButtonState extends State<SwitchButton> {
   }
 }
 
-_postRequest(String content, String phone_num) async {
+_postRequest(String content, String phone_num) async {    // 50건이상 쓰면 건당 10원이니 적당히 쓸 것
   try {
     DateTime now = DateTime.now();
     int timestamp = now.millisecondsSinceEpoch;
