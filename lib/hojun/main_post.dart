@@ -71,6 +71,7 @@ class _MainPostState extends State<MainPost> {
                     userNickname: widget.postContent.userNickname,
                     postName: widget.postContent.postName,
                     userId: widget.postContent.userId,
+                    timestamp: widget.postContent.timestamp,
                   ),
                   transitionsBuilder: (c, a1, a2, child) =>
                       FadeTransition(opacity: a1, child: child),

@@ -6,13 +6,14 @@ import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PostDocument extends StatefulWidget {
-  PostDocument({required this.postId, required this.imageUrl, required this.postMain, required this.userNickname, required this.postName, required this.userId});
+  PostDocument({required this.postId, required this.imageUrl, required this.postMain, required this.userNickname, required this.postName, required this.userId, required this.timestamp});
   final postId;
   final imageUrl;
   final postMain;
   final userNickname;
   final postName;
   final userId;
+  final timestamp;
   @override
   State<PostDocument> createState() => _PostDocumentState();
 }

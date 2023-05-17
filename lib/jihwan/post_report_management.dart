@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ReportManagementScreen extends StatefulWidget {
   @override
@@ -6,37 +7,74 @@ class ReportManagementScreen extends StatefulWidget {
 }
 
 class _ReportManagementScreenState extends State<ReportManagementScreen> {
-  final List<Map<String, String>> reports = [
-    {
-      'title': '출근하기 귀찮네',
-      'reason': '제보와 관련없는 글 게시',
-    },
-    {
-      'title': 'ㄴㄴ',
-      'reason': '음란물 게시',
-    },
-    {
-      'title': '시*',
-      'reason': '부적절한 언어 사용',
-    },
-    {
-      'title': 'ㅇㅇ',
-      'reason': '저작권 침해',
-    },
-  ];
-//
-  void _deleteReport(int index, bool isCanceled) {
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> items = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchItems();
+  }
+
+
+  Future<void> _fetchItems() async {
+    List<Map<String, dynamic>> Items = [];
+
+    QuerySnapshot querySnapshot = await _firestore.collection('reported_post').get();
+    querySnapshot.docs.forEach((doc) {
+      Items.add({
+        'post_id': doc['post_id'],
+        'post_name': doc['post_name'],
+        'reason': doc['reason'],
+        'user_id': doc['user_id'],
+        'user_name': doc['user_name'],
+      });
+    });
+
     setState(() {
-      reports.removeAt(index);
-      if (!isCanceled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('해당 게시글을 삭제하였습니다.'),
-          ),
-        );
-      }
+      items = Items;
     });
   }
+
+  Future<void> _deleteReport(int index, bool isCanceled) async {
+    if (!isCanceled) {
+      String postId = items[index]['post_id'];
+
+      // Update 'is_visible' to false in Firestore for matching 'post_id'
+      QuerySnapshot postSnapshot = await _firestore.collection('posts')
+          .where('post_id', isEqualTo: postId)
+          .get();
+      postSnapshot.docs.forEach((doc) async {
+        await doc.reference.update({'is_visible': false});
+      });
+
+      // Delete the reports with the same 'post_id' in Firestore
+      QuerySnapshot reportSnapshot = await _firestore.collection('reported_post')
+          .where('post_id', isEqualTo: postId)
+          .get();
+      reportSnapshot.docs.forEach((doc) async {
+        await doc.reference.delete();
+      });
+
+      // Filter out items with the same 'post_id'
+      items = items.where((item) => item['post_id'] != postId).toList();
+
+      // Show the snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('해당 게시글을 삭제하였습니다.'),
+        ),
+      );
+    }
+    else {
+      items.removeAt(index);
+    }
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,17 +96,22 @@ class _ReportManagementScreenState extends State<ReportManagementScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
-          itemCount: reports.length,
+          itemCount: items.length,
           itemBuilder: (context, index) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '게시글 제목: ${reports[index]['title']}',
+                  '게시글 제목: ${items[index]['post_name']}',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 5.0),
-                Text('신고사유: ${reports[index]['reason']}'),
+                Text(
+                  '게시글 작성자: ${items[index]['user_name']}',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 5.0),
+                Text('신고사유: ${items[index]['reason']}'),
                 SizedBox(height: 10.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -89,8 +132,8 @@ class _ReportManagementScreenState extends State<ReportManagementScreen> {
                         _deleteReport(index, false);
                       },
                       style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                    ),
+                        primary: Colors.red,
+                      ),
                     ),
                   ],
                 ),
