@@ -165,8 +165,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                           _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
                         });
 
-                        widget.onReportSubmitted();
-
+                        // widget.onReportSubmitted();
 
                       },
                       child: Text('제보하기'),

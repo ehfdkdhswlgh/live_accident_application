@@ -27,7 +27,7 @@ class _MainPostState extends State<MainPost> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
-              child: Profile(),
+              child: Profile(userNickname: widget.postContent.userNickname),
               onTap: () {
                 // '제보하기' 버튼 클릭 시 실행될 코드
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -67,6 +67,7 @@ class _MainPostState extends State<MainPost> {
                     postId: widget.postContent.postId,
                     imageUrl: widget.postContent.imageLinks,
                     postMain: widget.postContent.postMain,
+                    userNickname: widget.postContent.userNickname,
                   ),
                   transitionsBuilder: (c, a1, a2, child) =>
                       FadeTransition(opacity: a1, child: child),
@@ -103,7 +104,8 @@ class _MainPostState extends State<MainPost> {
   }
 }
 class Profile extends StatelessWidget {
-  const Profile({Key? key}) : super(key: key);
+  Profile({Key? key, required this.userNickname}) : super(key: key);
+  final userNickname;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +122,7 @@ class Profile extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('제보날씨'), // 닉네임 위치
+                Text(userNickname), // 닉네임 위치
                 Text('홍천교'), // 제보 위치
               ],
             ),

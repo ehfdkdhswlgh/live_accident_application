@@ -61,7 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
     //키보드 숨기기
     if (_formKey.currentState!.validate()) {
       FocusScope.of(context).requestFocus(FocusNode());
-
       // Firebase 사용자 인증, 사용자 등록
       try {
         UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -70,6 +69,18 @@ class _MyHomePageState extends State<MyHomePage> {
         );
 
         UserImfomation.uid = userCredential.user!.uid;
+
+        //닉네임 가져오는 함수
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .where('userid', isEqualTo: UserImfomation.uid)
+            .limit(1)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+          UserImfomation.nickname = documentSnapshot.get('name');
+        }
 
         // print("UID : " + uid+ "\n" );
         print("UID : " + UserImfomation.uid);

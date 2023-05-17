@@ -5,11 +5,11 @@ import 'store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PostDocument extends StatefulWidget {
-  PostDocument({required this.postId, required this.imageUrl, required this.postMain});
-  final String postId;
-  final String imageUrl;
-  final String postMain;
-
+  PostDocument({required this.postId, required this.imageUrl, required this.postMain, required this.userNickname});
+  final postId;
+  final imageUrl;
+  final postMain;
+  final userNickname;
   @override
   State<PostDocument> createState() => _PostDocumentState();
 }
@@ -23,7 +23,7 @@ class _PostDocumentState extends State<PostDocument> {
     return Scaffold(
       body: ListView(
           children: [
-            Profile(),
+            Profile(userNickname: widget.userNickname),
             Thumbnail(url: widget.imageUrl),
             MainDocument(postMain: widget.postMain),
             Divider(thickness: 2.0),
@@ -82,7 +82,7 @@ class _PostDocumentState extends State<PostDocument> {
       FirebaseFirestore.instance.collection('comments').add({
         'post_id': postId,
         'comment': comment,
-        'username': 'User', // Replace with actual username
+        'username': widget.userNickname, // Replace with actual username
         'timestamp': FieldValue.serverTimestamp(),
       });
 
