@@ -25,7 +25,9 @@ class _PostDocumentState extends State<PostDocument> {
       body: ListView(
           children: [
             Profile(userNickname: widget.userNickname),
-            Thumbnail(url: widget.imageUrl),
+            widget.imageUrl.isEmpty
+                ? SizedBox.shrink()
+                : Thumbnail(url: widget.imageUrl),
             MainDocument(postMain: widget.postMain),
             Divider(thickness: 2.0),
             StreamBuilder<QuerySnapshot>(

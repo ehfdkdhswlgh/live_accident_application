@@ -176,6 +176,7 @@ class _ThumbnailState extends State<Thumbnail> {
   int _current = 0;
   final CarouselController _controller = CarouselController();
   var imageList = [];
+
   @override
   void initState() {
     // TODO: implement initState
@@ -184,19 +185,25 @@ class _ThumbnailState extends State<Thumbnail> {
     imageList = widget.url.split(',');
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 500,
-      child: Stack(
-        children: [
-          sliderWidget(),
-          sliderIndicator(),
-        ],
-      ),
-    );
+    // Check if the imageList is empty
+    if (imageList.length == 1 && imageList[0] == '') {
+      return Container();  // or return any widget you want when there is no thumbnail
+    } else {
+      return SizedBox(
+        height: 500,
+        child: Stack(
+          children: [
+            sliderWidget(),
+            sliderIndicator(),
+          ],
+        ),
+      );
+    }
   }
+
+
 
   Widget sliderWidget() {
     return CarouselSlider(
