@@ -28,6 +28,7 @@ class ReportWriteScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportWriteScreen> {
+  bool _isLoading = false; // New state variable
   LatLng? currentPosition;
   String address = "";
   @override
@@ -204,13 +205,21 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                       ),
-                      onPressed: () async {
+                      onPressed: _isLoading ? null : () async { // disable button when loading
+                        setState(() {
+                          _isLoading = true;
+                        });
+
                         List<String> strList = await uploadImages(_pickedImages);
                         String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
                         _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
                         widget.onReportSubmitted();
+
+                        setState(() {
+                          _isLoading = false;
+                        });
                       },
-                      child: Text('제보하기'),
+                      child: _isLoading ? CircularProgressIndicator() : Text('제보하기'),
                     ),
                     SizedBox(width: 10),
                     OutlinedButton(
