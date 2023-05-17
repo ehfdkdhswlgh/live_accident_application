@@ -197,16 +197,12 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                       ),
-                      onPressed: () {
-                        Future<List<String>> str = uploadImages(_pickedImages);
-                        str.then((List<String> strList) {
-                          String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
-                          _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
-                        });
+                      onPressed: () async {
+                        List<String> strList = await uploadImages(_pickedImages);
+                        String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
+                        _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
 
                         widget.onReportSubmitted();
-
-
                       },
                       child: Text('제보하기'),
                     ),
