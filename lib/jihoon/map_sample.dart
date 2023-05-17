@@ -7,8 +7,6 @@ import 'location_service.dart';
 import 'tags.dart' as tag;
 import '../haechan/profile.dart' as profile;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
-import 'package:live_accident_application/hojun/store.dart';
 
 
 class MapSample extends StatefulWidget {
@@ -27,7 +25,7 @@ class _MapSampleState extends State<MapSample> {
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
-  // LatLng currentPosition =  LatLng(36.1455534,128.3925418);
+
   LatLng? currentPosition;
 
 
@@ -43,50 +41,10 @@ class _MapSampleState extends State<MapSample> {
   @override
   void initState() {
     super.initState();
-    _fetchOpendatasItems();
     getCurrentLocation();
+    _fetchOpendatasItems();
 
-    // for(int i = 0; i< items.length; i++) {
-    //   print(items[i]['locationDataX']);
-    //   print(items[i]['locationDataY']);
-    //   markers.add(Marker(
-    //       markerId: MarkerId("$i"),
-    //       draggable: false,
-    //       position: LatLng(items[i]['locationDataX'] as double, items[i]['locationDataY'] as double),
-    //       infoWindow: InfoWindow(
-    //           title: items[i]['incidentTitle'], snippet: postTitle.length.toString() + "건"),
-    //
-    //       onTap: () {
-    //         showModalBottomSheet(
-    //             context: context,
-    //             builder: (BuildContext context) {
-    //               return Container(
-    //                   height: 1000,
-    //                   decoration: const BoxDecoration(
-    //                       color: Colors.white,
-    //                       borderRadius: BorderRadius.only(
-    //                           topLeft: Radius.circular(0),
-    //                           topRight: Radius.circular(0)
-    //                       )
-    //                   ),
-    //                   child: Scaffold(
-    //                     appBar: AppBar(title: Text(address)),
-    //                     body:
-    //                     ListView.builder(
-    //                         itemCount: postTitle.length,
-    //                         itemBuilder: (c, i) {
-    //                           return ListTile(
-    //                               leading: Icon(
-    //                                 Icons.favorite, weight: 10,
-    //                               ),
-    //                               title: Text(postTitle[i]));
-    //                         }),
-    //                   )
-    //               );
-    //             });
-    //       },
-    //      ));
-    // }
+
 
   }
 
@@ -273,25 +231,28 @@ class _MapSampleState extends State<MapSample> {
       items = opendatasItems;
     });
 
-    // print('Items length: ${items.length}');
-    // print('Items contents:');
-    // for(int i = 0; i < items.length; i++) {
-    //   print(items[i]);
-    // }
+
   }
 
   Future<void> getCurrentLocation() async {
 
+    print("11111");
+    LocationPermission permission = await Geolocator.requestPermission();
+    print("222222");
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.medium,
     );
 
+    print("3333333");
     setState(() {
       currentPosition = LatLng(position.latitude, position.longitude);
     });
 
-    // print(position.latitude);
-    // print(position.longitude);
+    print("4444444");
+    print(position.latitude);
+    print(position.longitude);
+
   }
+
 
 }

@@ -491,9 +491,11 @@ class _ReportScreenState extends State<ReportWriteScreen> {
         'post_content': main,
         'post_type': postType,
         'images': url,
-        'address_name': '경상북도 구미시 대학로 42-10',
+        'address_name': address,
         'is_visible': true,
         'timestamp': FieldValue.serverTimestamp(),
+        'latitude' : currentPosition!.latitude,
+        'longitude' : currentPosition!.longitude,
       });
 
       _titleController.clear();
