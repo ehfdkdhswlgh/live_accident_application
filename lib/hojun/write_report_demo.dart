@@ -273,7 +273,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                             foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                           ),
                           onPressed: () {
-                            // '제보하기' 버튼 클릭 시 실행될 코드
+                            //문자API추가 위치
                           },
                           child: Text('제보하기'),
                         ),

@@ -12,20 +12,14 @@ class Post extends StatefulWidget {
 }
 
 class _PostState extends State<Post> {
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Tags(),
-        Expanded(child: [
-          Feed(postType: 0),
-          Feed(postType: 1),
-          Feed(postType: 2),
-          Feed(postType: 3),
-          Feed(postType: 4),
-          Feed(postType: 5)
-        ][context.read<Store>().selectedPostType]),
-      ],
+        Expanded(child: Feed(postType: context.read<Store>().selectedPostType),)
+      ]
     );
   }
 }

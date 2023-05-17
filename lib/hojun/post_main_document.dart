@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'main_post.dart';
 import 'package:provider/provider.dart';
 import 'store.dart';
+import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PostDocument extends StatefulWidget {
@@ -82,7 +83,7 @@ class _PostDocumentState extends State<PostDocument> {
       FirebaseFirestore.instance.collection('comments').add({
         'post_id': postId,
         'comment': comment,
-        'username': widget.userNickname, // Replace with actual username
+        'username': UserImfomation.nickname, // Replace with actual username
         'timestamp': FieldValue.serverTimestamp(),
       });
 
