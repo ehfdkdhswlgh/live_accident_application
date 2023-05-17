@@ -27,13 +27,10 @@ class _MapSampleState extends State<MapSample> {
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
-  Position? currentPosition;
+  LatLng currentPosition =  LatLng(36.1455534,128.3925418);
 
-  // 이 값은 지도가 시작될 때 첫 번째 위치입니다.
-  CameraPosition _currentPosition = CameraPosition(
-    target: LatLng(37.233637,127.292995),
-    zoom: 14,
-  );
+
+
 
   var selectedPostType = 1;
 
@@ -148,10 +145,7 @@ class _MapSampleState extends State<MapSample> {
               mapType: MapType.normal,
 
               initialCameraPosition: CameraPosition(
-                target:  LatLng(
-                  currentPosition!.latitude,
-                  currentPosition!.longitude,
-                ),
+                target:  currentPosition,
                 zoom: 15,
               ),
               markers: Set<Marker>.from(items.map((data) {
@@ -269,8 +263,11 @@ class _MapSampleState extends State<MapSample> {
     );
 
     setState(() {
-      currentPosition = position;
+      currentPosition = LatLng(position.latitude, position.longitude);
     });
+
+    print(position.latitude);
+    print(position.longitude);
   }
 
 
