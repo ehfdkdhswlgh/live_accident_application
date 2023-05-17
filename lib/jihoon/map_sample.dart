@@ -27,8 +27,8 @@ class _MapSampleState extends State<MapSample> {
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
-  LatLng currentPosition =  LatLng(36.1455534,128.3925418);
-
+  // LatLng currentPosition =  LatLng(36.1455534,128.3925418);
+  LatLng? currentPosition;
 
 
 
@@ -43,10 +43,8 @@ class _MapSampleState extends State<MapSample> {
   @override
   void initState() {
     super.initState();
-    getCurrentLocation();
     _fetchOpendatasItems();
-
-
+    getCurrentLocation();
 
     // for(int i = 0; i< items.length; i++) {
     //   print(items[i]['locationDataX']);
@@ -92,126 +90,151 @@ class _MapSampleState extends State<MapSample> {
 
   }
 
-
+  // selectedPostType = context.read<Store>().selectedPostType;
+  // print("지금 선택된 위치는? : $selectedPostType");
 
   @override
   Widget build(BuildContext context) {
-    // selectedPostType = context.read<Store>().selectedPostType;
-    // print("지금 선택된 위치는? : $selectedPostType");
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Live돌발사고"),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              // 돋보기 아이콘 클릭 시 동작 정의
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.account_circle),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => profile.ProfileScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body:
-      Column(
-        children : [
-          tag.Tags(),
-          Row(
-            children: [
-              Expanded(child: TextFormField(
-                controller: _searchController,
-                textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(hintText: "장소를 입력하세요."),
+    if (currentPosition == null) {
+      // 위치 정보가 아직 가져와지지 않았을 경우에 대한 처리
+      print("로딩중...");
+      return Stack(
+        fit: StackFit.loose,
+        children: const [
+        SizedBox(
+            width: 30, height: 30,
+            child: CircularProgressIndicator(
+                  strokeWidth: 10,
+                  backgroundColor: Colors.black,
+                  color: Colors.green,
+          )),
+          Center(
+              child: Text(
+                'Loading....',
+                style: TextStyle(fontSize: 10),
               )),
-              IconButton(onPressed: () async{
-                var place = await LocationService().getPlace(_searchController.text);
-                _goToPlace(place);
+        ],
+      );
+    }
+    else {
+
+      print("로딩 완료...");
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Live돌발사고"),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () {
+                // 돋보기 아이콘 클릭 시 동작 정의
               },
-                icon: Icon(Icons.search),)
-            ],
-          ),
-          Expanded(
-
-            child:  GoogleMap(
-              mapType: MapType.normal,
-
-              initialCameraPosition: CameraPosition(
-                target:  currentPosition,
-                zoom: 15,
-              ),
-              markers: Set<Marker>.from(items.map((data) {
-                String latitude = data['locationDataX'] as String;
-                String longitude = data['locationDataY'] as String;
-                String title = data['addressJibun'] as String;
-                String description = data['incidentTitle'] as String;
-                tagType = description.substring(1,3);
-                i++;
-
-
-                return Marker(
-                  markerId: MarkerId(i.toString()),
-                  position: LatLng(double.parse(longitude), double.parse(latitude)),
-                  infoWindow: InfoWindow(
-                    title: title,
-                    snippet: description,
-                  ),
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Container(
-                          height: 200,
-                          child: ListView(
-                            children: [
-                              ListTile(
-                                title: Text('항목 1'),
-                                onTap: () {
-                                  // 선택된 항목에 대한 처리 로직
-                                  Navigator.pop(context); // Bottom sheet 닫기
-                                },
-                              ),
-                              ListTile(
-                                title: Text('항목 2'),
-                                onTap: () {
-                                  // 선택된 항목에 대한 처리 로직
-                                  Navigator.pop(context); // Bottom sheet 닫기
-                                },
-                              ),
-                              // 추가적인 항목w들...
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  }
-                );
-
-              })), //마커 저장.
-
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
             ),
-          ),
+            IconButton(
+              icon: Icon(Icons.account_circle),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => profile.ProfileScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+        body:
+        Column(
+          children: [
+            tag.Tags(),
+            Row(
+              children: [
+                Expanded(child: TextFormField(
+                  controller: _searchController,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(hintText: "장소를 입력하세요."),
+                )),
+                IconButton(onPressed: () async {
+                  var place = await LocationService().getPlace(
+                      _searchController.text);
+                  _goToPlace(place);
+                },
+                  icon: Icon(Icons.search),)
+              ],
+            ),
+            Expanded(
 
-      ],
+              child: GoogleMap(
+                mapType: MapType.normal,
 
-    ),
+                initialCameraPosition: CameraPosition(
+                  target: currentPosition!,
+                  zoom: 15,
+                ),
+                markers: Set<Marker>.from(items.map((data) {
+                  String latitude = data['locationDataX'] as String;
+                  String longitude = data['locationDataY'] as String;
+                  String title = data['addressJibun'] as String;
+                  String description = data['incidentTitle'] as String;
+                  tagType = description.substring(1, 3);
+                  i++;
 
-    );
+
+                  return Marker(
+                      markerId: MarkerId(i.toString()),
+                      position: LatLng(
+                          double.parse(longitude), double.parse(latitude)),
+                      infoWindow: InfoWindow(
+                        title: title,
+                        snippet: description,
+                      ),
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Container(
+                              height: 200,
+                              child: ListView(
+                                children: [
+                                  ListTile(
+                                    title: Text('항목 1'),
+                                    onTap: () {
+                                      // 선택된 항목에 대한 처리 로직
+                                      Navigator.pop(context); // Bottom sheet 닫기
+                                    },
+                                  ),
+                                  ListTile(
+                                    title: Text('항목 2'),
+                                    onTap: () {
+                                      // 선택된 항목에 대한 처리 로직
+                                      Navigator.pop(context); // Bottom sheet 닫기
+                                    },
+                                  ),
+                                  // 추가적인 항목w들...
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      }
+                  );
+                })),
+                //마커 저장.
+
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+                },
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+              ),
+            ),
+
+          ],
+
+        ),
+
+      );
+    }
   }
-
   Future<void> _goToPlace(Map<String, dynamic> place) async{
     final double lat = place['geometry']['location']['lat'];
     final double lng = place['geometry']['location']['lng'];
@@ -257,9 +280,10 @@ class _MapSampleState extends State<MapSample> {
     }
   }
 
-  void getCurrentLocation() async {
+  Future<void> getCurrentLocation() async {
+
     Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      desiredAccuracy: LocationAccuracy.medium,
     );
 
     setState(() {
@@ -269,8 +293,5 @@ class _MapSampleState extends State<MapSample> {
     print(position.latitude);
     print(position.longitude);
   }
-
-
-
 
 }

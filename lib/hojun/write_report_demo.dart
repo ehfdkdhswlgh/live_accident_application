@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'store.dart';
@@ -8,6 +9,9 @@ import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 //애뮬레이터 실행시 오류날 시 https://www.youtube.com/watch?v=bTyLehofqvk
 //https://www.flutterbeads.com/change-android-minsdkversion-in-flutter/
@@ -23,6 +27,15 @@ class ReportWriteScreen extends StatefulWidget {
 }
 
 class _ReportScreenState extends State<ReportWriteScreen> {
+  LatLng? currentPosition;
+  String address = "";
+  @override
+  void initState() {
+    super.initState();
+    getCurrentLocation();
+
+
+  }
   int _selectedIndex = 0;
   final List<String> _reportTypes = ['제보하기', '긴급제보'];
   final List<Color> _selectedColors = [Colors.red, Colors.red];
@@ -37,33 +50,57 @@ class _ReportScreenState extends State<ReportWriteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.grey),
-          onPressed: () => Navigator.of(context).pop(),
+    if (currentPosition == null) {
+      // 위치 정보가 아직 가져와지지 않았을 경우에 대한 처리
+      print("로딩중...");
+      return Stack(
+        fit: StackFit.loose,
+        children: const [
+          SizedBox(
+              width: 30, height: 30,
+              child: CircularProgressIndicator(
+                strokeWidth: 10,
+                backgroundColor: Colors.black,
+                color: Colors.green,
+              )),
+          Center(
+              child: Text(
+                'Loading....',
+                style: TextStyle(fontSize: 10),
+              )),
+        ],
+      );
+    }
+    else {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.grey),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          centerTitle: true,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildReportTypeButton(0),
+              SizedBox(width: 8),
+              _buildReportTypeButton(1),
+            ],
+          ),
         ),
-        centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildReportTypeButton(0),
-            SizedBox(width: 8),
-            _buildReportTypeButton(1),
-          ],
+        body: Container(
+            padding: EdgeInsets.all(16.0),
+            child: _buildContainer(_selectedIndex, context)
         ),
-      ),
-      body: Container(
-          padding: EdgeInsets.all(16.0),
-          child: _buildContainer(_selectedIndex, context)
-      ),
-    );
+      );
+    }
   }
 
 
   Widget _buildContainer(int index, BuildContext context){
     if(index == 0){
+
       return SingleChildScrollView(
           child : Container(
             child: Column(
@@ -79,12 +116,14 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                   ),
                 ),
                 Container(
+
                   padding: EdgeInsets.all(8.0), // 약간의 여백 추가
                   color: Colors.grey.shade300,
                   child: Align(
                     alignment: Alignment.centerLeft, // Text를 좌측에 배치
-                    child: Text(
-                      '경상북도 구미시 대학로 42-10',
+                    child:
+                    Text(
+                      address,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 24.0,
@@ -158,12 +197,16 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
                         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                       ),
-                      onPressed: () async {
-                        List<String> strList = await uploadImages(_pickedImages);
-                        String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
-                        _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
+                      onPressed: () {
+                        Future<List<String>> str = uploadImages(_pickedImages);
+                        str.then((List<String> strList) {
+                          String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
+                          _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
+                        });
 
                         widget.onReportSubmitted();
+
+
                       },
                       child: Text('제보하기'),
                     ),
@@ -462,6 +505,41 @@ class _ReportScreenState extends State<ReportWriteScreen> {
       _mainController.clear();
     }
   }
+  Future<void> getCurrentLocation() async {
+
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.medium,
+    );
+    address =  await getAddress(position.latitude, position.longitude);
+
+    setState(() {
+      currentPosition = LatLng(position.latitude, position.longitude);
+      address;
+    });
+
+    print(position.latitude);
+    print(position.longitude);
+  }
+
+  Future<String> getAddress(double latitude, double longitude) async {
+    String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=AIzaSyDWq89VaEKZdEWpv6VoHQ8EVM5JSqE4JJs&language=ko';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'OK') {
+          if (data['results'].length > 0) {
+            return data['results'][0]['formatted_address'];
+          }
+        }
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+
+    return '주소 변환 실패';
+  }
 }
 
 class MyButton extends StatefulWidget {
@@ -471,9 +549,12 @@ class MyButton extends StatefulWidget {
   _MyButtonState createState() => _MyButtonState();
 }
 
-class _MyButtonState extends State<MyButton> {
-  String? _selectedItem;
 
+
+class _MyButtonState extends State<MyButton> {
+
+
+  String? _selectedItem;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -529,6 +610,8 @@ class _MyButtonState extends State<MyButton> {
       ),
     );
   }
+
+
 }
 
 
@@ -609,5 +692,7 @@ class _SwitchButtonState extends State<SwitchButton> {
     );
   }
 }
+
+
 
 
