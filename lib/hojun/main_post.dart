@@ -7,6 +7,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'post_main_document.dart';
+import '../jihwan/post_report.dart';
 
 class MainPost extends StatefulWidget {
   const MainPost({Key? key, required this.postContent}) : super(key: key);
@@ -27,7 +28,7 @@ class _MainPostState extends State<MainPost> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
-              child: Profile(userNickname: widget.postContent.userNickname),
+              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId,),
               onTap: () {
                 // '제보하기' 버튼 클릭 시 실행될 코드
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -68,6 +69,8 @@ class _MainPostState extends State<MainPost> {
                     imageUrl: widget.postContent.imageLinks,
                     postMain: widget.postContent.postMain,
                     userNickname: widget.postContent.userNickname,
+                    postName: widget.postContent.postName,
+                    userId: widget.postContent.userId,
                   ),
                   transitionsBuilder: (c, a1, a2, child) =>
                       FadeTransition(opacity: a1, child: child),
@@ -103,9 +106,13 @@ class _MainPostState extends State<MainPost> {
     );
   }
 }
+
 class Profile extends StatelessWidget {
-  Profile({Key? key, required this.userNickname}) : super(key: key);
+  Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId,}) : super(key: key);
   final userNickname;
+  final postId;
+  final postName;
+  final userId;
 
   @override
   Widget build(BuildContext context) {
@@ -136,21 +143,40 @@ class Profile extends StatelessWidget {
                   context: context,
                   builder: (BuildContext context) {
                     return Container(
-                      height: 300, // 모달 높이 크기
-                      margin: const EdgeInsets.only(
-                        left: 25,
-                        right: 25,
-                        bottom: 40,
-                      ), // 모달 좌우하단 여백 크기
-                      decoration: const BoxDecoration(
-                        color: Colors.white, // 모달 배경색
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(20), // 모달 전체 라운딩 처리
-                        ),
+                      height: 200,
+                      child: ListView(
+                        children: [
+                          ListTile(
+                            title: Text('신고하기'),
+                            onTap: () {
+                              print("다음 게시글을 신고합니다. : " + postName + " pid : " + postId);
+                              print("UID? : " + userId + userNickname);
+                              Navigator.pop(context); // Bottom sheet 닫기
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ReportScreen(
+                                    name: postName,
+                                    post_id: postId,
+                                    user_id: userId,
+                                    user_name: userNickname,
+                                  ),
+                                ),
+                              );
+
+                            },
+                          )
+                          ,
+                          ListTile(
+                            title: Text('항목 2'),
+                            onTap: () {
+                              // 선택된 항목에 대한 처리 로직
+                              Navigator.pop(context); // Bottom sheet 닫기
+                            },
+                          ),
+                          // 추가적인 항목w들...
+                        ],
                       ),
-                      child: [
-                        // 모달 내부 디자인 영역
-                      ][0],
                     );
                   },
                 );
@@ -164,6 +190,7 @@ class Profile extends StatelessWidget {
     );
   }
 }
+
 
 class Thumbnail extends StatefulWidget {
   const Thumbnail({Key? key, required this.url}) : super(key: key);

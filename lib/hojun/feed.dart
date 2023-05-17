@@ -103,13 +103,14 @@ class _FeedState extends State<Feed> {
       final imageLinks = doc.get('images').toString();
       final postMain = doc.get('post_content').toString();
       final userId = doc.get('user_id').toString();
+      final postName = doc.get('title').toString();
       String userNickname = '';
       try {
         final nickname = await getNickname(userId);
         userNickname = nickname;
       } catch (error) {
       }
-      return Post(postId: postId, imageLinks: imageLinks, postMain: postMain, userId: userId, userNickname: userNickname);
+      return Post(postId: postId, imageLinks: imageLinks, postMain: postMain, userId: userId, userNickname: userNickname, postName: postName);
     }).toList());
 
     setState(() {
@@ -148,5 +149,6 @@ class Post {
   final String postMain;
   final String userId;
   final String userNickname;
-  Post({required this.postId, required this.imageLinks, required this.postMain, required this.userId, required this.userNickname});
+  final String postName;
+  Post({required this.postId, required this.imageLinks, required this.postMain, required this.userId, required this.userNickname, required this.postName});
 }
