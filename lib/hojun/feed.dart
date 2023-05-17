@@ -37,7 +37,7 @@ class _FeedState extends State<Feed> {
     });
 
     QuerySnapshot querySnapshot;
-    if(widget.postType == 0){
+    if (widget.postType == 0) {
       if (_posts.isEmpty) {
         querySnapshot = await _db
             .collection('posts')
@@ -89,6 +89,7 @@ class _FeedState extends State<Feed> {
             .get();
       }
     }
+
 
     if (querySnapshot.docs.isEmpty) {
       setState(() {

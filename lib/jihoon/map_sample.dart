@@ -239,8 +239,8 @@ class _MapSampleState extends State<MapSample> {
     final double lat = place['geometry']['location']['lat'];
     final double lng = place['geometry']['location']['lng'];
 
-    print(lat);
-    print(lng);
+    // print(lat);
+    // print(lng);
 
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
@@ -273,11 +273,11 @@ class _MapSampleState extends State<MapSample> {
       items = opendatasItems;
     });
 
-    print('Items length: ${items.length}');
-    print('Items contents:');
-    for(int i = 0; i < items.length; i++) {
-      print(items[i]);
-    }
+    // print('Items length: ${items.length}');
+    // print('Items contents:');
+    // for(int i = 0; i < items.length; i++) {
+    //   print(items[i]);
+    // }
   }
 
   Future<void> getCurrentLocation() async {
@@ -290,8 +290,8 @@ class _MapSampleState extends State<MapSample> {
       currentPosition = LatLng(position.latitude, position.longitude);
     });
 
-    print(position.latitude);
-    print(position.longitude);
+    // print(position.latitude);
+    // print(position.longitude);
   }
 
 }

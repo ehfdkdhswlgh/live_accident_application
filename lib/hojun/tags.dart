@@ -13,14 +13,11 @@ class _TagsState extends State<Tags> {
 
   final List<String> _acc = ['전체','사고','공사','행사','통제','기타'];
   final List<String> _ord = ['거리순','최신순','추천순'];
-  var _selectedAccIndex = 0;
-  int _selectedOrdIndex = 0;
 
   Widget accTags(String txt, int index){
     return OutlinedButton(
       onPressed: (){
         setState(() {
-          _selectedAccIndex = index;
           context.read<Store>().setReadPostType(index);
         });
       },
@@ -31,8 +28,8 @@ class _TagsState extends State<Tags> {
               borderRadius: BorderRadius.all(Radius.circular(15))
           ),
           side: BorderSide(
-              width: (_selectedAccIndex == index) ? 2.0 : 0.5,
-              color: (_selectedAccIndex == index)
+              width: (context.read<Store>().selectedPostType == index) ? 2.0 : 0.5,
+              color: (context.read<Store>().selectedPostType == index)
                   ? Colors.red
                   : Colors.black
           )
@@ -40,14 +37,10 @@ class _TagsState extends State<Tags> {
     );
   }
 
-  int get index {
-    return this._selectedAccIndex;
-}
   Widget orderTags(String txt, int index){
     return TextButton(
       onPressed: (){
         setState(() {
-          _selectedOrdIndex = index;
           context.read<Store>().setReadPostOrder(index);
         });
       },
@@ -58,8 +51,8 @@ class _TagsState extends State<Tags> {
               borderRadius: BorderRadius.all(Radius.circular(15))
           ),
           side: BorderSide(
-              width: (_selectedOrdIndex == index) ? 2.0 : 0.5,
-              color: (_selectedOrdIndex == index)
+              width: (context.read<Store>().selectedPostOrder == index) ? 2.0 : 0.5,
+              color: (context.read<Store>().selectedPostOrder == index)
                   ? Colors.red
                   : Colors.black
           )
