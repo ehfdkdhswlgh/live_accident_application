@@ -12,6 +12,7 @@ import 'package:uuid/uuid.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 //애뮬레이터 실행시 오류날 시 https://www.youtube.com/watch?v=bTyLehofqvk
 //https://www.flutterbeads.com/change-android-minsdkversion-in-flutter/
@@ -686,6 +687,76 @@ class _SwitchButtonState extends State<SwitchButton> {
       ],
     );
   }
+}
+
+_postRequest(String content, String phone_num) async {
+  try {
+    DateTime now = DateTime.now();
+    int timestamp = now.millisecondsSinceEpoch;
+    String url = 'https://sens.apigw.ntruss.com/sms/v2/services/ncp:sms:kr:308204771431:emergency_report/messages'; // 엔드포인트 URL
+    String serviceId = 'ncp:sms:kr:308204771431:emergency_report';
+    String timeStamp = timestamp.toString();
+    String accessKey = 'Qqqt0HxbM6qrEEhgNgZ1';
+    String secretKey = 'LxDG8TbpJNWEL7VnLXmP6MG0XLccXyjH8vN7YUO6';
+    String sigbiture = getSignature(serviceId, timeStamp, accessKey, secretKey);
+
+    http.Response response = await http.post(
+      Uri.parse(url),
+      headers: <String, String> {
+        'Content-Type': 'application/json; charset=utf-8',
+        'x-ncp-apigw-timestamp': timeStamp,
+        'x-ncp-iam-access-key': accessKey,
+        'x-ncp-apigw-signature-v2': sigbiture,
+      },
+      body: jsonEncode(<String, dynamic> {
+        'type': 'SMS',
+        'contentType': 'COMM',
+        'countryCode': '82',
+        'from': '01051186937',
+        'content': '입력할 내용',
+        'messages': [
+          {
+            'to': '01051186937',
+            // 'to': phone_num, // 112 또는 119
+            'content': content,
+          },
+        ],
+      }),
+    );
+    print('=========================='+'실행완료');
+    print(response.bodyBytes);
+  } catch (error) {
+    print('오류 발생: $error');
+  }
+}
+
+
+
+String getSignature(
+    String serviceId, String timeStamp, String accessKey, String secretKey) {
+  var space = " "; // one space
+  var newLine = "\n"; // new line
+  var method = "POST"; // method
+  var url = "/sms/v2/services/$serviceId/messages";
+
+  var buffer = new StringBuffer();
+  buffer.write(method);
+  buffer.write(space);
+  buffer.write(url);
+  buffer.write(newLine);
+  buffer.write(timeStamp);
+  buffer.write(newLine);
+  buffer.write(accessKey);
+  print(buffer.toString());
+
+  /// signing key
+  var key = utf8.encode(secretKey);
+  var signingKey = new Hmac(sha256, key);
+
+  var bytes = utf8.encode(buffer.toString());
+  var digest = signingKey.convert(bytes);
+  String signatureKey = base64.encode(digest.bytes);
+  return signatureKey;
 }
 
 
