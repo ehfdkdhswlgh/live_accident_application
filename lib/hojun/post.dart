@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'store.dart';
 import 'tags.dart';
 import 'feed.dart';
 
@@ -15,7 +17,14 @@ class _PostState extends State<Post> {
     return Column(
       children: [
         Tags(),
-        Expanded(child: Feed()),
+        Expanded(child: [
+          Feed(postType: 0),
+          Feed(postType: 1),
+          Feed(postType: 2),
+          Feed(postType: 3),
+          Feed(postType: 4),
+          Feed(postType: 5)
+        ][context.read<Store>().selectedPostType]),
       ],
     );
   }

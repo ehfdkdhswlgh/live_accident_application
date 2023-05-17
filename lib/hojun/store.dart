@@ -9,7 +9,7 @@ class Store extends ChangeNotifier{
   var postType = 0;
 
   //제보글 조회에서 선택된 태그
-  var selectedPostType = 1;
+  var selectedPostType = 0;
 
   //제보글 조회에서 선택된 정렬순서
   var selectedPostOrder = 0;
@@ -32,10 +32,12 @@ class Store extends ChangeNotifier{
 
   setReadPostType(int selectedPostType){
     this.selectedPostType = selectedPostType;
+    notifyListeners();
   }
 
   setReadPostOrder(int selectedPostOrder){
     this.selectedPostOrder = selectedPostOrder;
+    notifyListeners();
   }
 
   liked(){
