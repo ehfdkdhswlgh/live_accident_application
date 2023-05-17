@@ -20,6 +20,7 @@ class _MapSampleState extends State<MapSample> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<Map<String, String>> items = [];
+  List<Map<String, String>> post_items = [];
   List<String> _acc = ['전체','사고','공사','행사','통제','기타'];
   String tagType ="";
 
@@ -43,6 +44,7 @@ class _MapSampleState extends State<MapSample> {
     super.initState();
     getCurrentLocation();
     _fetchOpendatasItems();
+    _fetchPostItems();
 
 
 
@@ -59,13 +61,13 @@ class _MapSampleState extends State<MapSample> {
       return Stack(
         fit: StackFit.loose,
         children: const [
-        SizedBox(
-            width: 30, height: 30,
-            child: CircularProgressIndicator(
-                  strokeWidth: 10,
-                  backgroundColor: Colors.black,
-                  color: Colors.green,
-          )),
+          SizedBox(
+              width: 30, height: 30,
+              child: CircularProgressIndicator(
+                strokeWidth: 10,
+                backgroundColor: Colors.black,
+                color: Colors.green,
+              )),
           Center(
               child: Text(
                 'Loading....',
@@ -202,8 +204,8 @@ class _MapSampleState extends State<MapSample> {
 
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(target: LatLng(lat,lng),
-      zoom: 14)
+        CameraPosition(target: LatLng(lat,lng),
+            zoom: 14)
     ));
 
   }
@@ -230,6 +232,38 @@ class _MapSampleState extends State<MapSample> {
     setState(() {
       items = opendatasItems;
     });
+
+
+  }
+
+  Future<void> _fetchPostItems() async {
+    List<Map<String, String>> postItems = [];
+
+    QuerySnapshot querySnapshot = await _firestore.collection('posts').get();
+    querySnapshot.docs.forEach((doc) {
+      postItems.add({
+        'address_name': doc['address_name'],
+        'images': doc['images'],
+        'is_visible': doc['is_visible'].toString(),
+        'post_content': doc['post_content'],
+        'post_id': doc['post_id'],
+        'post_type': doc['post_type'].toString(),
+        'timestamp': doc['timestamp'].toString(),
+        'title': doc['title'],
+        'user_id': doc['user_id'],
+      });
+    });
+
+    setState(() {
+      post_items = postItems;
+    });
+
+    print('Items length: ${postItems.length}');
+    print('Items contents:');
+    postItems.forEach((item) => print(item));
+    for(int i = 0; i < postItems.length; i++) {
+      print(postItems[i]);
+    }
 
 
   }
