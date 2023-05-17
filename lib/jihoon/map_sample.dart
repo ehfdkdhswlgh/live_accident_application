@@ -251,6 +251,9 @@ class _MapSampleState extends State<MapSample> {
         'timestamp': doc['timestamp'].toString(),
         'title': doc['title'],
         'user_id': doc['user_id'],
+        'latitude': doc['latitude'].toString(),
+        'longitude': doc['longitude'].toString(),
+        'like': doc['like'].toString(),
       });
     });
 
