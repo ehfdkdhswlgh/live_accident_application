@@ -76,14 +76,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
         //닉네임 가져오는 함수
         QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-            .collection('users')
-            .where('userid', isEqualTo: UserImfomation.uid)
+            .collection('user')
+            .where('uid', isEqualTo: UserImfomation.uid)
             .limit(1)
             .get();
 
         if (querySnapshot.docs.isNotEmpty) {
           DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
-          UserImfomation.nickname = documentSnapshot.get('name');
+          UserImfomation.nickname = documentSnapshot.get('name').toString();
         }
 
         // print("UID : " + uid+ "\n" );

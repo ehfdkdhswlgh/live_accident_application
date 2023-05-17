@@ -32,11 +32,13 @@ class Store extends ChangeNotifier{
 
   setReadPostType(int selectedPostType){
     this.selectedPostType = selectedPostType;
+    print(this.selectedPostType);
     notifyListeners();
   }
 
   setReadPostOrder(int selectedPostOrder){
     this.selectedPostOrder = selectedPostOrder;
+    print(this.selectedPostOrder);
     notifyListeners();
   }
 
