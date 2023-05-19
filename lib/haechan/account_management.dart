@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../haechan/login.dart';
 
 class AccountManagementScreen extends StatefulWidget {
   @override
@@ -18,7 +19,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       appBar: AppBar(
         title: Text("계정 관리"),
       ),
-      resizeToAvoidBottomInset : false,
+      resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -77,10 +78,12 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                           onPressed: () {
                             setState(() {
                               if (_interestAreas.length < 3) {
-                                if (_interestAreas.contains(_interestAreaController.text)) {
+                                if (_interestAreas.contains(
+                                    _interestAreaController.text)) {
                                   _errorMessage = "이미 있는 지역입니다";
                                 } else {
-                                  _interestAreas.add(_interestAreaController.text);
+                                  _interestAreas.add(
+                                      _interestAreaController.text);
                                   _errorMessage = "";
                                   Navigator.pop(context);
                                   _interestAreaController.clear();
@@ -151,7 +154,33 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                   },
                 );
               },
-              child: Text("수정"),
+              child: Text("수정하기"),
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                // Add your logout logic here
+                print("Logged out");
+// Navigate to the login screen
+//                 Navigator.pushReplacement(
+//                   context,
+//                   MaterialPageRoute(
+//                     builder: (context) => Login(), // Replace LoginScreen() with your actual login screen widget
+//                   ),
+//                 );
+
+                Navigator.pushAndRemoveUntil(
+                  context, MaterialPageRoute(builder: (context) => Login()),
+                      (Route<dynamic> route) => false,
+                );
+
+
+                // You can navigate to the login screen or perform any other logout actions
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red, // Set the button color to red
+              ),
+              child: Text("로그아웃"),
             ),
           ],
         ),
