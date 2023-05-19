@@ -18,7 +18,7 @@ class _PostState extends State<Post> {
     return Column(
       children: [
         Tags(),
-        Expanded(child: Feed(postType: context.read<Store>().selectedPostType),)
+        Expanded(child: Feed(selectedType: context.watch<Store>().selectedPostType))
       ]
     );
   }

@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:live_accident_application/hojun/top_rank.dart';
+import 'store.dart';
+import 'package:provider/provider.dart';
 import 'main_post.dart';
 
 class Feed extends StatefulWidget {
-  const Feed({Key? key, required this.postType}) : super(key: key);
-  final postType;
+  const Feed({Key? key, required this.selectedType}) : super(key: key);
+  final selectedType;
   @override
   State<Feed> createState() => _FeedState();
 }
 
 class _FeedState extends State<Feed> {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  List<Post> _posts = [];
   bool _isLoading = false;
   bool _hasMoreData = true;
-
   var scroll = ScrollController();
+  List<Post> posts = [];
 
   @override
   void initState() {
@@ -29,6 +31,21 @@ class _FeedState extends State<Feed> {
     });
   }
 
+  @override
+  void didUpdateWidget(Feed oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedType != oldWidget.selectedType) {
+      _isLoading = false;
+      _hasMoreData = true;
+      setState(() {
+        posts = [];
+      });
+      _fetchData();
+    }
+  }
+
+
+  @override
   Future<void> _fetchData() async {
     if (_isLoading || !_hasMoreData) return;
 
@@ -37,8 +54,8 @@ class _FeedState extends State<Feed> {
     });
 
     QuerySnapshot querySnapshot;
-    if (widget.postType == 0) {
-      if (_posts.isEmpty) {
+    if (context.read<Store>().selectedPostType == 0) {
+      if (posts.isEmpty) {
         querySnapshot = await _db
             .collection('posts')
             .where('is_visible', isEqualTo: true)
@@ -46,7 +63,7 @@ class _FeedState extends State<Feed> {
             .limit(5)
             .get();
       } else {
-        final lastPostId = _posts.last.postId;
+        final lastPostId = posts.last.postId;
         final lastDocSnapshot = await _db
             .collection('posts')
             .where('is_visible', isEqualTo: true)
@@ -62,34 +79,33 @@ class _FeedState extends State<Feed> {
             .get();
       }
     } else {
-      if (_posts.isEmpty) {
+      if (posts.isEmpty) {
         querySnapshot = await _db
             .collection('posts')
             .where('is_visible', isEqualTo: true)
-            .where('post_type', isEqualTo: widget.postType)
+            .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
             .orderBy('timestamp', descending: true)
             .limit(5)
             .get();
       } else {
-        final lastPostId = _posts.last.postId;
+        final lastPostId = posts.last.postId;
         final lastDocSnapshot = await _db
             .collection('posts')
             .where('is_visible', isEqualTo: true)
-            .where('post_type', isEqualTo: widget.postType)
+            .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
             .where('post_id', isEqualTo: lastPostId)
             .get()
             .then((querySnapshot) => querySnapshot.docs.first);
         querySnapshot = await _db
             .collection('posts')
             .where('is_visible', isEqualTo: true)
-            .where('post_type', isEqualTo: widget.postType)
+            .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
             .orderBy('timestamp', descending: true)
             .startAfterDocument(lastDocSnapshot)
             .limit(5)
             .get();
       }
     }
-
 
     if (querySnapshot.docs.isEmpty) {
       setState(() {
@@ -116,7 +132,7 @@ class _FeedState extends State<Feed> {
 
     setState(() {
       _isLoading = false;
-      _posts.addAll(newPosts);
+      posts.addAll(newPosts);
     });
   }
   Future<String> getNickname(String user_id) async{
@@ -130,14 +146,15 @@ class _FeedState extends State<Feed> {
 
   @override
   Widget build(BuildContext context) {
-    if(_posts.isNotEmpty){
-      return ListView.builder(itemCount: _posts.length, controller: scroll, itemBuilder: (c, i){
+    if (posts.isNotEmpty) {
+      return ListView.builder(itemCount: posts.length, controller: scroll, itemBuilder: (c, i) {
         return Column(
           children: [
-            MainPost(postContent: _posts[i]),
+            MainPost(postContent: posts[i]),
           ],
         );
-      });
+      },
+      );
     } else {
       return Text("로딩중");
     }

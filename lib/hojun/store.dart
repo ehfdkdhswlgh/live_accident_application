@@ -32,13 +32,11 @@ class Store extends ChangeNotifier{
 
   setReadPostType(int selectedPostType){
     this.selectedPostType = selectedPostType;
-    print(this.selectedPostType);
     notifyListeners();
   }
 
   setReadPostOrder(int selectedPostOrder){
     this.selectedPostOrder = selectedPostOrder;
-    print(this.selectedPostOrder);
     notifyListeners();
   }
 
@@ -52,4 +50,17 @@ class Store extends ChangeNotifier{
     }
     notifyListeners();
   }
+
+
+}
+
+class Post {
+  final String postId;
+  final String imageLinks;
+  final String postMain;
+  final String userId;
+  final String userNickname;
+  final String postName;
+  final String timestamp;
+  Post({required this.postId, required this.imageLinks, required this.postMain, required this.userId, required this.userNickname, required this.postName, required this.timestamp,});
 }

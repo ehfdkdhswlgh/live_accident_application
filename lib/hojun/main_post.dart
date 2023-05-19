@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'package:live_accident_application/hojun/feed.dart';
 import 'package:provider/provider.dart';
 import 'store.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -11,7 +10,7 @@ import '../jihwan/post_report.dart';
 
 class MainPost extends StatefulWidget {
   const MainPost({Key? key, required this.postContent}) : super(key: key);
-  final Post postContent;
+  final postContent;
 
   @override
   State<MainPost> createState() => _MainPostState();
