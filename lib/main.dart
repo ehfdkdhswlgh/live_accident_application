@@ -129,18 +129,3 @@ class _MyHomePageState extends State<MyHomePage> {
 
 }
 
-// Widget build(BuildContext context) {
-//   return Scaffold(
-//       body: StreamBuilder(
-//         stream: FirebaseAuth.instance.authStateChanges(),
-//         builder: (BuildContext context, snapshot) {
-//           if (!snapshot.hasData) {
-//             // 데이터가 있는 경우
-//             return MapSample();
-//           } else {
-//             return MapSample();
-//           }
-//         },
-//       )
-//   );
-// }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart';
+import 'MarkerData.dart';
 import 'location_service.dart';
 import 'tags.dart' as tag;
 import '../haechan/profile.dart' as profile;
@@ -17,12 +19,15 @@ class MapSample extends StatefulWidget {
 
 
 class _MapSampleState extends State<MapSample> {
+
+
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<Map<String, String>> items = [];
   List<Map<String, String>> post_items = [];
-  List<String> _acc = ['전체','사고','공사','행사','통제','기타'];
-  String tagType ="";
+  List<String> _acc = ['전체', '사고', '공사', '행사', '통제', '기타'];
+  String tagType = "";
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
@@ -30,13 +35,12 @@ class _MapSampleState extends State<MapSample> {
   LatLng? currentPosition;
 
 
-
   var selectedPostType = 1;
 
   var address = "한강로 1가";
-  List<String> postTitle = ["실시간 한강로 상황", "한강로 집회 사람 많네 ㄷㄷ ", "집회 현황 ㅎㄷㄷ", "출근길 조심하세요!!"];
+
   int i = 0;
-  List<Marker> markers = [];
+  Set<Marker> markers = {};
 
 
   @override
@@ -45,9 +49,6 @@ class _MapSampleState extends State<MapSample> {
     getCurrentLocation();
     _fetchOpendatasItems();
     _fetchPostItems();
-
-
-
   }
 
   // selectedPostType = context.read<Store>().selectedPostType;
@@ -55,31 +56,34 @@ class _MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
+    _createPostMarkers(); // 제보글데이터
+    _createOpendatasMarkers(); //공공데이터
+
     if (currentPosition == null) {
       // 위치 정보가 아직 가져와지지 않았을 경우에 대한 처리
       print("로딩중...");
       return Center(
           child: SizedBox(
-          width: 150,
-          height: 150,
-          child: Stack(
-        fit: StackFit.expand,
-        children: const [
-          SizedBox(
-              width: 30, height: 30,
-              child: CircularProgressIndicator(
-                strokeWidth: 10,
-                backgroundColor: Colors.black,
-                color: Colors.green,
-              )),
-          Center(
-              child: Text(
-                'Loading....',
-                style: TextStyle(fontSize: 10),
-              )),
-        ],
+              width: 150,
+              height: 150,
+              child: Stack(
+                fit: StackFit.expand,
+                children: const [
+                  SizedBox(
+                      width: 30, height: 30,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 10,
+                        backgroundColor: Colors.black,
+                        color: Colors.green,
+                      )),
+                  Center(
+                      child: Text(
+                        'Loading....',
+                        style: TextStyle(fontSize: 10),
+                      )),
+                ],
+              )
           )
-         )
       );
     }
     else {
@@ -134,55 +138,8 @@ class _MapSampleState extends State<MapSample> {
                   target: currentPosition!,
                   zoom: 15,
                 ),
-                markers: Set<Marker>.from(items.map((data) {
-                  String latitude = data['locationDataX'] as String;
-                  String longitude = data['locationDataY'] as String;
-                  String title = data['addressJibun'] as String;
-                  String description = data['incidentTitle'] as String;
-                  String incidenteTypeCd = data['incidenteTypeCd'] as String;
-                  i++;
+                markers: markers,
 
-
-                  return Marker(
-                      markerId: MarkerId(i.toString()),
-                      position: LatLng(
-                          double.parse(longitude), double.parse(latitude)),
-                      infoWindow: InfoWindow(
-                        title: title,
-                        snippet: description,
-                      ),
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return Container(
-                              height: 200,
-                              child: ListView(
-                                children: [
-                                  ListTile(
-                                    title: Text('항목 1'),
-                                    onTap: () {
-                                      // 선택된 항목에 대한 처리 로직
-                                      Navigator.pop(context); // Bottom sheet 닫기
-                                    },
-                                  ),
-                                  ListTile(
-                                    title: Text('항목 2'),
-                                    onTap: () {
-                                      // 선택된 항목에 대한 처리 로직
-                                      Navigator.pop(context); // Bottom sheet 닫기
-                                    },
-                                  ),
-                                  // 추가적인 항목w들...
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      }
-                  );
-                })),
-                //마커 저장.
 
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
@@ -199,7 +156,8 @@ class _MapSampleState extends State<MapSample> {
       );
     }
   }
-  Future<void> _goToPlace(Map<String, dynamic> place) async{
+
+  Future<void> _goToPlace(Map<String, dynamic> place) async {
     final double lat = place['geometry']['location']['lat'];
     final double lng = place['geometry']['location']['lng'];
 
@@ -208,17 +166,17 @@ class _MapSampleState extends State<MapSample> {
 
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: LatLng(lat,lng),
+        CameraPosition(target: LatLng(lat, lng),
             zoom: 14)
     ));
-
   }
 
 
   Future<void> _fetchOpendatasItems() async {
     List<Map<String, String>> opendatasItems = [];
 
-    QuerySnapshot querySnapshot = await _firestore.collection('opendatas').get();
+    QuerySnapshot querySnapshot = await _firestore.collection('opendatas')
+        .get();
     querySnapshot.docs.forEach((doc) {
       opendatasItems.add({
         'incidenteTypeCd': doc['incidenteTypeCd'],
@@ -236,8 +194,6 @@ class _MapSampleState extends State<MapSample> {
     setState(() {
       items = opendatasItems;
     });
-
-
   }
 
   Future<void> _fetchPostItems() async {
@@ -257,7 +213,7 @@ class _MapSampleState extends State<MapSample> {
         'user_id': doc['user_id'],
         'latitude': doc['latitude'].toString(),
         'longitude': doc['longitude'].toString(),
-        'like': doc['like'].toString(),
+        'like': doc['like'].toString()
       });
     });
 
@@ -265,21 +221,11 @@ class _MapSampleState extends State<MapSample> {
       post_items = postItems;
     });
 
-    print('Items length: ${postItems.length}');
-    print('Items contents:');
-    postItems.forEach((item) => print(item));
-    for(int i = 0; i < postItems.length; i++) {
-      print(postItems[i]);
-    }
 
-
+    print(post_items.length);
   }
 
   Future<void> getCurrentLocation() async {
-
-    // print("11111");
-    // LocationPermission permission = await Geolocator.requestPermission();
-
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.medium,
     );
@@ -287,11 +233,123 @@ class _MapSampleState extends State<MapSample> {
     setState(() {
       currentPosition = LatLng(position.latitude, position.longitude);
     });
-
-    print(position.latitude);
-    print(position.longitude);
-
   }
+
+
+  void _createPostMarkers() {
+    List<MarkerData> markerDataList = [];
+
+    for (var item in post_items) {
+      int decimalIndex = item['latitude']!.indexOf('.') + 4;
+      int decimalIndex2 = item['longitude']!.indexOf('.') + 4;
+
+      LatLng position = LatLng(
+        double.parse(item['latitude']!.substring(0, decimalIndex)),
+        double.parse(item['longitude']!.substring(0, decimalIndex2)),
+      );
+
+
+
+      bool isDuplicate = false;
+      for (var markerData in markerDataList) {
+        if (markerData.position == position) {
+          markerData.dataList.add(item);
+          isDuplicate = true;
+          break;
+        }
+      }
+
+      // 중복된 위치가 아니면 새로운 MarkerData 객체 생성
+      if (!isDuplicate) {
+        MarkerData markerData = MarkerData(position: position, dataList: [item]);
+        markerDataList.add(markerData);
+      }
+    }
+
+    // 마커 생성
+    for (var markerData in markerDataList) {
+      final marker = Marker(
+        markerId: MarkerId(markerData.position.toString()),
+        position: markerData.position,
+        onTap: () {
+          _showListDialog(markerData.dataList);
+        },
+      );
+
+      markers.add(marker);
+    }
+  }
+
+  void _createOpendatasMarkers() {
+    for (var data in items) {
+      String latitude = data['locationDataX']!;
+      String longitude = data['locationDataY']!;
+      String title = data['addressJibun']!;
+      String description = data['incidentTitle']!;
+      String incidenteTypeCd = data['incidenteTypeCd']!;
+      int i = markers.length + 1;
+
+      Marker marker = Marker(
+        markerId: MarkerId(i.toString()),
+        position: LatLng(double.parse(longitude), double.parse(latitude)),
+        infoWindow: InfoWindow(
+          title: title,
+          snippet: description,
+        ),
+        icon : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue)
+      );
+
+      markers.add(marker);
+    }
+  }
+
+  void _showListDialog(List<Map<String, dynamic>> dataList) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("제보현황"),
+          content: Container(
+            width: 600, // 적절한 너비 설정
+            height: 600, // 적절한 높이 설정
+            child: dataList.isNotEmpty
+                ? ListView.builder(
+              itemCount: dataList.length,
+              itemBuilder: (context, index) {
+                return Column(
+                    children: [
+                      Divider(),
+                      ListTile(
+                                leading: Column(
+                                    children: [
+                                      Icon(Icons.favorite),
+                                      SizedBox(width: 2),// 아이콘과 개수 사이의 간격 조절
+                                      Text(dataList[index]['like']), // 하트 개수를 나타내는 텍스트
+                                    ],),
+                                title: Text("  "+ dataList[index]['title']),
+                          ),
+                      Divider()
+                    ]
+
+                );
+              },
+            )
+                : Text('해당 위치에 데이터가 없습니다.'),
+          ),
+          actions: [
+            TextButton(
+              child: Text('닫기'),
+              onPressed: () {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
 
 
 }
