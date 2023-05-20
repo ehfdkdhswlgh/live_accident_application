@@ -81,11 +81,11 @@ class _NewsState extends State<News> {
 
   Future<void> _launchUrl(str_url) async {
     var _url = Uri.parse(str_url);
-
-    if (!await canLaunch(_url.toString())) {
-      throw Exception('Could not launch $_url');
-    } else {
+    if (await canLaunch(_url.toString())) {
       await launch(_url.toString());
+    } else {
+      print('Could not launch $_url');
+      throw 'Could not launch $_url';
     }
   }
 }
