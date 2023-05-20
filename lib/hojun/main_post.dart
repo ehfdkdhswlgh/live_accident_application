@@ -76,6 +76,7 @@ class _MainPostState extends State<MainPost> {
       FirebaseFirestore.instance.collection('likes').add({
         'userId': user?.uid,
         'postId': widget.postContent.postId,
+        'timestamp': FieldValue.serverTimestamp(), // added this line
       });
 
       FirebaseFirestore.instance
@@ -92,6 +93,7 @@ class _MainPostState extends State<MainPost> {
       });
     }
   }
+
 
   Widget build(BuildContext context) {
     return Container(
