@@ -26,8 +26,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   getPosts() async {
     QuerySnapshot querySnapshot = await _firestore
         .collection('posts')
-        .where('user_id', isEqualTo: '5n0WBbvJgNO0bqkIgnM6febvPqD3')
-        // .where('userId', isEqualTo: UserImfomation.uid)
+        // .where('user_id', isEqualTo: '5n0WBbvJgNO0bqkIgnM6febvPqD3')
+        .where('user_id', isEqualTo: UserImfomation.uid)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {

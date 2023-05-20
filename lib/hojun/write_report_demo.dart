@@ -514,6 +514,16 @@ class _ReportScreenState extends State<ReportWriteScreen> {
         'longitude' : currentPosition!.longitude,
         'like':0,
       });
+      // 해찬 추가
+      DocumentReference userRef = _firestore.collection('user').doc(userId);
+      _firestore.runTransaction((transaction) async {
+        DocumentSnapshot userSnapshot = await transaction.get(userRef);
+        if (userSnapshot.exists) {
+          int postCount = userSnapshot.get('post_count') ?? 0;
+          transaction.update(userRef, {'post_count': postCount + 1});
+        }
+      });
+      // 해찬 추가 여기까지
 
       _titleController.clear();
       _mainController.clear();
