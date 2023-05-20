@@ -84,7 +84,11 @@ class _MainPostState extends State<MainPost> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GestureDetector(
-                  onTap: onLikeIconPressed,
+                  onTap: (){
+
+
+
+                  },
                   child: Row(
                     children: [
                       Icon(Icons.favorite_border),
@@ -131,9 +135,7 @@ class _MainPostState extends State<MainPost> {
 }
 
 
-void onLikeIconPressed() {
-  print('Like icon pressed');
-}
+
 
 
 
