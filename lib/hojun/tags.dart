@@ -11,7 +11,7 @@ class Tags extends StatefulWidget {
 
 class _TagsState extends State<Tags> {
 
-  final List<String> _acc = ['전체','사고','공사','행사','통제','기타'];
+  final List<String> _acc = ['전체','사고','공사','행사/시위','통제','기타'];
   final List<String> _ord = ['거리순','최신순','추천순'];
 
   Widget accTags(String txt, int index){
@@ -62,21 +62,29 @@ class _TagsState extends State<Tags> {
 
   @override
   Widget build(BuildContext context) {
+    final double msgWindow = 100; // MSG_WINDOW 값에 해당하는 값으로 수정해주세요
+
     return Container(
       margin: EdgeInsets.all(5),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              accTags(_acc[0], 0),
-              accTags(_acc[1], 1),
-              accTags(_acc[2], 2),
-              accTags(_acc[3], 3),
-              accTags(_acc[4], 4),
-              accTags(_acc[5], 5),
-            ],
+          SizedBox(
+            height: msgWindow, // MSG_WINDOW 값으로 상단 영역의 높이를 지정합니다
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  accTags(_acc[0], 0),
+                  accTags(_acc[1], 1),
+                  accTags(_acc[2], 2),
+                  accTags(_acc[3], 3),
+                  accTags(_acc[4], 4),
+                  accTags(_acc[5], 5),
+                ],
+              ),
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -88,7 +96,7 @@ class _TagsState extends State<Tags> {
           ),
           Divider(thickness: 2.0),
         ],
-      )
+      ),
     );
   }
 }

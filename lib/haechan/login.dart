@@ -85,9 +85,9 @@ class _MyHomePageState extends State<MyHomePage> {
         if (querySnapshot.docs.isNotEmpty) {
           DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
           UserImfomation.nickname = documentSnapshot.get('name').toString();
-          UserImfomation.followCount = documentSnapshot.get('follow');
-          UserImfomation.followingCount = documentSnapshot.get('following');
-          UserImfomation.postCount = documentSnapshot.get('post_count');
+          // UserImfomation.followCount = documentSnapshot.get('follow');
+          // UserImfomation.followingCount = documentSnapshot.get('following');
+          // UserImfomation.postCount = documentSnapshot.get('post_count');
         }
 
         // print("UID : " + uid+ "\n" );
