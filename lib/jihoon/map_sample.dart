@@ -213,7 +213,7 @@ class _MapSampleState extends State<MapSample> {
         'user_id': doc['user_id'],
         'latitude': doc['latitude'].toString(),
         'longitude': doc['longitude'].toString(),
-        'like': doc['like'].toString()
+        // 'like': doc['like'].toString()
       });
     });
 
@@ -310,7 +310,7 @@ class _MapSampleState extends State<MapSample> {
         return AlertDialog(
           title: Text("제보현황"),
           content: Container(
-            width: 600, // 적절한 너비 설정
+            width: 800, // 적절한 너비 설정
             height: 600, // 적절한 높이 설정
             child: dataList.isNotEmpty
                 ? ListView.builder(
@@ -324,7 +324,8 @@ class _MapSampleState extends State<MapSample> {
                                     children: [
                                       Icon(Icons.favorite),
                                       SizedBox(width: 2),// 아이콘과 개수 사이의 간격 조절
-                                      Text(dataList[index]['like']), // 하트 개수를 나타내는 텍스트
+                                      // Text(dataList[index]['like']), // 하트 개수를 나타내는 텍스트
+                                      Text("5")
                                     ],),
                                 title: Text("  "+ dataList[index]['title']),
                           ),
