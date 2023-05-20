@@ -7,6 +7,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'post_main_document.dart';
 import '../jihwan/post_report.dart';
+import '../UserImfomation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MainPost extends StatefulWidget {
   const MainPost({Key? key, required this.postContent}) : super(key: key);
@@ -18,6 +20,79 @@ class MainPost extends StatefulWidget {
 
 class _MainPostState extends State<MainPost> {
   @override
+
+  bool isLiked = false;  // 좋아요 상태를 추적하는 데 사용할 변수를 생성합니다.
+
+  void initState() {
+    super.initState();
+    checkIfLikedOrNot();
+  }
+
+  void checkIfLikedOrNot() async {
+    // Check if the current post is already liked by the user
+    var user = FirebaseAuth.instance.currentUser;
+    var likeRef = FirebaseFirestore.instance.collection('likes');
+    var userLike = await likeRef
+        .where('userId', isEqualTo: user?.uid)
+        .where('postId', isEqualTo: widget.postContent.postId) // 'post_id'와 'user_id' 필드가 각 문서에 포함되어 있다고 가정합니다.
+        .get();
+
+    if (userLike.docs.length > 0) {
+      setState(() {
+        isLiked = true;
+      });
+    }
+  }
+
+  void handleLikePost() {
+    var user = FirebaseAuth.instance.currentUser;
+
+    if (isLiked) {
+      // Already liked, so we need to unlike
+      FirebaseFirestore.instance
+          .collection('likes')
+          .where('userId', isEqualTo: user?.uid)
+          .where('postId', isEqualTo: widget.postContent.postId)
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs[0].reference.delete();
+      });
+
+      FirebaseFirestore.instance
+          .collection('posts')
+          .where('post_id', isEqualTo: widget.postContent.postId)
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs[0].reference.update({'like': FieldValue.increment(-1)});
+      });
+
+      setState(() {
+        isLiked = false;
+        widget.postContent.like -= 1;
+      });
+
+    } else {
+      // Not liked yet, so we need to like
+      FirebaseFirestore.instance.collection('likes').add({
+        'userId': user?.uid,
+        'postId': widget.postContent.postId,
+      });
+
+      FirebaseFirestore.instance
+          .collection('posts')
+          .where('post_id', isEqualTo: widget.postContent.postId)
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs[0].reference.update({'like': FieldValue.increment(1)});
+      });
+
+      setState(() {
+        isLiked = true;
+        widget.postContent.like += 1;
+      });
+    }
+  }
+
   Widget build(BuildContext context) {
     return Container(
       width: 400,
@@ -29,7 +104,7 @@ class _MainPostState extends State<MainPost> {
             child: GestureDetector(
               child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like,),
               onTap: () {
-                // '제보하기' 버튼 클릭 시 실행될 코드
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('프로필 누름'),
@@ -85,14 +160,10 @@ class _MainPostState extends State<MainPost> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GestureDetector(
-                  onTap: (){
-
-
-//
-                  },
+                  onTap: handleLikePost,
                   child: Row(
                     children: [
-                      Icon(Icons.favorite_border),
+                      Icon(isLiked ? Icons.favorite : Icons.favorite_border),
                       SizedBox(width: 4.0),
                       Text(widget.postContent.like.toString()),
                     ],
@@ -362,24 +433,7 @@ class Preview extends StatelessWidget {
   }
 }
 
-class Like extends StatelessWidget {
-  const Like({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-            onPressed: (){
-              context.read<Store>().liked();
-            },
-            icon: context.watch<Store>().likeState ? Icon(Icons.favorite) : Icon(Icons.favorite_border_outlined)
-        ),
-        Text('${context.watch<Store>().likeNum}'),
-      ],
-    );
-  }
-}
 
 class Comment extends StatelessWidget {
   const Comment({Key? key}) : super(key: key);

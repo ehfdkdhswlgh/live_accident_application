@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Store extends ChangeNotifier{
-  var likeState = false;
-  var likeNum = 0;
+  // var likeState = false;
+  // var likeNum = 0;
   var commentNum = 10;
 
   //제보글 업로드 할 때 타입
@@ -40,15 +40,15 @@ class Store extends ChangeNotifier{
     notifyListeners();
   }
 
-  liked(){
-    if(likeState) {
-      likeNum--;
-      likeState = false;
-    } else {
-      likeNum++;
-      likeState = true;
-    }
-    notifyListeners();
-  }
+  // liked(){
+  //   if(likeState) {
+  //     likeNum--;
+  //     likeState = false;
+  //   } else {
+  //     likeNum++;
+  //     likeState = true;
+  //   }
+  //   notifyListeners();
+  // }
 
 }
