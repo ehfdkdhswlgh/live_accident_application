@@ -24,30 +24,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   getPosts() async {
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('posts')
-        // .where('user_id', isEqualTo: '5n0WBbvJgNO0bqkIgnM6febvPqD3')
-        .where('user_id', isEqualTo: UserImfomation.uid)
-        .get();
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('posts')
+      // .where('user_id', isEqualTo: '5n0WBbvJgNO0bqkIgnM6febvPqD3')
+          .where('user_id', isEqualTo: UserImfomation.uid)
+        .orderBy('timestamp', descending: true) // timestamp를 내림차순으로 정렬
+          .get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      List<String> urls = []; // 임시 리스트
+      if (querySnapshot.docs.isNotEmpty) {
+        List<String> urls = []; // 임시 리스트
 
-      querySnapshot.docs.forEach((doc) {
-        // 각 게시물의 이미지 URL을 가져와서 리스트에 추가
-        if(doc.get('images') == ''){
-          urls.add('https://firebasestorage.googleapis.com/v0/b/live-accident.appspot.com/o/images%2F게시글로 이동.PNG?alt=media&token=e6a8edf5-6f18-4f88-a038-7fa0a36e59d4');
-        }else
-        urls.add(doc.get('images'));
+        querySnapshot.docs.forEach((doc) {
+          // 각 게시물의 이미지 URL을 가져와서 리스트에 추가
+          if (doc.get('images') == '') {
+            urls.add(
+                'https://firebasestorage.googleapis.com/v0/b/live-accident.appspot.com/o/images%2F게시글로 이동.PNG?alt=media&token=e6a8edf5-6f18-4f88-a038-7fa0a36e59d4');
+          } else
+            urls.add(doc.get('images'));
 
-        // print(doc.get('images'));
-      });
+          // print(doc.get('images'));
+        });
 
-      setState(() {
-        postImageUrls = urls; // 게시물 이미지 URL을 저장한 리스트를 업데이트
-      });
+        setState(() {
+          postImageUrls = urls; // 게시물 이미지 URL을 저장한 리스트를 업데이트
+        });
+      }
+      print('length : ' + postImageUrls.length.toString());
+    } catch (e) {
+      print('Error: $e');
     }
-    print('length : ' + postImageUrls.length.toString());
   }
 
   // ProfileScreen() {
