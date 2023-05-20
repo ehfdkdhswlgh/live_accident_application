@@ -83,19 +83,42 @@ class _MainPostState extends State<MainPost> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.favorite_border),
-                    SizedBox(width: 4.0),
-                    Text('Like'),
-                  ],
+                GestureDetector(
+                  onTap: onLikeIconPressed,
+                  child: Row(
+                    children: [
+                      Icon(Icons.favorite_border),
+                      SizedBox(width: 4.0),
+                      Text('Like'),
+                    ],
+                  ),
                 ),
-                Row(
-                  children: [
-                    Icon(Icons.comment_outlined),
-                    SizedBox(width: 4.0),
-                    Text('Comment'),
-                  ],
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (c, a1, a2) => PostDocument(
+                          postId: widget.postContent.postId,
+                          imageUrl: widget.postContent.imageLinks,
+                          postMain: widget.postContent.postMain,
+                          userNickname: widget.postContent.userNickname,
+                          postName: widget.postContent.postName,
+                          userId: widget.postContent.userId,
+                          timestamp: widget.postContent.timestamp,
+                        ),
+                        transitionsBuilder: (c, a1, a2, child) =>
+                            FadeTransition(opacity: a1, child: child),
+                      ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.comment_outlined),
+                      SizedBox(width: 4.0),
+                      Text('Comment'),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -106,6 +129,15 @@ class _MainPostState extends State<MainPost> {
     );
   }
 }
+
+
+void onLikeIconPressed() {
+  print('Like icon pressed');
+}
+
+
+
+
 
 class Profile extends StatelessWidget {
   Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId,}) : super(key: key);
