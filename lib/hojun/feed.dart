@@ -121,13 +121,14 @@ class _FeedState extends State<Feed> {
       final userId = doc.get('user_id').toString();
       final postName = doc.get('title').toString();
       final timestamp = doc.get('timestamp').toString();
+      var like = doc.get('like');
       String userNickname = '';
       try {
         final nickname = await getNickname(userId);
         userNickname = nickname;
       } catch (error) {
       }
-      return Post(postId: postId, imageLinks: imageLinks, postMain: postMain, userId: userId, userNickname: userNickname, postName: postName, timestamp: timestamp);
+      return Post(postId: postId, imageLinks: imageLinks, postMain: postMain, userId: userId, userNickname: userNickname, postName: postName, timestamp: timestamp, like: like);
     }).toList());
 
     setState(() {
@@ -169,5 +170,6 @@ class Post {
   final String userNickname;
   final String postName;
   final String timestamp;
-  Post({required this.postId, required this.imageLinks, required this.postMain, required this.userId, required this.userNickname, required this.postName, required this.timestamp,});
+  var like;
+  Post({required this.postId, required this.imageLinks, required this.postMain, required this.userId, required this.userNickname, required this.postName, required this.timestamp, required this.like});
 }

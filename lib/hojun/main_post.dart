@@ -27,7 +27,7 @@ class _MainPostState extends State<MainPost> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
-              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId,),
+              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like,),
               onTap: () {
                 // '제보하기' 버튼 클릭 시 실행될 코드
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -71,6 +71,7 @@ class _MainPostState extends State<MainPost> {
                     postName: widget.postContent.postName,
                     userId: widget.postContent.userId,
                     timestamp: widget.postContent.timestamp,
+                    like: widget.postContent.like,
                   ),
                   transitionsBuilder: (c, a1, a2, child) =>
                       FadeTransition(opacity: a1, child: child),
@@ -93,7 +94,7 @@ class _MainPostState extends State<MainPost> {
                     children: [
                       Icon(Icons.favorite_border),
                       SizedBox(width: 4.0),
-                      Text('Like'),
+                      Text(widget.postContent.like.toString()),
                     ],
                   ),
                 ),
@@ -110,6 +111,7 @@ class _MainPostState extends State<MainPost> {
                           postName: widget.postContent.postName,
                           userId: widget.postContent.userId,
                           timestamp: widget.postContent.timestamp,
+                          like: widget.postContent.like,
                         ),
                         transitionsBuilder: (c, a1, a2, child) =>
                             FadeTransition(opacity: a1, child: child),
@@ -142,11 +144,12 @@ class _MainPostState extends State<MainPost> {
 
 
 class Profile extends StatelessWidget {
-  Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId,}) : super(key: key);
+  Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId, required this.like, }) : super(key: key);
   final userNickname;
   final postId;
   final postName;
   final userId;
+  var like;
 
   @override
   Widget build(BuildContext context) {
