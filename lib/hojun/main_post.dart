@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'post_main_document.dart';
 import '../jihwan/post_report.dart';
+import '../haechan/profile.dart';
 import '../UserImfomation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -106,12 +107,17 @@ class _MainPostState extends State<MainPost> {
             child: GestureDetector(
               child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like,),
               onTap: () {
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('프로필 누름'),
-                  ),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProfileScreen(widget.postContent.userId)),
                 );
+                // // '제보하기' 버튼 클릭 시 실행될 코드
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   SnackBar(
+                //     content: Text('프로필 누름2'),
+                //   ),
+                // );
               },
             ),
           ),

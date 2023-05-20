@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
+import 'package:live_accident_application/UserImfomation.dart';
 import 'MarkerData.dart';
 import 'location_service.dart';
 import 'tags.dart' as tag;
@@ -105,7 +106,7 @@ class _MapSampleState extends State<MapSample> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => profile.ProfileScreen()),
+                      builder: (context) => profile.ProfileScreen(UserImfomation.uid)),
                 );
               },
             ),

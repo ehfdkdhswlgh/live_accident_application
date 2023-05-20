@@ -4,7 +4,19 @@ import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 
+String nickname = '';
+String uid = '';
+String followingCount = '';
+String followCount = '';
+String postCount = '';
+
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 class ProfileScreen extends StatefulWidget {
+  final String inputUid; // 생성자에서 input_uid를 인자로 받을 수 있도록 수정
+
+  ProfileScreen(this.inputUid);
+
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
@@ -12,7 +24,11 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  String nickname = '';
+
+  // String uid = UserImfomation.uid;
+  // String followingCount = UserImfomation.followingCount.toString();
+  // String followCount = UserImfomation.followCount.toString();
+  // String postCount = UserImfomation.postCount.toString();
 
   List<String> postImageUrls = []; // 게시물 이미지 URL을 저장할 리스트
 
@@ -20,6 +36,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     getPosts(); // 게시물 이미지를 가져옴
+    if (UserImfomation.uid == widget.inputUid) {
+      nickname = UserImfomation.nickname;
+      uid = UserImfomation.uid;
+      followingCount = UserImfomation.followingCount.toString();
+      followCount = UserImfomation.followCount.toString();
+      postCount = UserImfomation.postCount.toString();
+    } else {
+      getUserInformation();
+    }
     print('hello');
   }
 
@@ -28,7 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       QuerySnapshot querySnapshot = await _firestore
           .collection('posts')
       // .where('user_id', isEqualTo: '5n0WBbvJgNO0bqkIgnM6febvPqD3')
-          .where('user_id', isEqualTo: UserImfomation.uid)
+          .where('user_id', isEqualTo: widget.inputUid)
         .orderBy('timestamp', descending: true) // timestamp를 내림차순으로 정렬
           .get();
 
@@ -51,6 +76,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
       print('length : ' + postImageUrls.length.toString());
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+
+  getUserInformation() async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('user')
+      // .where('user_id', isEqualTo: '5n0WBbvJgNO0bqkIgnM6febvPqD3')
+          .where('uid', isEqualTo: widget.inputUid)
+          .get();
+      if (querySnapshot.docs.isNotEmpty) {
+        DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+        setState(() {
+          nickname = documentSnapshot.get('name');
+          followCount = documentSnapshot.get('follow').toString();
+          followingCount = documentSnapshot.get('following').toString();
+          postCount = documentSnapshot.get('post_count').toString();
+        });
+      }
+
     } catch (e) {
       print('Error: $e');
     }
@@ -125,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        UserImfomation.nickname, // 닉네임
+                        nickname, // 닉네임
                         style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8.0),
@@ -133,17 +181,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         mainAxisAlignment: MainAxisAlignment.start, // 오른쪽 정렬
                         children: [
                           Text(
-                            '게시물: ' + UserImfomation.postCount.toString(), // 게시물 수
+                            '게시물: ' + postCount, // 게시물 수
                             style: TextStyle(fontSize: 16.0),
                           ),
                           SizedBox(width: 8.0),
                           Text(
-                            '팔로워: ' + UserImfomation.followCount.toString(), // 팔로워 수
+                            '팔로워: ' + followCount, // 팔로워 수
                             style: TextStyle(fontSize: 16.0),
                           ),
                           SizedBox(width: 8.0),
                           Text(
-                            '팔로잉: ' + UserImfomation.followingCount.toString() + '  ', // 팔로잉 수
+                            '팔로잉: ' + followingCount + '  ', // 팔로잉 수
                             style: TextStyle(fontSize: 16.0),
                           ),
                           ElevatedButton(
