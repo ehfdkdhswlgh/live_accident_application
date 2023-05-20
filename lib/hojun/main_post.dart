@@ -88,7 +88,7 @@ class _MainPostState extends State<MainPost> {
                   onTap: (){
 
 
-
+//
                   },
                   child: Row(
                     children: [
