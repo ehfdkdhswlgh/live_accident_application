@@ -512,6 +512,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
         'timestamp': FieldValue.serverTimestamp(),
         'latitude' : currentPosition!.latitude,
         'longitude' : currentPosition!.longitude,
+        'like':0,
       });
 
       _titleController.clear();
