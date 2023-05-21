@@ -3,36 +3,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart';
 import 'package:live_accident_application/UserImfomation.dart';
 import '../hojun/post_main_document.dart';
+import '../hojun/store.dart';
 import 'MarkerData.dart';
 import 'location_service.dart';
 import 'tags.dart' as tag;
 import '../haechan/profile.dart' as profile;
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:provider/provider.dart';
 import '../hojun/feed.dart';
 
 
 class MapSample extends StatefulWidget {
-  const MapSample({super.key});
-
+  const MapSample({super.key, this.selectedType});
+  final selectedType;
   _MapSampleState createState() => _MapSampleState();
 }
 
 
 class _MapSampleState extends State<MapSample> {
 
+  bool _isLoading = false;
 
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<Map<String, String>> items = [];
   List<Map<String, String>> post_items = [];
-  List<Post> posts = [];
-  List<String> _acc = ['전체', '사고', '공사', '행사', '통제', '기타'];
-  String tagType = "";
+
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
@@ -52,12 +51,106 @@ class _MapSampleState extends State<MapSample> {
   void initState() {
     super.initState();
     getCurrentLocation();
-    _fetchOpendatasItems();
-    _fetchPostItems();
+    _fetchData();
   }
 
-  // selectedPostType = context.read<Store>().selectedPostType;
-  // print("지금 선택된 위치는? : $selectedPostType");
+  @override
+  void didUpdateWidget(MapSample oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedType != oldWidget.selectedType) {
+      _isLoading = false;
+      setState(() {
+        items = [];
+        post_items = [];
+        markers = {};
+      });
+      _fetchData();
+    }
+  }
+
+  Future<void> _fetchData() async {
+    if (_isLoading) return;
+    QuerySnapshot querySnapshotOD;
+    QuerySnapshot querySnapshotPost;
+    setState(() {
+      _isLoading = true;
+    });
+
+    if (context.read<Store>().selectedPostType == 0) {
+      if (items.isEmpty && post_items.isEmpty) {
+        _fetchOpendatasItems();
+        _fetchPostItems();
+         }
+      else{
+        if (items.isEmpty && post_items.isEmpty) {
+          List<Map<String, String>> postItems = [];
+          List<Map<String, String>> opendatasItems = [];
+
+
+          querySnapshotPost = await _firestore
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context
+              .read<Store>()
+              .selectedPostType)
+              .get();
+
+
+          querySnapshotOD = await _firestore
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('incidenteTypeCd', isEqualTo: context
+              .read<Store>()
+              .selectedPostType)
+              .get();
+
+
+          querySnapshotPost.docs.forEach((doc) {
+            postItems.add({
+              'address_name': doc['address_name'],
+              'images': doc['images'],
+              'is_visible': doc['is_visible'].toString(),
+              'post_content': doc['post_content'],
+              'post_id': doc['post_id'],
+              'post_type': doc['post_type'].toString(),
+              'timestamp': doc['timestamp'].toString(),
+              'title': doc['title'],
+              'user_id': doc['user_id'],
+              'latitude': doc['latitude'].toString(),
+              'longitude': doc['longitude'].toString(),
+              'like': doc['like'].toString()
+            });
+          });
+
+
+          querySnapshotOD.docs.forEach((doc) {
+            opendatasItems.add({
+              'incidenteTypeCd': doc['incidenteTypeCd'],
+              'incidenteSubTypeCd': doc['incidenteSubTypeCd'],
+              'addressJibun': doc['addressJibun'],
+              'locationDataX': doc['locationDataX'],
+              'locationDataY': doc['locationDataY'],
+              'incidentTitle': doc['incidentTitle'],
+              'startDate': doc['startDate'],
+              'endDate': doc['endDate'],
+              'roadName': doc['roadName'],
+            });
+          });
+
+
+          setState(() {
+            post_items = postItems;
+            items = opendatasItems;
+          });
+         }
+
+
+        }
+      }
+
+    }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -221,30 +314,11 @@ class _MapSampleState extends State<MapSample> {
         'like': doc['like'].toString()
       });
     });
-    // final newPosts = await Future.wait(querySnapshot.docs.map((doc) async {
-    //   final _postId = doc.get('post_id').toString();
-    //   final _imageLinks = doc.get('images').toString();
-    //   final _postMain = doc.get('post_content').toString();
-    //   final _userId = doc.get('user_id').toString();
-    //   final _postName = doc.get('title').toString();
-    //   final _timestamp = doc.get('timestamp').toString();
-    //   var _like = doc.get('like');
-    //   String _userNickname = '';
-    //   try {
-    //     final _nickname = await getNickname(_userId);
-    //     _userNickname = _nickname;
-    //   } catch (error) {}
-    //   return Post(postId: _postId, imageLinks: _imageLinks, postMain: _postMain, userId: _userId, userNickname: _userNickname, postName: _postName, timestamp: _timestamp, like: _like);
-    // }).toList());
 
     setState(() {
       post_items = postItems;
-      // posts.addAll(newPosts);
     });
 
-
-    print(post_items.length);
-    print(posts.length);
   }
 
   Future<String> getNickname(String user_id) async{
@@ -282,7 +356,10 @@ class _MapSampleState extends State<MapSample> {
 
 
       bool isDuplicate = false;
+      bool isVisible = false;
+
       for (var markerData in markerDataList) {
+
         if (markerData.position == position) {
           markerData.dataList.add(item);
           isDuplicate = true;
@@ -296,6 +373,11 @@ class _MapSampleState extends State<MapSample> {
         markerDataList.add(markerData);
       }
     }
+
+    for (var markerData in markerDataList) {
+      markerData.dataList.removeWhere((item) => item['is_visible'] == true);
+    }
+
 
     // 마커 생성
     for (var markerData in markerDataList) {
