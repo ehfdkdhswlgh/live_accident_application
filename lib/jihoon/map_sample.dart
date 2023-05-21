@@ -16,7 +16,7 @@ import '../hojun/feed.dart';
 
 
 class MapSample extends StatefulWidget {
-  const MapSample({super.key, this.selectedType});
+  const MapSample({super.key,required this.selectedType});
   final selectedType;
   _MapSampleState createState() => _MapSampleState();
 }

@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (UserImfomation.checker == false) {
       checker_widget = login.Login();
     } else {
-      checker_widget = MapSample();
+      checker_widget = MapSample(selectedType: context.watch<Store>().selectedPostType,);
     }
 
     return Scaffold(

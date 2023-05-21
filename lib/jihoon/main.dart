@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../firebase_options.dart';
 import 'map_sample.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../hojun/store.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MapSample(),
+      home: MapSample(selectedType: context.watch<Store>().selectedPostType),
     );
   }
 
