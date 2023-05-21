@@ -70,21 +70,28 @@ class _MapSampleState extends State<MapSample> {
 
   Future<void> _fetchData() async {
     if (_isLoading) return;
-    QuerySnapshot querySnapshotOD;
-    QuerySnapshot querySnapshotPost;
     setState(() {
       _isLoading = true;
     });
+
+
+    QuerySnapshot querySnapshotOD;
+    QuerySnapshot querySnapshotPost;
+    List<Map<String, String>> postItems = [];
+    List<Map<String, String>> opendatasItems = [];
+
 
     if (context.read<Store>().selectedPostType == 0) {
       if (items.isEmpty && post_items.isEmpty) {
         _fetchOpendatasItems();
         _fetchPostItems();
-         }
+      }
+    }
       else{
+        print("하이");
+        print(context.read<Store>().selectedPostType.toString());
         if (items.isEmpty && post_items.isEmpty) {
-          List<Map<String, String>> postItems = [];
-          List<Map<String, String>> opendatasItems = [];
+
 
 
           querySnapshotPost = await _firestore
@@ -97,12 +104,8 @@ class _MapSampleState extends State<MapSample> {
 
 
           querySnapshotOD = await _firestore
-              .collection('posts')
-              .where('is_visible', isEqualTo: true)
-              .where('incidenteTypeCd', isEqualTo: context
-              .read<Store>()
-              .selectedPostType)
-              .get();
+              .collection('opendatas')
+              .where('incidenteTypeCd', isEqualTo: context.read<Store>().selectedPostType.toString()).get();
 
 
           querySnapshotPost.docs.forEach((doc) {
@@ -137,7 +140,6 @@ class _MapSampleState extends State<MapSample> {
             });
           });
 
-
           setState(() {
             post_items = postItems;
             items = opendatasItems;
@@ -145,8 +147,12 @@ class _MapSampleState extends State<MapSample> {
          }
 
 
+        print('post_items: $post_items');
+        print('items: $items');
+
+
         }
-      }
+
 
     }
 
@@ -154,6 +160,7 @@ class _MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
+    
     _createPostMarkers(); // 제보글데이터
     _createOpendatasMarkers(); //공공데이터
 
@@ -437,8 +444,8 @@ class _MapSampleState extends State<MapSample> {
                                     children: [
                                       Icon(Icons.favorite),
                                       SizedBox(width: 2),// 아이콘과 개수 사이의 간격 조절
-                                      // Text(dataList[index]['like']), // 하트 개수를 나타내는 텍스트
-                                      Text("5")
+                                      Text(dataList[index]['like']), // 하트 개수를 나타내는 텍스트
+
                                     ],),
                                 title: Text("  "+ dataList[index]['title']),
                                       onTap: () async {
