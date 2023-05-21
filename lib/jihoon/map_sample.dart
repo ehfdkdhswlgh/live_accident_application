@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 import 'package:live_accident_application/UserImfomation.dart';
+import '../hojun/post_main_document.dart';
 import 'MarkerData.dart';
 import 'location_service.dart';
 import 'tags.dart' as tag;
@@ -220,25 +221,25 @@ class _MapSampleState extends State<MapSample> {
         'like': doc['like'].toString()
       });
     });
-    final newPosts = await Future.wait(querySnapshot.docs.map((doc) async {
-      final _postId = doc.get('post_id').toString();
-      final _imageLinks = doc.get('images').toString();
-      final _postMain = doc.get('post_content').toString();
-      final _userId = doc.get('user_id').toString();
-      final _postName = doc.get('title').toString();
-      final _timestamp = doc.get('timestamp').toString();
-      var _like = doc.get('like');
-      String _userNickname = '';
-      try {
-        final _nickname = await getNickname(_userId);
-        _userNickname = _nickname;
-      } catch (error) {}
-      return Post(postId: _postId, imageLinks: _imageLinks, postMain: _postMain, userId: _userId, userNickname: _userNickname, postName: _postName, timestamp: _timestamp, like: _like);
-    }).toList());
+    // final newPosts = await Future.wait(querySnapshot.docs.map((doc) async {
+    //   final _postId = doc.get('post_id').toString();
+    //   final _imageLinks = doc.get('images').toString();
+    //   final _postMain = doc.get('post_content').toString();
+    //   final _userId = doc.get('user_id').toString();
+    //   final _postName = doc.get('title').toString();
+    //   final _timestamp = doc.get('timestamp').toString();
+    //   var _like = doc.get('like');
+    //   String _userNickname = '';
+    //   try {
+    //     final _nickname = await getNickname(_userId);
+    //     _userNickname = _nickname;
+    //   } catch (error) {}
+    //   return Post(postId: _postId, imageLinks: _imageLinks, postMain: _postMain, userId: _userId, userNickname: _userNickname, postName: _postName, timestamp: _timestamp, like: _like);
+    // }).toList());
 
     setState(() {
       post_items = postItems;
-      posts.addAll(newPosts);
+      // posts.addAll(newPosts);
     });
 
 
@@ -278,7 +279,6 @@ class _MapSampleState extends State<MapSample> {
         double.parse(item['latitude']!.substring(0, decimalIndex)),
         double.parse(item['longitude']!.substring(0, decimalIndex2)),
       );
-
 
 
       bool isDuplicate = false;
@@ -359,6 +359,26 @@ class _MapSampleState extends State<MapSample> {
                                       Text("5")
                                     ],),
                                 title: Text("  "+ dataList[index]['title']),
+                                      onTap: () async {
+                                        final String nickname = await getNickname(dataList[index]['user_id']);
+                                        Navigator.push(
+                                          context,
+                                          PageRouteBuilder(
+                                            pageBuilder: (c, a1, a2) => PostDocument(
+                                              postId: dataList[index]['post_id'],
+                                              imageUrl: dataList[index]['images'],
+                                              postMain: dataList[index]['post_content'],
+                                              userNickname: nickname,
+                                              postName: dataList[index]['title'],
+                                              userId: dataList[index]['user_id'],
+                                              timestamp: dataList[index]['timestamp'],
+                                              like: dataList[index]['like'],
+                                            ),
+                                            transitionsBuilder: (c, a1, a2, child) =>
+                                                FadeTransition(opacity: a1, child: child),
+                                          ),
+                                        );
+                                      },
                           ),
                       Divider()
                     ]
