@@ -93,7 +93,6 @@ class _MapSampleState extends State<MapSample> {
         if (items.isEmpty && post_items.isEmpty) {
 
 
-
           querySnapshotPost = await _firestore
               .collection('posts')
               .where('is_visible', isEqualTo: true)
@@ -303,7 +302,7 @@ class _MapSampleState extends State<MapSample> {
 
   Future<void> _fetchPostItems() async {
     List<Map<String, String>> postItems = [];
-    QuerySnapshot querySnapshot = await _firestore.collection('posts').get();
+    QuerySnapshot querySnapshot = await _firestore.collection('posts').where('is_visible', isEqualTo: true).get();
 
     querySnapshot.docs.forEach((doc) {
       postItems.add({
@@ -363,7 +362,6 @@ class _MapSampleState extends State<MapSample> {
 
 
       bool isDuplicate = false;
-      bool isVisible = false;
 
       for (var markerData in markerDataList) {
 
@@ -381,9 +379,6 @@ class _MapSampleState extends State<MapSample> {
       }
     }
 
-    for (var markerData in markerDataList) {
-      markerData.dataList.removeWhere((item) => item['is_visible'] == true);
-    }
 
 
     // 마커 생성
@@ -406,7 +401,6 @@ class _MapSampleState extends State<MapSample> {
       String longitude = data['locationDataY']!;
       String title = data['addressJibun']!;
       String description = data['incidentTitle']!;
-      String incidenteTypeCd = data['incidenteTypeCd']!;
       int i = markers.length + 1;
 
       Marker marker = Marker(
