@@ -361,6 +361,7 @@ class _MapSampleState extends State<MapSample> {
                                 title: Text("  "+ dataList[index]['title']),
                                       onTap: () async {
                                         final String nickname = await getNickname(dataList[index]['user_id']);
+                                        if(!mounted) return;
                                         Navigator.push(
                                           context,
                                           PageRouteBuilder(
