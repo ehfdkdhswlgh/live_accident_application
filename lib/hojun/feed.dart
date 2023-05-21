@@ -18,6 +18,7 @@ class _FeedState extends State<Feed> {
   bool _hasMoreData = true;
   var scroll = ScrollController();
   List<Post> posts = [];
+  var post2;
 
   @override
   void initState() {
@@ -115,20 +116,19 @@ class _FeedState extends State<Feed> {
       return;
     }//
     final newPosts = await Future.wait(querySnapshot.docs.map((doc) async {
-      final postId = doc.get('post_id').toString();
-      final imageLinks = doc.get('images').toString();
-      final postMain = doc.get('post_content').toString();
-      final userId = doc.get('user_id').toString();
-      final postName = doc.get('title').toString();
-      final timestamp = doc.get('timestamp').toString();
-      var like = doc.get('like');
-      String userNickname = '';
+      final _postId = doc.get('post_id').toString();
+      final _imageLinks = doc.get('images').toString();
+      final _postMain = doc.get('post_content').toString();
+      final _userId = doc.get('user_id').toString();
+      final _postName = doc.get('title').toString();
+      final _timestamp = doc.get('timestamp').toString();
+      var _like = doc.get('like');
+      String _userNickname = '';
       try {
-        final nickname = await getNickname(userId);
-        userNickname = nickname;
-      } catch (error) {
-      }
-      return Post(postId: postId, imageLinks: imageLinks, postMain: postMain, userId: userId, userNickname: userNickname, postName: postName, timestamp: timestamp, like: like);
+        final _nickname = await getNickname(_userId);
+        _userNickname = _nickname;
+      } catch (error) {}
+      return Post(postId: _postId, imageLinks: _imageLinks, postMain: _postMain, userId: _userId, userNickname: _userNickname, postName: _postName, timestamp: _timestamp, like: _like);
     }).toList());
 
     setState(() {
@@ -144,6 +144,7 @@ class _FeedState extends State<Feed> {
     final userNickname = userquery.docs.first.get('name').toString();
     return userNickname;
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -162,6 +163,7 @@ class _FeedState extends State<Feed> {
   }
 }
 
+//posts테이블 확장 될 때마다 유지보수 할 것
 class Post {
   final String postId;
   final String imageLinks;

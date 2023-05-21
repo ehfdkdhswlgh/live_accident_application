@@ -6,7 +6,7 @@ class Store extends ChangeNotifier{
   var commentNum = 10;
 
   //제보글 업로드 할 때 타입
-  var postType = 0;
+  var postType = 1;
 
   //제보글 조회에서 선택된 태그
   var selectedPostType = 0;
@@ -39,16 +39,5 @@ class Store extends ChangeNotifier{
     this.selectedPostOrder = selectedPostOrder;
     notifyListeners();
   }
-
-  // liked(){
-  //   if(likeState) {
-  //     likeNum--;
-  //     likeState = false;
-  //   } else {
-  //     likeNum++;
-  //     likeState = true;
-  //   }
-  //   notifyListeners();
-  // }
 
 }

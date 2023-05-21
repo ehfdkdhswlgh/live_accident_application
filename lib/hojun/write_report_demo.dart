@@ -36,7 +36,6 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     super.initState();
     getCurrentLocation();
 
-
   }
   int _selectedIndex = 0;
   final List<String> _reportTypes = ['제보하기', '긴급제보'];
@@ -49,6 +48,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
 
 
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +108,6 @@ class _ReportScreenState extends State<ReportWriteScreen> {
 
   Widget _buildContainer(int index, BuildContext context){
     if(index == 0){
-
       return SingleChildScrollView(
           child : Container(
             child: Column(
@@ -568,17 +567,13 @@ class _ReportScreenState extends State<ReportWriteScreen> {
 
 class MyButton extends StatefulWidget {
   const MyButton({Key? key}) : super(key: key);
-
   @override
   _MyButtonState createState() => _MyButtonState();
 }
 
-
-
 class _MyButtonState extends State<MyButton> {
-
-
   String? _selectedItem;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -634,8 +629,6 @@ class _MyButtonState extends State<MyButton> {
       ),
     );
   }
-
-
 }
 
 

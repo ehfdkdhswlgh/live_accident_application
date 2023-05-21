@@ -11,6 +11,8 @@ import 'tags.dart' as tag;
 import '../haechan/profile.dart' as profile;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../hojun/feed.dart';
+
 
 class MapSample extends StatefulWidget {
   const MapSample({super.key});
@@ -27,6 +29,7 @@ class _MapSampleState extends State<MapSample> {
 
   List<Map<String, String>> items = [];
   List<Map<String, String>> post_items = [];
+  List<Post> posts = [];
   List<String> _acc = ['전체', '사고', '공사', '행사', '통제', '기타'];
   String tagType = "";
 
@@ -199,8 +202,8 @@ class _MapSampleState extends State<MapSample> {
 
   Future<void> _fetchPostItems() async {
     List<Map<String, String>> postItems = [];
-
     QuerySnapshot querySnapshot = await _firestore.collection('posts').get();
+
     querySnapshot.docs.forEach((doc) {
       postItems.add({
         'address_name': doc['address_name'],
@@ -214,17 +217,44 @@ class _MapSampleState extends State<MapSample> {
         'user_id': doc['user_id'],
         'latitude': doc['latitude'].toString(),
         'longitude': doc['longitude'].toString(),
-        // 'like': doc['like'].toString()
+        'like': doc['like'].toString()
       });
     });
+    final newPosts = await Future.wait(querySnapshot.docs.map((doc) async {
+      final _postId = doc.get('post_id').toString();
+      final _imageLinks = doc.get('images').toString();
+      final _postMain = doc.get('post_content').toString();
+      final _userId = doc.get('user_id').toString();
+      final _postName = doc.get('title').toString();
+      final _timestamp = doc.get('timestamp').toString();
+      var _like = doc.get('like');
+      String _userNickname = '';
+      try {
+        final _nickname = await getNickname(_userId);
+        _userNickname = _nickname;
+      } catch (error) {}
+      return Post(postId: _postId, imageLinks: _imageLinks, postMain: _postMain, userId: _userId, userNickname: _userNickname, postName: _postName, timestamp: _timestamp, like: _like);
+    }).toList());
 
     setState(() {
       post_items = postItems;
+      posts.addAll(newPosts);
     });
 
 
     print(post_items.length);
+    print(posts.length);
   }
+
+  Future<String> getNickname(String user_id) async{
+    QuerySnapshot userquery = await _firestore
+        .collection('user')
+        .where('uid', isEqualTo: user_id)
+        .get();
+    final userNickname = userquery.docs.first.get('name').toString();
+    return userNickname;
+  }
+
 
   Future<void> getCurrentLocation() async {
     Position position = await Geolocator.getCurrentPosition(

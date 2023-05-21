@@ -112,12 +112,6 @@ class _MainPostState extends State<MainPost> {
                   MaterialPageRoute(
                       builder: (context) => ProfileScreen(widget.postContent.userId)),
                 );
-                // // '제보하기' 버튼 클릭 시 실행될 코드
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(
-                //     content: Text('프로필 누름2'),
-                //   ),
-                // );
               },
             ),
           ),
