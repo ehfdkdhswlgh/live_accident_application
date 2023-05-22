@@ -93,9 +93,25 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(),News()]
-      [_currentIndex],
-        bottomNavigationBar: UserImfomation.checker ? BottomNavigationBar(
+      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(),News()][_currentIndex],
+      floatingActionButton: UserImfomation.athority == 'manager'
+          ? FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReportManagementScreen(),
+                ),
+              );
+            },
+            backgroundColor: Colors.red,
+            child: Icon(
+              Icons.notifications_active,
+              color: Colors.white,
+            ),
+          )
+        : null,
+      bottomNavigationBar: UserImfomation.checker ? BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
