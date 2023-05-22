@@ -483,10 +483,11 @@ class _MapSampleState extends State<MapSample> {
                       child: TextButton(
                         child: Text('닫기'),
                         onPressed: () {
-                          Navigator.of(context).pop();
+                          Navigator.pop(buildContext);
                         },
                       ),
                     )),
+
                   ],
                 ),
               ),
