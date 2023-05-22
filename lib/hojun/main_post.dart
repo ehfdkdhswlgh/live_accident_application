@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
@@ -351,11 +352,15 @@ class _ThumbnailState extends State<Thumbnail> {
             builder: (context) {
               return SizedBox(
                 width: MediaQuery.of(context).size.width,
-                child: Image(
+                child: CachedNetworkImage(
+                  imageUrl: imgLink,
+                  placeholder: (context, url) => Center(child: SizedBox(
+                    width: 20.0,
+                    height: 20.0,
+                    child: CircularProgressIndicator(),
+                  )),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                   fit: BoxFit.fill,
-                  image: NetworkImage(
-                    imgLink,
-                  ),
                 ),
               );
             },
@@ -375,6 +380,8 @@ class _ThumbnailState extends State<Thumbnail> {
       ),
     );
   }
+
+
 
   Widget sliderIndicator() {
     return Align(
