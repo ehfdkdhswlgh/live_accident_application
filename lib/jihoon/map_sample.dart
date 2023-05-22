@@ -418,72 +418,104 @@ class _MapSampleState extends State<MapSample> {
   }
 
   void _showListDialog(List<Map<String, dynamic>> dataList) {
-    showDialog(
+    final dialogHeight = MediaQuery.of(context).size.height * 0.95;
+
+    showGeneralDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("제보현황"),
-          content: Container(
-            width: 800, // 적절한 너비 설정
-            height: 600, // 적절한 높이 설정
-            child: dataList.isNotEmpty
-                ? ListView.builder(
-              itemCount: dataList.length,
-              itemBuilder: (context, index) {
-                return Column(
-                    children: [
-                      Divider(),
-                      ListTile(
+      pageBuilder: (BuildContext buildContext, Animation<double> animation,
+          Animation<double> secondaryAnimation) {
+        return SafeArea(
+          child: Dialog(
+            insetPadding: EdgeInsets.zero, // remove padding
+            child: Container(
+              height: dialogHeight,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SizedBox(height: 50, child: Center(child: Text("제보현황"))),
+                    Container(
+                      height: dialogHeight - 100, // Subtract the height occupied by the title and the button
+                      child: dataList.isNotEmpty
+                          ? ListView.builder(
+                        itemCount: dataList.length,
+                        itemBuilder: (context, index) {
+                          return Column(
+                            children: [
+                              Divider(),
+                              ListTile(
                                 leading: Column(
-                                    children: [
-                                      Icon(Icons.favorite),
-                                      SizedBox(width: 2),// 아이콘과 개수 사이의 간격 조절
-                                      Text(dataList[index]['like']), // 하트 개수를 나타내는 텍스트
-
-                                    ],),
+                                  children: [
+                                    Icon(Icons.favorite),
+                                    SizedBox(width: 2),
+                                    Text(dataList[index]['like']),
+                                  ],),
                                 title: Text("  "+ dataList[index]['title']),
-                                      onTap: () async {
-                                        final String nickname = await getNickname(dataList[index]['user_id']);
-                                        if(!mounted) return;
-                                        Navigator.push(
-                                          context,
-                                          PageRouteBuilder(
-                                            pageBuilder: (c, a1, a2) => PostDocument(
-                                              postId: dataList[index]['post_id'],
-                                              imageUrl: dataList[index]['images'],
-                                              postMain: dataList[index]['post_content'],
-                                              userNickname: nickname,
-                                              postName: dataList[index]['title'],
-                                              userId: dataList[index]['user_id'],
-                                              timestamp: dataList[index]['timestamp'],
-                                              like: dataList[index]['like'],
-                                            ),
-                                            transitionsBuilder: (c, a1, a2, child) =>
-                                                FadeTransition(opacity: a1, child: child),
-                                          ),
-                                        );
-                                      },
-                          ),
-                      Divider()
-                    ]
-
-                );
-              },
-            )
-                : Text('해당 위치에 데이터가 없습니다.'),
-          ),
-          actions: [
-            TextButton(
-              child: Text('닫기'),
-              onPressed: () {
-                Navigator.of(context).pop(); // 다이얼로그 닫기
-              },
+                                onTap: () async {
+                                  final String nickname = await getNickname(dataList[index]['user_id']);
+                                  if(!mounted) return;
+                                  Navigator.push(
+                                    context,
+                                    PageRouteBuilder(
+                                      pageBuilder: (c, a1, a2) => PostDocument(
+                                        postId: dataList[index]['post_id'],
+                                        imageUrl: dataList[index]['images'],
+                                        postMain: dataList[index]['post_content'],
+                                        userNickname: nickname,
+                                        postName: dataList[index]['title'],
+                                        userId: dataList[index]['user_id'],
+                                        timestamp: dataList[index]['timestamp'],
+                                        like: dataList[index]['like'],
+                                      ),
+                                      transitionsBuilder: (c, a1, a2, child) =>
+                                          FadeTransition(opacity: a1, child: child),
+                                    ),
+                                  );
+                                },
+                              ),
+                              Divider()
+                            ],
+                          );
+                        },
+                      )
+                          : Text('해당 위치에 데이터가 없습니다.'),
+                    ),
+                    SizedBox(height: 50, child: Center(
+                      child: TextButton(
+                        child: Text('닫기'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    )),
+                  ],
+                ),
+              ),
             ),
-          ],
+          ),
+        );
+      },
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black45,
+      transitionDuration: const Duration(milliseconds: 500),
+      transitionBuilder: (BuildContext context, Animation<double> animation,
+          Animation<double> secondaryAnimation, Widget child) {
+        final begin = Offset(0.0, 1.0);
+        final end = Offset.zero;
+        final curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
         );
       },
     );
   }
+
+
+
 
 
 
