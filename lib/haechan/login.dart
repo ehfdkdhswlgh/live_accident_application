@@ -88,6 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
           UserImfomation.followCount = documentSnapshot.get('follow');
           UserImfomation.followingCount = documentSnapshot.get('following');
           UserImfomation.postCount = documentSnapshot.get('post_count');
+          UserImfomation.athority = documentSnapshot.get('authority');
         }
 
         // print("UID : " + uid+ "\n" );

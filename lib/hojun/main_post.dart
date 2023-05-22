@@ -1,16 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'store.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'post_main_document.dart';
 import '../jihwan/post_report.dart';
 import '../haechan/profile.dart';
-import '../UserImfomation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'modal.dart';
 
 class MainPost extends StatefulWidget {
   const MainPost({Key? key, required this.postContent}) : super(key: key);
@@ -210,13 +208,6 @@ class _MainPostState extends State<MainPost> {
   }
 }
 
-
-
-
-
-
-
-
 class Profile extends StatelessWidget {
   Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId, required this.like, }) : super(key: key);
   final userNickname;
@@ -253,42 +244,7 @@ class Profile extends StatelessWidget {
                 showModalBottomSheet(
                   context: context,
                   builder: (BuildContext context) {
-                    return Container(
-                      height: 200,
-                      child: ListView(
-                        children: [
-                          ListTile(
-                            title: Text('신고하기'),
-                            onTap: () {
-                              print("다음 게시글을 신고합니다. : " + postName + " pid : " + postId);
-                              print("UID? : " + userId + userNickname);
-                              Navigator.pop(context); // Bottom sheet 닫기
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ReportScreen(
-                                    name: postName,
-                                    post_id: postId,
-                                    user_id: userId,
-                                    user_name: userNickname,
-                                  ),
-                                ),
-                              );
-
-                            },
-                          )
-                          ,
-                          ListTile(
-                            title: Text('항목 2'),
-                            onTap: () {
-                              // 선택된 항목에 대한 처리 로직
-                              Navigator.pop(context); // Bottom sheet 닫기
-                            },
-                          ),
-                          // 추가적인 항목w들...
-                        ],
-                      ),
-                    );
+                    return Modal(postId: postId, postName: postName, userId: userId, userNickname: userNickname,);
                   },
                 );
               },
