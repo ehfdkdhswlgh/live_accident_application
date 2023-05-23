@@ -417,7 +417,7 @@ class _MapSampleState extends State<MapSample> {
                 content: Text(description),
                 actions: <Widget>[
                   TextButton(
-                    child: Text("Close"),
+                    child: Text("닫기"),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
