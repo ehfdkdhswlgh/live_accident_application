@@ -23,9 +23,9 @@ class Store extends ChangeNotifier{
       postType = 2;
     } else if (text=="행사/시위") {
       postType = 3;
-    } else if (text=='통제') {
-      postType = 4;
     } else if (text=='기타') {
+      postType = 4;
+    } else if (text=='통제') {
       postType = 5;
     }
     notifyListeners();

@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'main_post.dart';
 
 class Feed extends StatefulWidget {
-  const Feed({Key? key, required this.selectedType}) : super(key: key);
+  const Feed({Key? key, required this.selectedType, required this.selectedOrder}) : super(key: key);
   final selectedType;
+  final selectedOrder;
   @override
   State<Feed> createState() => _FeedState();
 }
@@ -43,6 +44,14 @@ class _FeedState extends State<Feed> {
       });
       _fetchData();
     }
+    if (widget.selectedOrder != oldWidget.selectedOrder) {
+      _isLoading = false;
+      _hasMoreData = true;
+      setState(() {
+        posts = [];
+      });
+      _fetchData();
+    }
   }
 
 
@@ -56,56 +65,173 @@ class _FeedState extends State<Feed> {
 
     QuerySnapshot querySnapshot;
     if (context.read<Store>().selectedPostType == 0) {
-      if (posts.isEmpty) {
-        querySnapshot = await _db
-            .collection('posts')
-            .where('is_visible', isEqualTo: true)
-            .orderBy('timestamp', descending: true)
-            .limit(5)
-            .get();
+      if(context.read<Store>().selectedPostOrder == 0) {
+        if (posts.isEmpty) {
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .orderBy('timestamp', descending: true)
+              .limit(5)
+              .get();
+        } else {
+          final lastPostId = posts.last.postId;
+          final lastDocSnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .orderBy('timestamp', descending: true)
+              .where('post_id', isEqualTo: lastPostId)
+              .get()
+              .then((querySnapshot) => querySnapshot.docs.first);
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .orderBy('timestamp', descending: true)
+              .startAfterDocument(lastDocSnapshot)
+              .limit(5)
+              .get();
+        }
+      } else if(context.read<Store>().selectedPostOrder == 1) {
+        if (posts.isEmpty) {
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .orderBy('timestamp', descending: true)
+              .limit(5)
+              .get();
+        } else {
+          final lastPostId = posts.last.postId;
+          final lastDocSnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .orderBy('timestamp', descending: true)
+              .where('post_id', isEqualTo: lastPostId)
+              .get()
+              .then((querySnapshot) => querySnapshot.docs.first);
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .orderBy('timestamp', descending: true)
+              .startAfterDocument(lastDocSnapshot)
+              .limit(5)
+              .get();
+        }
+      } else if(context.read<Store>().selectedPostOrder == 2){
+        if (posts.isEmpty) {
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .orderBy('like', descending: true)
+              .limit(5)
+              .get();
+        } else {
+          final lastPostId = posts.last.postId;
+          final lastDocSnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .orderBy('like', descending: true)
+              .where('post_id', isEqualTo: lastPostId)
+              .get()
+              .then((querySnapshot) => querySnapshot.docs.first);
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .orderBy('like', descending: true)
+              .startAfterDocument(lastDocSnapshot)
+              .limit(5)
+              .get();
+        }
       } else {
-        final lastPostId = posts.last.postId;
-        final lastDocSnapshot = await _db
-            .collection('posts')
-            .where('is_visible', isEqualTo: true)
-            .where('post_id', isEqualTo: lastPostId)
-            .get()
-            .then((querySnapshot) => querySnapshot.docs.first);
-        querySnapshot = await _db
-            .collection('posts')
-            .where('is_visible', isEqualTo: true)
-            .orderBy('timestamp', descending: true)
-            .startAfterDocument(lastDocSnapshot)
-            .limit(5)
-            .get();
+        querySnapshot = await _db.collection('posts').get();
       }
     } else {
-      if (posts.isEmpty) {
-        querySnapshot = await _db
-            .collection('posts')
-            .where('is_visible', isEqualTo: true)
-            .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
-            .orderBy('timestamp', descending: true)
-            .limit(5)
-            .get();
-      } else {
-        final lastPostId = posts.last.postId;
-        final lastDocSnapshot = await _db
-            .collection('posts')
-            .where('is_visible', isEqualTo: true)
-            .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
-            .where('post_id', isEqualTo: lastPostId)
-            .get()
-            .then((querySnapshot) => querySnapshot.docs.first);
-        querySnapshot = await _db
-            .collection('posts')
-            .where('is_visible', isEqualTo: true)
-            .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
-            .orderBy('timestamp', descending: true)
-            .startAfterDocument(lastDocSnapshot)
-            .limit(5)
-            .get();
+      if(context.read<Store>().selectedPostOrder == 0){
+        if (posts.isEmpty) {
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .orderBy('timestamp', descending: true)
+              .limit(5)
+              .get();
+        } else {
+          final lastPostId = posts.last.postId;
+          final lastDocSnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .orderBy('timestamp', descending: true)
+              .where('post_id', isEqualTo: lastPostId)
+              .get()
+              .then((querySnapshot) => querySnapshot.docs.first);
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .orderBy('timestamp', descending: true)
+              .startAfterDocument(lastDocSnapshot)
+              .limit(5)
+              .get();
+        }
       }
+      else if(context.read<Store>().selectedPostOrder == 1){
+        if (posts.isEmpty) {
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .orderBy('timestamp', descending: true)
+              .limit(5)
+              .get();
+        } else {
+          final lastPostId = posts.last.postId;
+          final lastDocSnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .orderBy('timestamp', descending: true)
+              .where('post_id', isEqualTo: lastPostId)
+              .get()
+              .then((querySnapshot) => querySnapshot.docs.first);
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .orderBy('timestamp', descending: true)
+              .startAfterDocument(lastDocSnapshot)
+              .limit(5)
+              .get();
+        }
+      }
+      else if(context.read<Store>().selectedPostOrder == 2){
+        if (posts.isEmpty) {
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .orderBy('like', descending: true)
+              .limit(5)
+              .get();
+        } else {
+          final lastPostId = posts.last.postId;
+          final lastDocSnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .orderBy('like', descending: true)
+              .where('post_id', isEqualTo: lastPostId)
+              .get()
+              .then((querySnapshot) => querySnapshot.docs.first);
+          querySnapshot = await _db
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .orderBy('like', descending: true)
+              .startAfterDocument(lastDocSnapshot)
+              .limit(5)
+              .get();
+        }
+      }
+      else {querySnapshot = await _db.collection('posts').get();}
     }
 
     if (querySnapshot.docs.isEmpty) {
@@ -138,9 +264,9 @@ class _FeedState extends State<Feed> {
   }
   Future<String> getNickname(String user_id) async{
     QuerySnapshot userquery = await _db
-      .collection('user')
-      .where('uid', isEqualTo: user_id)
-      .get();
+        .collection('user')
+        .where('uid', isEqualTo: user_id)
+        .get();
     final userNickname = userquery.docs.first.get('name').toString();
     return userNickname;
   }

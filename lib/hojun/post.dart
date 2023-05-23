@@ -16,10 +16,10 @@ class _PostState extends State<Post> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
-        Tags(),
-        Expanded(child: Feed(selectedType: context.watch<Store>().selectedPostType))
-      ]
+        children: [
+          Tags(),
+          Expanded(child: Feed(selectedType: context.watch<Store>().selectedPostType, selectedOrder: context.watch<Store>().selectedPostOrder,))
+        ]
     );
   }
 }
