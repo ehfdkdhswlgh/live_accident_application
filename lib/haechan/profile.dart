@@ -184,6 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       QuerySnapshot querySnapshot = await _firestore
           .collection('posts')
           .where('user_id', isEqualTo: widget.inputUid)
+          .where('is_visible', isEqualTo: true)
           .orderBy('timestamp', descending: true)
           .get();
 
