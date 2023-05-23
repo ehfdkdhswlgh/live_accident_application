@@ -59,6 +59,7 @@ class _TagsState extends State<Tags> {
             width: (store.selectedPostType == index) ? 2.0 : 0.5,
             color: (store.selectedPostType == index) ? Colors.red : Colors.grey, // 선택 여부에 따른 색상 설정,
           ),
+
           backgroundColor: (store.selectedPostType == index) ? Colors.red : Colors.grey,
         ),
       ),
