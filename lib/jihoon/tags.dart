@@ -54,18 +54,20 @@ class _TagsState extends State<Tags> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                accTags(_acc[0], 0),
-                accTags(_acc[1], 1),
-                accTags(_acc[2], 2),
-                accTags(_acc[3], 3),
-                accTags(_acc[4], 4),
-                accTags(_acc[5], 5),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  accTags(_acc[0], 0),
+                  accTags(_acc[1], 1),
+                  accTags(_acc[2], 2),
+                  accTags(_acc[3], 3),
+                  accTags(_acc[4], 4),
+                  accTags(_acc[5], 5),
+                ],
+              ),
             ),
-
             Divider(thickness: 2.0),
           ],
         )

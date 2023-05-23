@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../UserImfomation.dart';
 import 'account_management.dart';
 import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../hojun/post_main_document.dart';
 
 
 String nickname = '';
@@ -9,6 +11,11 @@ String uid = '';
 String followingCount = '';
 String followCount = '';
 String postCount = '';
+
+// String buttonText = '';
+bool followChecer = false;
+
+// List<Map<String, dynamic>> dataList;
 
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 class ProfileScreen extends StatefulWidget {
@@ -24,58 +31,196 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Widget followBtn = SizedBox.shrink();
+  Widget settingBtn = SizedBox.shrink();
+  bool followChecker = false;
+  // if(UserImfomation.uid == widget.inputUid){
+  // followBtn = ElevatedButton(
+  //
+  // child: Text('구독하기'),
+  // onPressed: () {},
+  // );
+  // }
 
   // String uid = UserImfomation.uid;
   // String followingCount = UserImfomation.followingCount.toString();
   // String followCount = UserImfomation.followCount.toString();
   // String postCount = UserImfomation.postCount.toString();
 
-  List<String> postImageUrls = []; // 게시물 이미지 URL을 저장할 리스트
 
+  List<Map<String, dynamic>> dataList = [];
+  List<String> postImageUrls = []; // 게시물 이미지 URL을 저장할 리스트
+  Map<String, dynamic>? postData;
   @override
   void initState() {
     super.initState();
+    //프로필 사진 가져오기 ===================================================================================================
     getPosts(); // 게시물 이미지를 가져옴
     if (UserImfomation.uid == widget.inputUid) {
+      // 구독하기 버튼을 위젯으로 만들어서 여기다가?
       nickname = UserImfomation.nickname;
       uid = UserImfomation.uid;
       followingCount = UserImfomation.followingCount.toString();
       followCount = UserImfomation.followCount.toString();
       postCount = UserImfomation.postCount.toString();
+      followBtn = SizedBox.shrink();
+      settingBtn = IconButton(
+        icon: Icon(Icons.settings),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AccountManagementScreen()),
+          );
+        },
+      );
     } else {
       getUserInformation();
+      // 'follow' 컬렉션에서 해당 정보 가져오기
+      FirebaseFirestore.instance
+          .collection('follow')
+          .where('follow', isEqualTo: UserImfomation.uid)
+          .where('follower', isEqualTo: widget.inputUid)
+          .get()
+          .then((querySnapshot) {
+        if (querySnapshot.size > 0) {
+          // follow == follower이면 구독중으로 설정
+          setState(() {
+            followBtn = ElevatedButton(
+              child: Text('구독중'),
+              onPressed: () {handleUnsubscribe();},
+            );
+          });
+        } else {
+          // follow != follower이면 구독하기로 설정
+          setState(() {
+            followBtn = ElevatedButton(
+              child: Text('구독하기'),
+              onPressed: () {handleSubscribe();},
+            );
+          });
+        }
+      });
     }
     print('hello');
+  }
+
+// 구독하기 버튼을 눌렀을 때
+  void handleSubscribe() {
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      // 해당 uid에 해당하는 문서 가져오기
+      DocumentSnapshot userSnapshot = await transaction.get(
+          FirebaseFirestore.instance.collection('user').doc(widget.inputUid)
+      );
+      // 문서가 존재하면 'follow' 필드 +1, 현재 유저의 'following' 필드 +1 업데이트
+      if (userSnapshot.exists) {
+        int followCount = userSnapshot.data() != null ? (userSnapshot.data()! as Map<String, dynamic>)['follow'] ?? 0 : 0;
+        transaction.update(userSnapshot.reference, {'follow': followCount + 1});
+      }
+      int followingCount = UserImfomation.followingCount ?? 0;
+      setState(() {
+        UserImfomation.followingCount++;
+      });
+      transaction.update(FirebaseFirestore.instance.collection('user').doc(UserImfomation.uid), {'following': followingCount + 1});
+      // transaction.update(FirebaseFirestore.instance.collection('user').doc(widget.inputUid), {'follow': followingCount + 1});
+
+      // 'follow' 컬렉션에 구독 정보 추가
+      transaction.set(FirebaseFirestore.instance.collection('follow').doc(), {
+        'follow': UserImfomation.uid,
+        'follower': widget.inputUid,
+      });
+    }).then((_) {
+      setState(() {
+        followBtn = ElevatedButton(
+          child: Text('구독중'),
+          onPressed: handleUnsubscribe, // 구독중 버튼으로 변경되면 handleUnsubscribe 함수 실행
+        );
+        followCount = (int.parse(followCount) + 1).toString();
+      });
+    }).catchError((error) {
+      // 업데이트 실패 시 에러 처리
+      print('구독하기 실패: $error');
+    });
+    // UserImfomation.followingCount++;
+  }
+
+// 구독중 버튼을 눌렀을 때
+  void handleUnsubscribe() {
+    FirebaseFirestore.instance.runTransaction((transaction) async {
+      // 해당 uid에 해당하는 문서 가져오기
+      DocumentSnapshot userSnapshot = await transaction.get(
+          FirebaseFirestore.instance.collection('user').doc(widget.inputUid)
+      );
+      // 문서가 존재하면 'follow' 필드 -1, 현재 유저의 'following' 필드 -1 업데이트
+      if (userSnapshot.exists) {
+        int followCount = userSnapshot.data() != null ? (userSnapshot.data()! as Map<String, dynamic>)['follow'] ?? 0 : 0;
+        transaction.update(userSnapshot.reference, {'follow': followCount - 1});
+      }
+      int followingCount = UserImfomation.followingCount ?? 0;
+
+      setState(() {
+        UserImfomation.followingCount--;
+      });
+      transaction.update(FirebaseFirestore.instance.collection('user').doc(UserImfomation.uid), {'following': followingCount - 1});
+      // transaction.update(FirebaseFirestore.instance.collection('user').doc(widget.inputUid), {'follow': followingCount - 1});
+
+      // 'follow' 컬렉션에서 구독 정보 삭제
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('follow')
+          .where('follow', isEqualTo: UserImfomation.uid)
+          .where('follower', isEqualTo: widget.inputUid)
+          .get();
+
+      // QuerySnapshot querySnapshot = await transaction.get(FirebaseFirestore.instance.collection('follow').where('follow', isEqualTo: UserImfomation.uid).where('follower', isEqualTo: widget.inputUid));
+      querySnapshot.docs.forEach((doc) {
+        transaction.delete(doc.reference);
+      });
+    }).then((_) {
+      setState(() {
+        followBtn = ElevatedButton(
+          child: Text('구독하기'),
+          onPressed: handleSubscribe, // 구독하기 버튼으로 변경되면 handleSubscribe 함수 실행
+        );
+        followCount = (int.parse(followCount) - 1).toString();
+      });
+    }).catchError((error) {
+      // 업데이트 실패 시 에러 처리
+      print('구독 취소 실패: $error');
+    });
+    // UserImfomation.followingCount--;
   }
 
   getPosts() async {
     try {
       QuerySnapshot querySnapshot = await _firestore
           .collection('posts')
-      // .where('user_id', isEqualTo: '5n0WBbvJgNO0bqkIgnM6febvPqD3')
           .where('user_id', isEqualTo: widget.inputUid)
-        .orderBy('timestamp', descending: true) // timestamp를 내림차순으로 정렬
+          .where('is_visible', isEqualTo: true)
+          .orderBy('timestamp', descending: true)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
+        List<Map<String, dynamic>> dataList = []; // 데이터를 저장할 리스트 생성
         List<String> urls = []; // 임시 리스트
 
         querySnapshot.docs.forEach((doc) {
-          // 각 게시물의 이미지 URL을 가져와서 리스트에 추가
-          if (doc.get('images') == '') {
-            urls.add(
-                'https://firebasestorage.googleapis.com/v0/b/live-accident.appspot.com/o/images%2F게시글로 이동.PNG?alt=media&token=e6a8edf5-6f18-4f88-a038-7fa0a36e59d4');
-          } else
-            urls.add(doc.get('images'));
+          Map<String, dynamic> postData = doc.data() as Map<String, dynamic>; // 문서의 데이터를 가져옴
 
-          // print(doc.get('images'));
+          if (postData['images'] == '') {
+            urls.add('https://firebasestorage.googleapis.com/v0/b/live-accident.appspot.com/o/images%2F게시글로 이동.PNG?alt=media&token=e6a8edf5-6f18-4f88-a038-7fa0a36e59d4');
+          } else {
+            urls.add(postData['images']);
+          }
+
+          dataList.add(postData); // 데이터를 리스트에 추가
         });
 
         setState(() {
+          this.dataList = dataList; // 데이터 리스트를 업데이트
           postImageUrls = urls; // 게시물 이미지 URL을 저장한 리스트를 업데이트
         });
       }
-      print('length : ' + postImageUrls.length.toString());
+
+      print('length: ${postImageUrls.length}');
     } catch (e) {
       print('Error: $e');
     }
@@ -136,6 +281,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
 
+  Future<String> getNickname(String user_id) async{
+    QuerySnapshot userquery = await _firestore
+        .collection('user')
+        .where('uid', isEqualTo: user_id)
+        .get();
+    final userNickname = userquery.docs.first.get('name').toString();
+    return userNickname;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,15 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: Text("회원 정보"),
         actions: [
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AccountManagementScreen()),
-              );
-            },
-          ),
+          settingBtn
         ],
       ),
       body: Padding(
@@ -194,17 +339,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             '팔로잉: ' + followingCount + '  ', // 팔로잉 수
                             style: TextStyle(fontSize: 16.0),
                           ),
-                          ElevatedButton(
-                            onPressed: () {
-                              // 구독하기 버튼 동작 구현
-                              // ...
-                            },
-                            child: Text("구독하기"),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                              textStyle: TextStyle(fontSize: 12.0), // 버튼 텍스트 스타일
-                            ),
-                          ),
+                          followBtn,
+                          // ElevatedButton(
+                          //   onPressed: () {
+                          //     // 버튼 누르면 user 테이블도 update
+                          //     // 다른 프로필 누르면 버튼도 바뀌게
+                          //     // 내 프로필은 버튼 안보이게
+                          //     // 함수 만드는게 좋을 듯 ===================================================================================================
+                          //
+                          //     if(followChecer = true){
+                          //       buttonText = '구독하기';
+                          //       followChecer = false;
+                          //       //db 반영
+                          //     }else {
+                          //       buttonText = '구독중';
+                          //       followChecer = true;
+                          //       // db 반영
+                          //     }
+                          //     // 구독하기 버튼 동작 구현
+                          //   },
+                          //   child: Text(buttonText),
+                          //   style: ElevatedButton.styleFrom(
+                          //     padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                          //     textStyle: TextStyle(fontSize: 12.0), // 버튼 텍스트 스타일
+                          //   ),
+                          // ),
                         ],
                       ),
                     ],
@@ -224,9 +383,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 itemCount: postImageUrls.length, // 게시물 수
                 itemBuilder: (context, index) {
                   return GestureDetector(
-                      onTap: () {
-                    navigateToPostDetail(); // 게시물 상세 페이지로 이동하는 함수 호출
-                  },
+                    onTap: () async {
+                      final String nickname = await getNickname(widget.inputUid);
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (c, a1, a2) => PostDocument(
+                            postId: dataList[index]['post_id'],
+                            imageUrl: dataList[index]['images'],
+                            postMain: dataList[index]['post_content'],
+                            userNickname: nickname,
+                            postName: dataList[index]['title'],
+                            userId: dataList[index]['user_id'],
+                            timestamp: dataList[index]['timestamp'],
+                            like: dataList[index]['like'],
+                          ),
+                          transitionsBuilder: (c, a1, a2, child) =>
+                              FadeTransition(opacity: a1, child: child),
+                        ),
+                      );
+                    },
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),

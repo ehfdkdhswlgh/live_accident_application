@@ -96,7 +96,7 @@ class _TagsState extends State<Tags> {
 
   @override
   Widget build(BuildContext context) {
-    final double msgWindow = 100; // MSG_WINDOW 값에 해당하는 값으로 수정해주세요
+    final double msgWindow = 50; // MSG_WINDOW 값에 해당하는 값으로 수정해주세요
 
     return Container(
       margin: EdgeInsets.all(5),
