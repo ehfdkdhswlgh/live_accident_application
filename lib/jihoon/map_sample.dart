@@ -407,16 +407,33 @@ class _MapSampleState extends State<MapSample> {
       Marker marker = Marker(
         markerId: MarkerId(i.toString()),
         position: LatLng(double.parse(longitude), double.parse(latitude)),
-        infoWindow: InfoWindow(
-          title: title,
-          snippet: description,
-        ),
-        icon : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue)
+        infoWindow: InfoWindow(title: '', snippet: ''), // 비어있는 InfoWindow
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(title),
+                content: Text(description),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text("Close"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       );
 
       markers.add(marker);
     }
   }
+
 
   void _showListDialog(List<Map<String, dynamic>> dataList) {
     final dialogHeight = MediaQuery.of(context).size.height * 0.95;
