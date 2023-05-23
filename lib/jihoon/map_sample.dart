@@ -541,6 +541,7 @@ class _MapSampleState extends State<MapSample> {
                                         userId: dataList[index]['user_id'],
                                         timestamp: dataList[index]['timestamp'],
                                         like: dataList[index]['like'],
+                                        address: dataList[index]['address_name'],
                                       ),
                                       transitionsBuilder: (c, a1, a2, child) =>
                                           FadeTransition(opacity: a1, child: child),

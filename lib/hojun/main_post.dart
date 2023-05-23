@@ -104,7 +104,7 @@ class _MainPostState extends State<MainPost> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
-              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like,),
+              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like, address: widget.postContent.address,),
               onTap: () {
                 Navigator.push(
                   context,
@@ -148,6 +148,7 @@ class _MainPostState extends State<MainPost> {
                     userId: widget.postContent.userId,
                     timestamp: widget.postContent.timestamp,
                     like: widget.postContent.like,
+                    address: widget.postContent.address,
                   ),
                   transitionsBuilder: (c, a1, a2, child) =>
                       FadeTransition(opacity: a1, child: child),
@@ -184,6 +185,7 @@ class _MainPostState extends State<MainPost> {
                           userId: widget.postContent.userId,
                           timestamp: widget.postContent.timestamp,
                           like: widget.postContent.like,
+                          address: widget.postContent.address,
                         ),
                         transitionsBuilder: (c, a1, a2, child) =>
                             FadeTransition(opacity: a1, child: child),
@@ -209,11 +211,12 @@ class _MainPostState extends State<MainPost> {
 }
 
 class Profile extends StatelessWidget {
-  Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId, required this.like, }) : super(key: key);
+  Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId, required this.like, required this.address}) : super(key: key);
   final userNickname;
   final postId;
   final postName;
   final userId;
+  final address;
   var like;
 
   @override
@@ -232,7 +235,31 @@ class Profile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(userNickname), // 닉네임 위치
-                Text('홍천교'), // 제보 위치
+                Container(
+                  width: 125,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Flexible(
+                          child: RichText(
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2, //출력되는 최대 줄
+                            strutStyle: StrutStyle(fontSize: 10),
+                            text: TextSpan(
+                                text:
+                                address,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  height: 1.4,
+                                  fontSize: 12.0,
+                                  // fontFamily: // 글자 폰트 지정 가능
+                                )
+                            ),
+                          )
+                      )
+                    ],
+                  ),
+                ),
               ],
             ),
           ],

@@ -6,7 +6,7 @@ import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PostDocument extends StatefulWidget {
-  PostDocument({required this.postId, required this.imageUrl, required this.postMain, required this.userNickname, required this.postName, required this.userId, required this.timestamp, required this.like});
+  PostDocument({required this.postId, required this.imageUrl, required this.postMain, required this.userNickname, required this.postName, required this.userId, required this.timestamp, required this.like, required this.address});
   final postId;
   final imageUrl;
   final postMain;
@@ -14,6 +14,7 @@ class PostDocument extends StatefulWidget {
   final postName;
   final userId;
   final timestamp;
+  final address;
   var like;
   @override
   State<PostDocument> createState() => _PostDocumentState();
@@ -28,7 +29,7 @@ class _PostDocumentState extends State<PostDocument> {
     return Scaffold(
       body: ListView(
           children: [
-            Profile(userNickname: widget.userNickname, postId: widget.postId, postName: widget.postName, userId: widget.userId, like: widget.like),
+            Profile(userNickname: widget.userNickname, postId: widget.postId, postName: widget.postName, userId: widget.userId, like: widget.like, address: widget.address,),
             widget.imageUrl.isEmpty
                 ? SizedBox.shrink()
                 : Thumbnail(url: widget.imageUrl),
