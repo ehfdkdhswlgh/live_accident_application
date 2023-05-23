@@ -264,9 +264,9 @@ class _FeedState extends State<Feed> {
   }
   Future<String> getNickname(String user_id) async{
     QuerySnapshot userquery = await _db
-      .collection('user')
-      .where('uid', isEqualTo: user_id)
-      .get();
+        .collection('user')
+        .where('uid', isEqualTo: user_id)
+        .get();
     final userNickname = userquery.docs.first.get('name').toString();
     return userNickname;
   }
