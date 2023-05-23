@@ -402,6 +402,8 @@ class _MapSampleState extends State<MapSample> {
       String longitude = data['locationDataY']!;
       String title = data['addressJibun']!;
       String description = data['incidentTitle']!;
+      String startDate = data['startDate']!;
+      String endDate = data['endDate']!;
       int i = markers.length + 1;
 
       Marker marker = Marker(
@@ -412,17 +414,54 @@ class _MapSampleState extends State<MapSample> {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(title),
-                content: Text(description),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text("닫기"),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+              return Dialog(
+                child: Container(
+                  width: 500, // 원하는 너비로 조정
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("주소 : " + title,
+                            style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 15, // 원하는 폰트 크기로 조정
+                        )),
+                      ),
+                      Divider(),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(description , style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16, // 원하는 폰트 크기로 조정
+                        )),
+                      ),
+                      SizedBox(height: 10),
+                      Divider(),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("시작일: $startDate", style: TextStyle(fontSize: 13)),
+                      ),
+                      Divider(),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("종료일: $endDate", style: TextStyle(fontSize: 13)),
+                      ),
+                      SizedBox(height: 10),
+
+                      Align(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          child: Text("닫기"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               );
             },
           );
@@ -433,6 +472,7 @@ class _MapSampleState extends State<MapSample> {
       markers.add(marker);
     }
   }
+
 
 
   void _showListDialog(List<Map<String, dynamic>> dataList) {
@@ -464,7 +504,7 @@ class _MapSampleState extends State<MapSample> {
                               Navigator.pop(buildContext);
                             },
                           ),
-                          Text('제보현황', style: TextStyle(fontSize: 20)), // This is the new line for your text
+                          Text('제보현황', style: TextStyle(fontSize: 20,color: Colors.red,fontWeight: FontWeight.w400)), // This is the new line for your text
                           SizedBox(width: 40), // This is just a placeholder to keep the balance
                         ],
                       ),
@@ -485,7 +525,7 @@ class _MapSampleState extends State<MapSample> {
                                     SizedBox(width: 2),
                                     Text(dataList[index]['like']),
                                   ],),
-                                title: Text("  "+ dataList[index]['title']),
+                                title: Text("  "+ dataList[index]['title'],style: TextStyle(fontWeight: FontWeight.bold)),
                                 onTap: () async {
                                   final String nickname = await getNickname(dataList[index]['user_id']);
                                   if(!mounted) return;
