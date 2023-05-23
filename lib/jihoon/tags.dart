@@ -14,49 +14,36 @@ class _TagsState extends State<Tags> {
   final List<String> _acc = ['전체','사고','공사','행사','통제','기타'];
   var _selectedAccIndex = 0;
 
-  Widget accTags(String txt, int index){
-    return OutlinedButton(
-      onPressed: (){
-        setState(() {
-          _selectedAccIndex = index;
-          context.read<Store>().setReadPostType(index);
-        });
-      },
-      child: Text(txt),
-      style: OutlinedButton.styleFrom(
+  Widget accTags(String txt, int index) {
+    return Consumer<Store>(
+      builder: (context, store, _) => OutlinedButton(
+        onPressed: () {
+          store.setReadPostType(index);
+        },
+        child: Text(
+          txt,
+          style: TextStyle(
+            color: Colors.white, // 버튼 텍스트 색상 설정
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
           padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8.0),
           shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(15))
+            borderRadius: BorderRadius.all(Radius.circular(15)),
           ),
           side: BorderSide(
-              width: (_selectedAccIndex == index) ? 2.0 : 0.5,
-              color: (_selectedAccIndex == index)
-                  ? Colors.red
-                  : Colors.black
-          )
+            width: (store.selectedPostType == index) ? 2.0 : 0.5,
+            color: (store.selectedPostType == index) ? Colors.red : Colors.grey, // 선택 여부에 따른 색상 설정,
+          ),
+          backgroundColor: (store.selectedPostType == index) ? Colors.red : Colors.grey,
+        ),
       ),
     );
   }
 
   int get index {
     return this._selectedAccIndex;
-  }
-  Widget orderTags(String txt, int index){
-    return TextButton(
-      onPressed: (){
-        setState(() {
-          context.read<Store>().setReadPostOrder(index);
-        });
-      },
-      child: Text(txt),
-      style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8.0),
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(15))
-          ),
-
-      ),
-    );
   }
 
   @override
