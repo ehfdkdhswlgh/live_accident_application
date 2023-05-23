@@ -48,7 +48,6 @@ dependencies:
   search_map_place_updated: ^0.0.4
   location: ^4.3.0
   cached_network_image: ^3.2.0
-
   #  dart_rss: ^2.0.1
   cupertino_icons: ^1.0.2
   url_launcher: ^6.1.10

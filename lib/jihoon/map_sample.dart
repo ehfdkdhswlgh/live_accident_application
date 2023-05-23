@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 import '../hojun/feed.dart';
 
 
+
 class MapSample extends StatefulWidget {
   const MapSample({super.key,required this.selectedType});
   final selectedType;
@@ -418,7 +419,7 @@ class _MapSampleState extends State<MapSample> {
   }
 
   void _showListDialog(List<Map<String, dynamic>> dataList) {
-    final dialogHeight = MediaQuery.of(context).size.height * 0.95;
+    final dialogHeight = MediaQuery.of(context).size.height * 0.85;
 
     showGeneralDialog(
       context: context,
@@ -432,7 +433,25 @@ class _MapSampleState extends State<MapSample> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(height: 50, child: Center(child: Text("제보현황"))),
+                    SizedBox(
+                      height: 50,
+                        child: Row(
+                          children: [
+                            IconButton(
+                                  icon: Icon(
+                                  Icons.expand_circle_down_rounded,
+                                  size: 40
+                          ),
+                          onPressed: () {
+                            Navigator.pop(buildContext);
+                          },
+                         ),
+
+                        ],
+
+                        ),
+                      ),
+
                     Container(
                       height: dialogHeight - 100, // Subtract the height occupied by the title and the button
                       child: dataList.isNotEmpty
@@ -479,14 +498,14 @@ class _MapSampleState extends State<MapSample> {
                       )
                           : Text('해당 위치에 데이터가 없습니다.'),
                     ),
-                    SizedBox(height: 50, child: Center(
-                      child: TextButton(
-                        child: Text('닫기'),
-                        onPressed: () {
-                          Navigator.pop(buildContext);
-                        },
-                      ),
-                    )),
+                    // SizedBox(height: 50, child: Center(
+                    //   child: TextButton(
+                    //     child: Text('닫기'),
+                    //     onPressed: () {
+                    //       Navigator.pop(buildContext);
+                    //     },
+                    //   ),
+                    // )),
 
                   ],
                 ),
