@@ -407,19 +407,36 @@ class _MapSampleState extends State<MapSample> {
       Marker marker = Marker(
         markerId: MarkerId(i.toString()),
         position: LatLng(double.parse(longitude), double.parse(latitude)),
-        infoWindow: InfoWindow(
-          title: title,
-          snippet: description,
-        ),
-        icon : BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue)
+        infoWindow: InfoWindow(title: '', snippet: ''), // 비어있는 InfoWindow
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(title),
+                content: Text(description),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text("닫기"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       );
 
       markers.add(marker);
     }
   }
 
+
   void _showListDialog(List<Map<String, dynamic>> dataList) {
-    final dialogHeight = MediaQuery.of(context).size.height * 0.85;
+    final dialogHeight = MediaQuery.of(context).size.height * 0.95;
 
     showGeneralDialog(
       context: context,
@@ -435,23 +452,23 @@ class _MapSampleState extends State<MapSample> {
                   children: [
                     SizedBox(
                       height: 50,
-                        child: Row(
-                          children: [
-                            IconButton(
-                                  icon: Icon(
-                                  Icons.expand_circle_down_rounded,
-                                  size: 40
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                                Icons.expand_circle_down_rounded,
+                                size: 40
+                            ),
+                            onPressed: () {
+                              Navigator.pop(buildContext);
+                            },
                           ),
-                          onPressed: () {
-                            Navigator.pop(buildContext);
-                          },
-                         ),
-
+                          Text('제보현황', style: TextStyle(fontSize: 20)), // This is the new line for your text
+                          SizedBox(width: 40), // This is just a placeholder to keep the balance
                         ],
-
-                        ),
                       ),
-
+                    ),
                     Container(
                       height: dialogHeight - 100, // Subtract the height occupied by the title and the button
                       child: dataList.isNotEmpty
@@ -517,7 +534,7 @@ class _MapSampleState extends State<MapSample> {
       barrierDismissible: true,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       barrierColor: Colors.black45,
-      transitionDuration: const Duration(milliseconds: 500),
+      transitionDuration: const Duration(milliseconds: 400),
       transitionBuilder: (BuildContext context, Animation<double> animation,
           Animation<double> secondaryAnimation, Widget child) {
         final begin = Offset(0.0, 1.0);
