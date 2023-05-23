@@ -419,7 +419,7 @@ class _MapSampleState extends State<MapSample> {
   }
 
   void _showListDialog(List<Map<String, dynamic>> dataList) {
-    final dialogHeight = MediaQuery.of(context).size.height * 0.85;
+    final dialogHeight = MediaQuery.of(context).size.height * 0.95;
 
     showGeneralDialog(
       context: context,
