@@ -32,6 +32,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Widget followBtn = SizedBox.shrink();
+  Widget settingBtn = SizedBox.shrink();
   bool followChecker = false;
   // if(UserImfomation.uid == widget.inputUid){
   // followBtn = ElevatedButton(
@@ -63,6 +64,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       followCount = UserImfomation.followCount.toString();
       postCount = UserImfomation.postCount.toString();
       followBtn = SizedBox.shrink();
+      settingBtn = IconButton(
+        icon: Icon(Icons.settings),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AccountManagementScreen()),
+          );
+        },
+      );
     } else {
       getUserInformation();
       // 'follow' 컬렉션에서 해당 정보 가져오기
@@ -286,15 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: Text("회원 정보"),
         actions: [
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AccountManagementScreen()),
-              );
-            },
-          ),
+          settingBtn
         ],
       ),
       body: Padding(
