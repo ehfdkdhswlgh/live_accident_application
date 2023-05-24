@@ -164,7 +164,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       transaction.update(FirebaseFirestore.instance.collection('user').doc(UserImfomation.uid), {'following': followingCount - 1});
       // transaction.update(FirebaseFirestore.instance.collection('user').doc(widget.inputUid), {'follow': followingCount - 1});
-
       // 'follow' 컬렉션에서 구독 정보 삭제
       QuerySnapshot querySnapshot = await _firestore
           .collection('follow')

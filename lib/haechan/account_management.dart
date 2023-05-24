@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 import '../haechan/login.dart';
+import '../UserImfomation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AccountManagementScreen extends StatefulWidget {
   @override
-  _AccountManagementScreenState createState() => _AccountManagementScreenState();
+  _AccountManagementScreenState createState() =>
+      _AccountManagementScreenState();
 }
 
 class _AccountManagementScreenState extends State<AccountManagementScreen> {
-  String _nickname = "";
+  String _nickname = UserImfomation.nickname;
   String _password = "";
   List<String> _interestAreas = [];
   TextEditingController _interestAreaController = TextEditingController();
   String _errorMessage = "";
+  TextEditingController _nicknameController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _nicknameController.text = _nickname;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +36,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         child: Column(
           children: [
             TextField(
+              controller: _nicknameController,
               onChanged: (value) {
                 setState(() {
                   _nickname = value;
@@ -31,14 +44,14 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
               },
               decoration: InputDecoration(labelText: "닉네임"),
             ),
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  _password = value;
-                });
-              },
-              decoration: InputDecoration(labelText: "비밀번호 수정"),
-            ),
+            // TextField(
+            //   onChanged: (value) {
+            //     setState(() {
+            //       _password = value;
+            //     });
+            //   },
+            //   decoration: InputDecoration(labelText: "비밀번호 수정"),
+            // ),
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
@@ -126,33 +139,84 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
               },
             ),
             ElevatedButton(
-              onPressed: () {
-                // 수정된 정보를 서버에 저장하는 로직 추가
-                // _nickname, _password, _interestAreas 변수에 저장된 값을 활용
-                print("닉네임: $_nickname");
-                print("비밀번호: $_password");
-                print("관심지역: $_interestAreas");
+              onPressed: () async {
+                try {
+                  print('here11111111111111111111111');
+                  DocumentReference userRef = _firestore
+                      .collection('user')
+                      .doc(UserImfomation.uid);
 
-                // 서버에 수정된 정보를 전송하고 처리하는 로직을 추가해야 함
+                  await _firestore.runTransaction((transaction) async {
+                    DocumentSnapshot userSnapshot = await transaction.get(userRef);
+                    Map<String, dynamic>? userData =
+                    userSnapshot.data() as Map<String, dynamic>?;
 
-                // 수정된 정보를 서버에 성공적으로 전송하면
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text("성공"),
-                      content: Text("계정 정보가 성공적으로 저장되었습니다."),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text("확인"),
-                        ),
-                      ],
-                    );
-                  },
-                );
+                    if (userData == null) {
+                      // 사용자 데이터가 없는 경우에 대한 처리 로직 추가
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text("오류"),
+                            content: Text("사용자 정보를 찾을 수 없습니다."),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text("확인"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      return;
+                    }
+
+                    userData['name'] = _nickname;
+
+                    transaction.update(userRef, userData);
+                  });
+
+                  print('here22222222222222222222222222222');
+
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text("성공"),
+                        content: Text("계정 정보가 성공적으로 저장되었습니다."),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("확인"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } catch (error) {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text("오류"),
+                        content: Text("계정 정보를 업데이트하는 중에 오류가 발생했습니다."),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("확인"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                  print("오류 발생: $error");
+                }
               },
               child: Text("수정하기"),
             ),
@@ -161,20 +225,12 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
               onPressed: () {
                 // Add your logout logic here
                 print("Logged out");
-// Navigate to the login screen
-//                 Navigator.pushReplacement(
-//                   context,
-//                   MaterialPageRoute(
-//                     builder: (context) => Login(), // Replace LoginScreen() with your actual login screen widget
-//                   ),
-//                 );
-
+                // Navigate to the login screen
                 Navigator.pushAndRemoveUntil(
-                  context, MaterialPageRoute(builder: (context) => Login()),
+                  context,
+                  MaterialPageRoute(builder: (context) => Login()),
                       (Route<dynamic> route) => false,
                 );
-
-
                 // You can navigate to the login screen or perform any other logout actions
               },
               style: ElevatedButton.styleFrom(

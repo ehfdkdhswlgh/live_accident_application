@@ -56,6 +56,85 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final TextEditingController emailController = TextEditingController();
+
+
+  void showEmailInputDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("이메일 입력"),
+          content: TextField(
+            controller: emailController,
+            decoration: InputDecoration(
+              labelText: '이메일',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                sendPasswordResetEmail(context);
+              },
+              child: Text("확인"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("취소"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void sendPasswordResetEmail(BuildContext context) async {
+    final String email = emailController.text;
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("비밀번호 초기화 이메일 전송"),
+            content: Text("비밀번호 초기화 이메일이 전송되었습니다."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text("확인"),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (error) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("오류"),
+            content: Text("비밀번호 초기화 이메일을 전송하는 중에 오류가 발생했습니다."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text("확인"),
+              ),
+            ],
+          );
+        },
+      );
+      print("오류 발생: $error");
+    }
+  }
+
   // String uid = UserImfomation.uid;
 
   String my_email = 'hae507@gmail.com';
@@ -214,41 +293,20 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('회원가입'),
                 ),
               ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    showEmailInputDialog(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blue,
+                  ),
+                  child: Text("비밀번호 수정"),
+                ),
+              ),
 
-
-              // SizedBox(
-              //   width: double.infinity,
-              //   child: OutlinedButton(
-              //     style: OutlinedButton.styleFrom(
-              //       foregroundColor: Colors.white,
-              //       backgroundColor: Colors.red,
-              //       side: BorderSide(color: Colors.blue),
-              //     ),
-              //     onPressed: () {
-              //       Navigator.push(
-              //         context,
-              //         MaterialPageRoute(
-              //           builder: (context) => ReportManagementScreen(),
-              //         ),
-              //       );
-              //     },
-              //     child: Text('신고게시글 관리 (임시)'),
-              //   ),
-              // )
-
-
-              // SizedBox(
-              //   width: double.infinity,
-              //   child: ElevatedButton.icon(
-              //     style: ElevatedButton.styleFrom(
-              //       foregroundColor: Colors.white,
-              //       backgroundColor: Colors.red,
-              //     ),
-              //     icon: Icon(Icons.account_circle_outlined), // 아이콘
-              //     label: Text('구글 로그인'),
-              //     onPressed: () { signInWithGoogle(); },
-              //   ),
-              // ),
             ],
           ),
         ),
