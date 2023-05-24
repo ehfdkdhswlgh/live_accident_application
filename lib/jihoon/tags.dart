@@ -11,7 +11,7 @@ class Tags extends StatefulWidget {
 
 class _TagsState extends State<Tags> {
 
-  final List<String> _acc = ['전체','사고','공사','행사','통제','기타'];
+  final List<String> _acc = ['전체','사고','공사','행사','기상','통제'];
   var _selectedAccIndex = 0;
 
   Widget accTags(String txt, int index) {

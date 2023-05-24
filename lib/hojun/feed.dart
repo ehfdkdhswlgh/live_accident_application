@@ -247,7 +247,7 @@ class _FeedState extends State<Feed> {
       final _postMain = doc.get('post_content').toString();
       final _userId = doc.get('user_id').toString();
       final _postName = doc.get('title').toString();
-      final _timestamp = doc.get('timestamp').toString();
+      final _timestamp = doc.get('timestamp');
       final _address = doc.get('address_name').toString();
       var _like = doc.get('like');
       String _userNickname = '';
@@ -298,7 +298,7 @@ class Post {
   final String userId;
   final String userNickname;
   final String postName;
-  final String timestamp;
+  final Timestamp timestamp;
   final String address;
   var like;
   Post({required this.postId, required this.imageLinks, required this.postMain, required this.userId, required this.userNickname, required this.postName, required this.timestamp, required this.like, required this.address});

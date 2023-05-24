@@ -104,7 +104,7 @@ class _MainPostState extends State<MainPost> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
-              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like, address: widget.postContent.address,),
+              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like, address: widget.postContent.address, timestamp: widget.postContent.timestamp,),
               onTap: () {
                 Navigator.push(
                   context,
@@ -211,12 +211,13 @@ class _MainPostState extends State<MainPost> {
 }
 
 class Profile extends StatelessWidget {
-  Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId, required this.like, required this.address}) : super(key: key);
+  Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId, required this.like, required this.address, required this.timestamp}) : super(key: key);
   final userNickname;
   final postId;
   final postName;
   final userId;
   final address;
+  final timestamp;
   var like;
 
   @override
@@ -277,11 +278,27 @@ class Profile extends StatelessWidget {
               },
               icon: Icon(Icons.more_horiz),
             ), // 아이콘
-            Text('203일전'), // 업로드 날짜
+            Text(formatTimestamp(timestamp)), // 업로드 날짜
           ],
         ),
       ],
     );
+  }
+  String formatTimestamp(Timestamp timestamp) {
+    final now = DateTime.now();
+    final time = timestamp.toDate();
+
+    final difference = now.difference(time);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}일 전';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}시간 전';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}분 전';
+    } else {
+      return '방금 전';
+    }
   }
 }
 
