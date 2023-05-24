@@ -4,7 +4,7 @@ import 'account_management.dart';
 import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../hojun/post_main_document.dart';
-
+import 'package:carousel_slider/carousel_slider.dart';
 
 String nickname = '';
 String uid = '';
@@ -34,6 +34,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget followBtn = SizedBox.shrink();
   Widget settingBtn = SizedBox.shrink();
   bool followChecker = false;
+  CarouselController carouselController = CarouselController();
+
   // if(UserImfomation.uid == widget.inputUid){
   // followBtn = ElevatedButton(
   //
@@ -404,15 +406,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       );
                     },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.0),
-                      image: DecorationImage(
-                        image: NetworkImage(postImageUrls[index]), // 게시물 이미지
-                        fit: BoxFit.cover,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // 로딩 중인 상태를 표시할 위젯
+                          CircularProgressIndicator(), // 로딩 중인 상태를 표시할 위젯
+
+                          // 실제 이미지
+                          Image.network(
+                            postImageUrls[index], // 게시물 이미지
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) {
+                                // 이미지 로딩 완료
+                                return child;
+                              } else {
+                                // 이미지 로딩 중
+                                return CircularProgressIndicator();
+                              }
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              // 이미지 로딩 실패
+                              return Icon(Icons.error);
+                            },
+                          ),
+                        ],
                       ),
                     ),
-                  ),
                   );
                 },
               ),

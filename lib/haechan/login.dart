@@ -214,25 +214,29 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('회원가입'),
                 ),
               ),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.red,
-                    side: BorderSide(color: Colors.blue),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ReportManagementScreen(),
-                      ),
-                    );
-                  },
-                  child: Text('신고게시글 관리 (임시)'),
-                ),
-              )
+
+
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: OutlinedButton(
+              //     style: OutlinedButton.styleFrom(
+              //       foregroundColor: Colors.white,
+              //       backgroundColor: Colors.red,
+              //       side: BorderSide(color: Colors.blue),
+              //     ),
+              //     onPressed: () {
+              //       Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //           builder: (context) => ReportManagementScreen(),
+              //         ),
+              //       );
+              //     },
+              //     child: Text('신고게시글 관리 (임시)'),
+              //   ),
+              // )
+
+
               // SizedBox(
               //   width: double.infinity,
               //   child: ElevatedButton.icon(
