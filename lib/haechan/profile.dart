@@ -251,37 +251,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // ProfileScreen() {
-  //   get_information();
-  // }
-  //
-  // get_information() async{
-  //   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //       .collection('user')
-  //       .where('uid', isEqualTo: UserImfomation.uid)
-  //       .limit(1)
-  //       .get();
-  //
-  //   if (querySnapshot.docs.isNotEmpty) {
-  //     DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
-  //     UserImfomation.nickname = documentSnapshot.get('name');
-  //     UserImfomation.followCount = documentSnapshot.get('follow');
-  //     UserImfomation.followingCount = documentSnapshot.get('following');
-  //     UserImfomation.postCount = documentSnapshot.get('post_count');
-  //   }
-  //   print('nickname : ' + UserImfomation.nickname);
-  //   print('userid : ' + UserImfomation.uid);
-  //   print('followCount : ' + UserImfomation.followCount.toString());
-  //   print('followingCount : ' + UserImfomation.followingCount.toString());
-  //   print('postCount : ' + UserImfomation.postCount.toString());
-  //   nickname = UserImfomation.nickname;
-  //   // return UserImfomation.nickname;
-  // }
-
-  void navigateToPostDetail() {
-    // 게시물 상세 페이지로 이동하는 코드를 여기에 작성
-  }
-
 
   Future<String> getNickname(String user_id) async{
     QuerySnapshot userquery = await _firestore
@@ -328,7 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         mainAxisAlignment: MainAxisAlignment.start, // 오른쪽 정렬
                         children: [
                           Text(
-                            '게시물: ' + postCount, // 게시물 수
+                            '게시물: ' + postImageUrls.length.toString(), // 게시물 수
                             style: TextStyle(fontSize: 16.0),
                           ),
                           SizedBox(width: 8.0),
