@@ -31,7 +31,7 @@ class _MapSampleState extends State<MapSample> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<Map<String, String>> items = [];
-  List<Map<String, String>> post_items = [];
+  List<Map<String, dynamic>> post_items = [];
 
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
@@ -42,7 +42,7 @@ class _MapSampleState extends State<MapSample> {
 
   var selectedPostType = 1;
 
-  var address = "한강로 1가";
+
 
   int i = 0;
   Set<Marker> markers = {};
@@ -116,7 +116,7 @@ class _MapSampleState extends State<MapSample> {
               'post_content': doc['post_content'],
               'post_id': doc['post_id'],
               'post_type': doc['post_type'].toString(),
-              'timestamp': doc['timestamp'].toString(),
+              'timestamp': doc['timestamp'],
               'title': doc['title'],
               'user_id': doc['user_id'],
               'latitude': doc['latitude'].toString(),
@@ -198,12 +198,6 @@ class _MapSampleState extends State<MapSample> {
           title: Text("Live돌발사고"),
           centerTitle: true,
           actions: [
-            IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () {
-                // 돋보기 아이콘 클릭 시 동작 정의
-              },
-            ),
             IconButton(
               icon: Icon(Icons.account_circle),
               onPressed: () {
@@ -302,7 +296,7 @@ class _MapSampleState extends State<MapSample> {
   }
 
   Future<void> _fetchPostItems() async {
-    List<Map<String, String>> postItems = [];
+    List<Map<String, dynamic>> postItems = [];
     QuerySnapshot querySnapshot = await _firestore.collection('posts').where('is_visible', isEqualTo: true).get();
 
     querySnapshot.docs.forEach((doc) {
@@ -313,7 +307,7 @@ class _MapSampleState extends State<MapSample> {
         'post_content': doc['post_content'],
         'post_id': doc['post_id'],
         'post_type': doc['post_type'].toString(),
-        'timestamp': doc['timestamp'].toString(),
+        'timestamp': doc['timestamp'],
         'title': doc['title'],
         'user_id': doc['user_id'],
         'latitude': doc['latitude'].toString(),
