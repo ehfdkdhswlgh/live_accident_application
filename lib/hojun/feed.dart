@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:live_accident_application/hojun/top_rank.dart';
 import 'store.dart';
 import 'package:provider/provider.dart';
 import 'main_post.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 
 class Feed extends StatefulWidget {
   const Feed({Key? key, required this.selectedType, required this.selectedOrder}) : super(key: key);
@@ -20,6 +22,7 @@ class _FeedState extends State<Feed> {
   var scroll = ScrollController();
   List<Post> posts = [];
   var post2;
+  var geoHasher = GeoHasher();
 
   @override
   void initState() {
@@ -32,6 +35,7 @@ class _FeedState extends State<Feed> {
       }
     });
   }
+
 
   @override
   void didUpdateWidget(Feed oldWidget) {
@@ -57,6 +61,15 @@ class _FeedState extends State<Feed> {
 
   @override
   Future<void> _fetchData() async {
+
+
+    Position currentPosition = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.medium,
+    );
+
+    var mygeohash = GeoHash(geoHasher.encode(currentPosition!.longitude, currentPosition!.latitude, precision: 4));
+
+
     if (_isLoading || !_hasMoreData) return;
 
     setState(() {
@@ -64,6 +77,9 @@ class _FeedState extends State<Feed> {
     });
 
     QuerySnapshot querySnapshot;
+    List<DocumentSnapshot> documentList;
+
+
     if (context.read<Store>().selectedPostType == 0) {
       if(context.read<Store>().selectedPostOrder == 0) {
         if (posts.isEmpty) {
@@ -91,10 +107,15 @@ class _FeedState extends State<Feed> {
               .get();
         }
       } else if(context.read<Store>().selectedPostOrder == 1) {
+        var mygeo = mygeohash.geohash;
+        print(mygeo);
+        // 파이어베이스에는 WHERE에서 다중 OR 사용이 불가능하여 범위를 크게 잡아서 구현함
+
         if (posts.isEmpty) {
           querySnapshot = await _db
               .collection('posts')
               .where('is_visible', isEqualTo: true)
+              .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
               .limit(5)
               .get();
@@ -103,6 +124,7 @@ class _FeedState extends State<Feed> {
           final lastDocSnapshot = await _db
               .collection('posts')
               .where('is_visible', isEqualTo: true)
+              .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
               .where('post_id', isEqualTo: lastPostId)
               .get()
@@ -110,6 +132,7 @@ class _FeedState extends State<Feed> {
           querySnapshot = await _db
               .collection('posts')
               .where('is_visible', isEqualTo: true)
+              .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
               .startAfterDocument(lastDocSnapshot)
               .limit(5)
@@ -174,11 +197,15 @@ class _FeedState extends State<Feed> {
         }
       }
       else if(context.read<Store>().selectedPostOrder == 1){
+        var mygeo = mygeohash.geohash;
+        print(mygeo);
+
         if (posts.isEmpty) {
           querySnapshot = await _db
               .collection('posts')
               .where('is_visible', isEqualTo: true)
               .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
               .limit(5)
               .get();
@@ -188,6 +215,7 @@ class _FeedState extends State<Feed> {
               .collection('posts')
               .where('is_visible', isEqualTo: true)
               .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
               .where('post_id', isEqualTo: lastPostId)
               .get()
@@ -196,6 +224,7 @@ class _FeedState extends State<Feed> {
               .collection('posts')
               .where('is_visible', isEqualTo: true)
               .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
+              .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
               .startAfterDocument(lastDocSnapshot)
               .limit(5)
@@ -234,13 +263,16 @@ class _FeedState extends State<Feed> {
       else {querySnapshot = await _db.collection('posts').get();}
     }
 
+
     if (querySnapshot.docs.isEmpty) {
       setState(() {
         _isLoading = false;
         _hasMoreData = false;
       });
       return;
-    }//
+    }
+
+
     final newPosts = await Future.wait(querySnapshot.docs.map((doc) async {
       final _postId = doc.get('post_id').toString();
       final _imageLinks = doc.get('images').toString();
@@ -262,7 +294,10 @@ class _FeedState extends State<Feed> {
       _isLoading = false;
       posts.addAll(newPosts);
     });
+
   }
+
+
   Future<String> getNickname(String user_id) async{
     QuerySnapshot userquery = await _db
         .collection('user')

@@ -13,6 +13,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'package:dart_geohash/dart_geohash.dart';
 
 //애뮬레이터 실행시 오류날 시 https://www.youtube.com/watch?v=bTyLehofqvk
 //https://www.flutterbeads.com/change-android-minsdkversion-in-flutter/
@@ -48,6 +49,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
 
 
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  var geoHasher = GeoHasher();
 
 
   @override
@@ -499,6 +501,11 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     String main = _mainController.text;
 
     if (title.isNotEmpty) {
+
+      //GeoFirePoint mygeo = geo.point(latitude: currentPosition!.latitude, longitude: currentPosition!.longitude);
+      var geohash = geoHasher.encode(currentPosition!.longitude, currentPosition!.latitude, precision: 4);
+      //
+
       _firestore.collection('posts').add({
         'user_id': userId,
         'post_id': '${userId}${DateTime.now().microsecondsSinceEpoch}',
@@ -511,8 +518,10 @@ class _ReportScreenState extends State<ReportWriteScreen> {
         'timestamp': FieldValue.serverTimestamp(),
         'latitude' : currentPosition!.latitude,
         'longitude' : currentPosition!.longitude,
+        'geohash': geohash, // Geohash 필드 추가
         'like':0,
       });
+
       // 해찬 추가
       DocumentReference userRef = _firestore.collection('user').doc(userId);
       _firestore.runTransaction((transaction) async {
@@ -528,6 +537,8 @@ class _ReportScreenState extends State<ReportWriteScreen> {
       _mainController.clear();
     }
   }
+
+
   Future<void> getCurrentLocation() async {
 
     Position position = await Geolocator.getCurrentPosition(

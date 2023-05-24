@@ -78,7 +78,7 @@ class _MapSampleState extends State<MapSample> {
 
     QuerySnapshot querySnapshotOD;
     QuerySnapshot querySnapshotPost;
-    List<Map<String, String>> postItems = [];
+    List<Map<String, dynamic>> postItems = [];
     List<Map<String, String>> opendatasItems = [];
 
 
