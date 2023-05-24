@@ -303,7 +303,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     foregroundColor: Colors.white,
                     backgroundColor: Colors.blue,
                   ),
-                  child: Text("비밀번호 수정"),
+                  child: Text("비밀번호 재설정"),
                 ),
               ),
 
