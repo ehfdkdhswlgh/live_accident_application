@@ -29,7 +29,7 @@ class _PostDocumentState extends State<PostDocument> {
     return Scaffold(
       body: ListView(
           children: [
-            Profile(userNickname: widget.userNickname, postId: widget.postId, postName: widget.postName, userId: widget.userId, like: widget.like, address: widget.address,),
+            Profile(userNickname: widget.userNickname, postId: widget.postId, postName: widget.postName, userId: widget.userId, like: widget.like, address: widget.address, timestamp: widget.timestamp,),
             widget.imageUrl.isEmpty
                 ? SizedBox.shrink()
                 : Thumbnail(url: widget.imageUrl),
@@ -131,37 +131,3 @@ class MainDocument extends StatelessWidget {
     );
   }
 }
-
-class PostComment extends StatelessWidget {
-  const PostComment({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.grey, // 프사를 넣을 경우 backgroundImage
-            ),
-            Column(
-              children: [
-                Text('제보날씨'), // 닉네임 위치
-                Text('홍천교'), // 제보 위치
-              ],
-            ),
-          ],
-        ),
-        Column(
-          children: [
-            IconButton(onPressed: (){}, icon: Icon(Icons.more_horiz)), // 아이콘
-            Text('203일전'), // 업로드 날짜
-          ],
-        )
-      ],
-    );;
-  }
-}
-
