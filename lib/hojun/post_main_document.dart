@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'main_post.dart';
-import 'package:provider/provider.dart';
-import 'store.dart';
 import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

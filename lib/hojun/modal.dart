@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_accident_application/hojun/post_main_modify.dart';
 import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../jihwan/post_report.dart';
@@ -70,6 +71,14 @@ class _ModalState extends State<Modal> {
                 onTap: () {
                   // 선택된 항목에 대한 처리 로직
                   Navigator.pop(context); // Bottom sheet 닫기
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ModifyScreen(
+                        postId: widget.postId,
+                      ),
+                    ),
+                  );
                 },
               ),
               // 추가적인 항목w들...

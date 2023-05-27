@@ -41,4 +41,8 @@ class Store extends ChangeNotifier{
     notifyListeners();
   }
 
+  void _goToPostScreen(int currentIndex) {
+    currentIndex = 1;
+    notifyListeners();
+  }
 }

@@ -34,8 +34,8 @@ class _FeedState extends State<Feed> {
         _fetchData();
       }
     });
+    listenForDataChanges();
   }
-
 
   @override
   void didUpdateWidget(Feed oldWidget) {
@@ -58,6 +58,19 @@ class _FeedState extends State<Feed> {
     }
   }
 
+  void refreshUI() {
+    _isLoading = false;
+    _hasMoreData = true;
+    if (mounted) setState(() {posts = [];});
+    _fetchData();
+  }
+
+  void listenForDataChanges() {
+    _db.collection('posts').snapshots().listen((snapshot) {refreshUI();});
+    print("refreshed");
+  }
+
+
 
   @override
   Future<void> _fetchData() async {
@@ -72,9 +85,7 @@ class _FeedState extends State<Feed> {
 
     if (_isLoading || !_hasMoreData) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    if(mounted){setState(() {_isLoading = true;});}
 
     QuerySnapshot querySnapshot;
     List<DocumentSnapshot> documentList;

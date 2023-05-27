@@ -13,7 +13,6 @@ import 'modal.dart';
 class MainPost extends StatefulWidget {
   const MainPost({Key? key, required this.postContent}) : super(key: key);
   final postContent;
-
   @override
   State<MainPost> createState() => _MainPostState();
 }
@@ -104,7 +103,7 @@ class _MainPostState extends State<MainPost> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
-              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like, address: widget.postContent.address, timestamp: widget.postContent.timestamp,),
+              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like, address: widget.postContent.address, timestamp: widget.postContent.timestamp),
               onTap: () {
                 Navigator.push(
                   context,
@@ -272,7 +271,7 @@ class Profile extends StatelessWidget {
                 showModalBottomSheet(
                   context: context,
                   builder: (BuildContext context) {
-                    return Modal(postId: postId, postName: postName, userId: userId, userNickname: userNickname,);
+                    return Modal(postId: postId, postName: postName, userId: userId, userNickname: userNickname);
                   },
                 );
               },
