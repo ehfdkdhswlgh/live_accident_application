@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../UserImfomation.dart';
 import '../haechan/profile.dart' as profile;
 import 'store.dart';
@@ -38,7 +39,7 @@ class _PostState extends State<Post> {
         Column(
           children: [
             Tags(),
-            Expanded(child: Feed(selectedType: context.watch<Store>().selectedPostType, selectedOrder: context.watch<Store>().selectedPostOrder,))
+            Expanded(child: Feed(selectedType: context.watch<Store>().selectedPostType, selectedOrder: context.watch<Store>().selectedPostOrder))
           ]
         )
     );

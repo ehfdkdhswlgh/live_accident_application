@@ -5,7 +5,6 @@ import 'dart:io';
 import 'store.dart';
 import 'package:provider/provider.dart';
 import '../UserImfomation.dart';
-import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
@@ -41,7 +40,6 @@ class _ReportScreenState extends State<ReportWriteScreen> {
   int _selectedIndex = 0;
   final List<String> _reportTypes = ['제보하기', '긴급제보'];
   final List<Color> _selectedColors = [Colors.red, Colors.red];
-  final List<Color> _unselectedColors = [Colors.grey, Colors.grey];
   final ImagePicker _picker = ImagePicker();
   final List<XFile?> _pickedImages = [];
   final TextEditingController _titleController = TextEditingController();
@@ -315,8 +313,6 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     }
   }
 
-
-
   // 카메라, 갤러리에서 이미지 1개 불러오기
   // ImageSource.galley , ImageSource.camera
   void getImage(ImageSource source) async {
@@ -417,11 +413,6 @@ class _ReportScreenState extends State<ReportWriteScreen> {
       ),
     );
   }
-
-
-
-
-
 
 // 버튼을 생성하는 함수
   Widget _buildButton(String text) {
@@ -600,15 +591,19 @@ class _MyButtonState extends State<MyButton> {
             ),
           ),
           SizedBox(height: 16.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildButton('사고', context),
-              _buildButton('공사', context),
-              _buildButton('행사/시위', context),
-              _buildButton('기상', context),
-              _buildButton('통제', context),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child:
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildButton('사고', context),
+                _buildButton('공사', context),
+                _buildButton('행사/시위', context),
+                _buildButton('기상', context),
+                _buildButton('통제', context),
+              ],
+            ),
           ),
         ],
       ),
@@ -762,8 +757,6 @@ _postRequest(String content, String phone_num) async {    // 50건이상 쓰면 
   }
 }
 
-
-
 String getSignature(
     String serviceId, String timeStamp, String accessKey, String secretKey) {
   var space = " "; // one space
@@ -790,7 +783,3 @@ String getSignature(
   String signatureKey = base64.encode(digest.bytes);
   return signatureKey;
 }
-
-
-
-
