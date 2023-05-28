@@ -68,6 +68,7 @@ dev_dependencies:
   carousel_slider: 4.2.1
   provider: ^6.0.1
   uuid: ^3.0.4
+  firebase_messaging: ^10.0.0
 
 #dependency_overrides:
 #  firebase_core_platform_interface: 4.5.1

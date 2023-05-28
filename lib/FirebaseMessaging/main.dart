@@ -40,8 +40,7 @@ Future<void> main() async {
   await Firebase.initializeApp();
 
   // 위에 정의한 백그라운드 메세지 처리 핸들러 연결
-  FirebaseMessaging.onBackgroundMessage(
-      _firebaseMessagingBackgroundHandler); // 백그라운드에서 동작하게 해줌
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler); // 백그라운드에서 동작하게 해줌
   /// Create an Android Notification Channel.
   ///
   /// We use this channel in the `AndroidManifest.xml` file to override the

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:live_accident_application/UserImfomation.dart';
 import 'store.dart';
 import 'package:provider/provider.dart';
 import 'main_post.dart';
@@ -66,7 +67,7 @@ class _FeedState extends State<Feed> {
   }
 
   void listenForDataChanges() {
-    _db.collection('posts').snapshots().listen((snapshot) {refreshUI();});
+    _db.collection('posts').where('user_id', isEqualTo: UserImfomation.uid).snapshots().listen((snapshot) {refreshUI();});
     print("refreshed");
   }
 
