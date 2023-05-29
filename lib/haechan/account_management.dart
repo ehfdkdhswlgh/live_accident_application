@@ -23,6 +23,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   void initState() {
     super.initState();
     _nicknameController.text = _nickname;
+    getInterestAreasFromFirebase(UserImfomation.uid);
   }
 
   @override
@@ -73,6 +74,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                                 _errorMessage = "";
                                 Navigator.pop(context);
                                 _interestAreaController.clear();
+                                addInterestAreaToFirebase(UserImfomation.uid, _interestAreas); // 파이어베이스에 데이터 추가
                               }
                             } else {
                               Navigator.pop(context);
@@ -100,6 +102,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                                   _errorMessage = "";
                                   Navigator.pop(context);
                                   _interestAreaController.clear();
+                                  addInterestAreaToFirebase(UserImfomation.uid, _interestAreas); // 파이어베이스에 데이터 추가
                                 }
                               } else {
                                 Navigator.pop(context);
@@ -131,6 +134,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                       onPressed: () {
                         setState(() {
                           _interestAreas.removeAt(index);
+                          addInterestAreaToFirebase(UserImfomation.uid, _interestAreas); // 파이어베이스에서 데이터 삭제
                         });
                       },
                     ),
@@ -243,4 +247,38 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       ),
     );
   }
+
+  Future<void> addInterestAreaToFirebase(
+      String uid, List<String> interestAreas) async {
+    try {
+      DocumentReference userRef = _firestore.collection('user').doc(uid);
+      await userRef.update({'interestAreas': interestAreas});
+      print('관심지역이 성공적으로 업데이트되었습니다.');
+    } catch (error) {
+      print('관심지역 업데이트 오류: $error');
+    }
+  }
+
+  Future<void> getInterestAreasFromFirebase(String uid) async {
+    try {
+      DocumentSnapshot userSnapshot = await _firestore
+          .collection('user')
+          .doc(uid)
+          .get();
+
+      Map<String, dynamic>? userData = userSnapshot.data() as Map<String, dynamic>?;
+
+      if (userData != null && userData.containsKey('interestAreas')) {
+        List<dynamic> interestAreas = userData['interestAreas'];
+        setState(() {
+          _interestAreas = interestAreas.cast<String>().toList();
+        });
+      }
+    } catch (error) {
+      print('관심지역 가져오기 오류: $error');
+    }
+  }
+
 }
+
+
