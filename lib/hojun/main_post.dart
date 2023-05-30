@@ -5,7 +5,6 @@ import 'store.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'post_main_document.dart';
-import '../jihwan/post_report.dart';
 import '../haechan/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'modal.dart';
