@@ -220,6 +220,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -298,6 +299,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ElevatedButton(
                   onPressed: () {
                     showEmailInputDialog(context);
+                    // _launchSMSApp();
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,

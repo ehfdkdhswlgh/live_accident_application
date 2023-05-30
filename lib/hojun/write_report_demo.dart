@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:dart_geohash/dart_geohash.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 //애뮬레이터 실행시 오류날 시 https://www.youtube.com/watch?v=bTyLehofqvk
 //https://www.flutterbeads.com/change-android-minsdkversion-in-flutter/
@@ -44,6 +45,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
   final List<XFile?> _pickedImages = [];
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _mainController = TextEditingController();
+  final TextEditingController emgergencyController = TextEditingController();
 
 
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -260,6 +262,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
+                      controller: emgergencyController,
                       maxLines: null,
                       maxLength: 500, // 글자수 20자 제한
                       textAlign: TextAlign.left, // 텍스트 왼쪽 정렬
@@ -288,6 +291,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                           ),
                           onPressed: () {
                             //문자API추가 위치
+                            _launchSMSApp(emgergencyController.text);
                           },
                           child: Text('제보하기'),
                         ),
@@ -716,44 +720,57 @@ class _SwitchButtonState extends State<SwitchButton> {
   }
 }
 
-_postRequest(String content, String phone_num) async {    // 50건이상 쓰면 건당 10원이니 적당히 쓸 것
-  try {
-    DateTime now = DateTime.now();
-    int timestamp = now.millisecondsSinceEpoch;
-    String url = 'https://sens.apigw.ntruss.com/sms/v2/services/ncp:sms:kr:308204771431:emergency_report/messages'; // 엔드포인트 URL
-    String serviceId = 'ncp:sms:kr:308204771431:emergency_report';
-    String timeStamp = timestamp.toString();
-    String accessKey = 'Qqqt0HxbM6qrEEhgNgZ1';
-    String secretKey = 'LxDG8TbpJNWEL7VnLXmP6MG0XLccXyjH8vN7YUO6';
-    String sigbiture = getSignature(serviceId, timeStamp, accessKey, secretKey);
+// _postRequest(String content, String phone_num) async {    // 50건이상 쓰면 건당 10원이니 적당히 쓸 것
+//   try {
+//     DateTime now = DateTime.now();
+//     int timestamp = now.millisecondsSinceEpoch;
+//     String url = 'https://sens.apigw.ntruss.com/sms/v2/services/ncp:sms:kr:308204771431:emergency_report/messages'; // 엔드포인트 URL
+//     String serviceId = 'ncp:sms:kr:308204771431:emergency_report';
+//     String timeStamp = timestamp.toString();
+//     String accessKey = 'Qqqt0HxbM6qrEEhgNgZ1';
+//     String secretKey = 'LxDG8TbpJNWEL7VnLXmP6MG0XLccXyjH8vN7YUO6';
+//     String sigbiture = getSignature(serviceId, timeStamp, accessKey, secretKey);
+//
+//     http.Response response = await http.post(
+//       Uri.parse(url),
+//       headers: <String, String> {
+//         'Content-Type': 'application/json; charset=utf-8',
+//         'x-ncp-apigw-timestamp': timeStamp,
+//         'x-ncp-iam-access-key': accessKey,
+//         'x-ncp-apigw-signature-v2': sigbiture,
+//       },
+//       body: jsonEncode(<String, dynamic> {
+//         'type': 'SMS',
+//         'contentType': 'COMM',
+//         'countryCode': '82',
+//         'from': '01051186937',
+//         'content': '입력할 내용',
+//         'messages': [
+//           {
+//             'to': '01051186937',
+//             // 'to': phone_num, // 112 또는 119
+//             'content': content,
+//           },
+//         ],
+//       }),
+//     );
+//     print('=========================='+'실행완료');
+//     print(response.bodyBytes);
+//   } catch (error) {
+//     print('오류 발생: $error');
+//   }
+// }
 
-    http.Response response = await http.post(
-      Uri.parse(url),
-      headers: <String, String> {
-        'Content-Type': 'application/json; charset=utf-8',
-        'x-ncp-apigw-timestamp': timeStamp,
-        'x-ncp-iam-access-key': accessKey,
-        'x-ncp-apigw-signature-v2': sigbiture,
-      },
-      body: jsonEncode(<String, dynamic> {
-        'type': 'SMS',
-        'contentType': 'COMM',
-        'countryCode': '82',
-        'from': '01051186937',
-        'content': '입력할 내용',
-        'messages': [
-          {
-            'to': '01051186937',
-            // 'to': phone_num, // 112 또는 119
-            'content': content,
-          },
-        ],
-      }),
-    );
-    print('=========================='+'실행완료');
-    print(response.bodyBytes);
-  } catch (error) {
-    print('오류 발생: $error');
+void _launchSMSApp(String message) async {
+  final String recipient = '01051186937'; // 받는이 전화번호
+  // String message = '안녕하세요!'; // 내용
+
+  final String encodedMessage = Uri.encodeComponent(message);
+  final url = 'sms:$recipient?body=$encodedMessage';
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Failed to launch SMS app.';
   }
 }
 
