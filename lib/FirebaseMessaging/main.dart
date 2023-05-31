@@ -9,11 +9,13 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../hojun/post_main_document.dart';
 import 'message.dart';
 import 'message_list.dart';
 import 'permissions.dart';
@@ -94,7 +96,7 @@ String constructFCMPayload(String postId, String imageUrl, String postMain, Stri
   final now = DateTime.now();
   final timestamp = now.millisecondsSinceEpoch;
   return jsonEncode({
-    "to" : "/topics/${userId}",
+    "to" : "/topics/asd",
     'data': {
       'postId': postId,
       'imageUrl': imageUrl,
@@ -156,11 +158,14 @@ class _Application extends State<Application> {
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
-      Navigator.pushNamed(context, '/message',
-          arguments: MessageArguments(message, true));
+      final MessageArguments args =
+      ModalRoute
+          .of(context)
+          .settings
+          .arguments as MessageArguments;
+      RemoteMessage message = args.message;
+      Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
     });
-
   }
 
   Future<void> sendPushMessage() async {
@@ -196,7 +201,7 @@ class _Application extends State<Application> {
         {
           print(
               'FlutterFire Messaging Example: Subscribing to topic "fcm_test".');
-          await FirebaseMessaging.instance.subscribeToTopic('i0ycGkQl94dWeUG0YC1nTimLEP13');
+          await FirebaseMessaging.instance.subscribeToTopic('asd');
           print(
               'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.');
         }
@@ -205,7 +210,7 @@ class _Application extends State<Application> {
         {
           print(
               'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".');
-          await FirebaseMessaging.instance.unsubscribeFromTopic('i0ycGkQl94dWeUG0YC1nTimLEP13');
+          await FirebaseMessaging.instance.unsubscribeFromTopic('asd');
           print(
               'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.');
         }

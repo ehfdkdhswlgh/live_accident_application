@@ -48,6 +48,11 @@ void main() async{
       .resolvePlatformSpecificImplementation<
       AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
   runApp(
       MultiProvider( // privider를 위해 추가함 - 호준 4/16
         providers: [
@@ -63,6 +68,7 @@ void main() async{
 
   );
 }
+
 class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
