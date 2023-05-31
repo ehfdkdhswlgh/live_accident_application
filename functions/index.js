@@ -113,15 +113,16 @@ exports.getSms = functions.https.onRequest(async (req, res) => {
   })();
 });
 
-exports.getPolice = functions.https.onRequest(async (req, res) => {
+
+exports.getEarthquake = functions.https.onRequest(async (req, res) => {
   // Firebase Firestore reference
   const db = admin.firestore();
 
   // URL of the public JSON data
-  const url = "https://www.safetydata.go.kr/openApi/%EA%B2%BD%EC%B0%B0%EC%B2%AD_%EA%B5%90%ED%86%B5%EB%8F%8C%EB%B0%9C%EC%83%81%ED%99%A9%EB%B0%9C%EC%83%9D%EC%A0%95%EB%B3%B4?serviceKey=0N6TVD9SUFR5F41S&returnType=JSON&pageNum=1&numRowsPerPage=200";
+  const url = "https://www.safetydata.go.kr/openApi/%EA%B8%B0%EC%83%81%EC%B2%AD_%EC%A7%80%EC%A7%84%ED%86%B5%EB%B3%B4?serviceKey=5ONNDO8QT5CEF2O3&returnType=JSON&pageNum=1&numRowsPerPage=200";
 
   (async () => {
-    await tools.firestore.delete("/police",
+    await tools.firestore.delete("/earthquake",
         {project: process.env.GCLOUD_PROJECT,
           recursive: true,
           yes: true,
@@ -136,21 +137,20 @@ exports.getPolice = functions.https.onRequest(async (req, res) => {
       const newsData = data.responseData.data;
       for (const item of newsData) {
         // Automatically generate a document identifier.
-        const docRef = db.collection("police").doc();
+        const docRef = db.collection("earthquake").doc();
 
         await docRef.set({
-          STD_LINK_ID: item.STD_LINK_ID,
-          STATUS: item.STATUS,
-          SUCCESS: item.SUCCESS,
-          UPDATE_DESC: item.UPDATE_DESC,
-          TYPE_OTHER: item.TYPE_OTHER,
-          REG_DATE: item.REG_DATE,
-          UPDATE_TYPE: item.UPDATE_TYPE,
-          SUCCESS_C: item.SUCCESS_C,
-          UPDATE_TIME: item.UPDATE_TIME,
-          SUCCESS_M: item.SUCCESS_M,
-          TYPE_DESC: item.TYPE_DESC,
-          STATUS_DESC: item.STATUS_DESC,
+          CD_STN: item.CD_STN,
+          DT_REGT: item.DT_REGT,
+          LOC_LOC: item.LOC_LOC,
+          CORD_LON: item.CORD_LON,
+          NO_REF: item.NO_REF,
+          NO_ORD: item.NO_ORD,
+          CORD_LAT: item.CORD_LAT,
+          DT_STFC: item.DT_STFC,
+          STAT_OTHER: item.STAT_OTHER,
+          SECT_SCLE: item.SECT_SCLE,
+          DT_TM_FC: item.DT_TM_FC,
         });
       }
 
@@ -161,6 +161,66 @@ exports.getPolice = functions.https.onRequest(async (req, res) => {
     }
   })();
 });
+
+
+exports.getWildfire = functions.https.onRequest(async (req, res) => {
+  // Firebase Firestore reference
+  const db = admin.firestore();
+
+  // URL of the public JSON data
+  const url = "https://www.safetydata.go.kr/openApi/%EC%82%B0%EB%A6%BC%EC%B2%AD_%EA%B8%B0%EA%B4%80%EC%9A%A9_%EA%B8%88%EC%9D%BC%EC%82%B0%EB%B6%88%EB%B0%9C%EC%83%9D%ED%98%84%ED%99%A9?serviceKey=4KBL32YA9M0X80XU&returnType=JSON&pageNum=1&numRowsPerPage=200";
+
+  (async () => {
+    await tools.firestore.delete("/wildfire",
+        {project: process.env.GCLOUD_PROJECT,
+          recursive: true,
+          yes: true,
+          force: true,
+        });
+
+    try {
+      const response = await axios.get(url);
+      const data = response.data;
+
+      // Storing data into Firestore
+      const newsData = data.responseData.data;
+      for (const item of newsData) {
+        // If any of the necessary fields are not present in the data, ignore and move to next item.
+        if (!item.FRFR_INFO_ID || !item.FRFR_OCCRR_ADDR || !item.LAST_UPDT_DTM || !item.FRFR_FRNG_DTM ||
+            !item.FRFR_OCCRR_TPCD || !item.FRST_RGSTN_DTM || !item.FRFR_STTMN_HMS || !item.RNO ||
+            !item.FRFR_PRGRS_STCD || !item.FRFR_STTMN_DT || !item.FRFR_STTMN_ADDR ||
+            !item.FRFR_LCTN_XCRD || !item.FRFR_LCTN_YCRD) {
+          continue;
+        }
+
+        // Automatically generate a document identifier.
+        const docRef = db.collection("wildfire").doc();
+
+        await docRef.set({
+          FRFR_INFO_ID: item.FRFR_INFO_ID,
+          FRFR_OCCRR_ADDR: item.FRFR_OCCRR_ADDR,
+          LAST_UPDT_DTM: item.LAST_UPDT_DTM,
+          FRFR_FRNG_DTM: item.FRFR_FRNG_DTM,
+          FRFR_OCCRR_TPCD: item.FRFR_OCCRR_TPCD,
+          FRST_RGSTN_DTM: item.FRST_RGSTN_DTM,
+          FRFR_STTMN_HMS: item.FRFR_STTMN_HMS,
+          RNO: item.RNO,
+          FRFR_PRGRS_STCD: item.FRFR_PRGRS_STCD,
+          FRFR_STTMN_DT: item.FRFR_STTMN_DT,
+          FRFR_STTMN_ADDR: item.FRFR_STTMN_ADDR,
+          FRFR_LCTN_XCRD: item.FRFR_LCTN_XCRD,
+          FRFR_LCTN_YCRD: item.FRFR_LCTN_YCRD,
+        });
+      }
+
+      res.send("Data successfully stored in Firestore!");
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Failed to fetch data from the public JSON URL");
+    }
+  })();
+});
+
 
 // rss함수도 유동IP사용시 오류가 자주 발생함 -> 고정IP사용할  것
 exports.rssFeedManual = functions.https.onRequest((request, response) => {

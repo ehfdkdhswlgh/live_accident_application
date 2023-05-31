@@ -51,6 +51,8 @@ class _MapSampleState extends State<MapSample> {
   @override
   void initState() {
     super.initState();
+
+
     getCurrentLocation();
     _fetchData();
   }
@@ -333,6 +335,12 @@ class _MapSampleState extends State<MapSample> {
 
 
   Future<void> getCurrentLocation() async {
+    bool hasPermission = await requestLocationPermission();
+    if (!hasPermission) {
+      // 권한이 없는 경우 처리할 내용
+      return;
+    }
+
     Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.medium,
     );
@@ -342,6 +350,21 @@ class _MapSampleState extends State<MapSample> {
     });
   }
 
+  Future<bool> requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // 권한 거부됨
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      // 사용자가 영원히 권한을 거부함
+      return false;
+    }
+    return true;
+  }
 
   void _createPostMarkers() {
     List<MarkerData> markerDataList = [];
