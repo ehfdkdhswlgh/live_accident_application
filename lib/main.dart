@@ -15,11 +15,11 @@ import 'hojun/post.dart' as post;
 import 'hojun/store.dart';
 import 'hojun/top_rank.dart';
 import 'hojun/write_report_demo.dart' as test;
-import 'jihwan/news.dart';
 import 'jihwan/post_report.dart';
 import 'jihwan/post_report_management.dart';
 import 'jihwan/write_report.dart';
 import 'jihoon/map_sample.dart';
+import 'jihwan/yh_news.dart';
 
 
 void main() async{
@@ -93,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(),News()][_currentIndex],
+      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(), YHNews(),][_currentIndex],
       floatingActionButton: UserImfomation.athority == 'manager'
           ? FloatingActionButton(
             onPressed: () {
