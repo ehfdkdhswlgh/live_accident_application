@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../UserImfomation.dart';
 import 'account_management.dart';
-import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../hojun/post_main_document.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 String nickname = '';
 String uid = '';
@@ -89,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             followBtn = ElevatedButton(
               child: Text('구독중'),
-              onPressed: () {handleUnsubscribe();},
+              onPressed: () {handleUnsubscribe();unSubscribe(widget.inputUid);},
             );
           });
         } else {
@@ -97,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             followBtn = ElevatedButton(
               child: Text('구독하기'),
-              onPressed: () {handleSubscribe();},
+              onPressed: () {handleSubscribe();subscribe(widget.inputUid);},
             );
           });
         }
@@ -259,6 +259,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userNickname = userquery.docs.first.get('name').toString();
     return userNickname;
   }
+
+  Future<void> subscribe(String uid) async {
+    print('FlutterFire Messaging Example: Subscribing to topic $uid.');
+    await FirebaseMessaging.instance.subscribeToTopic(uid);
+    print('FlutterFire Messaging Example: Subscribing to topic $uid successful.');
+
+  }
+
+  Future<void> unSubscribe(String uid) async {
+    print('FlutterFire Messaging Example: Subscribing to topic $uid.');
+    await FirebaseMessaging.instance.unsubscribeFromTopic(uid);
+    print('FlutterFire Messaging Example: Subscribing to topic $uid successful.');
+  }
+
 
   @override
   Widget build(BuildContext context) {

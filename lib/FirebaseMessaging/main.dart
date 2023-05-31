@@ -86,20 +86,29 @@ class MessagingExampleApp extends StatelessWidget {
 }
 
 // Crude counter to make messages unique
-int _messageCount = 0;
 
+//보내는 메시지 형식
+//"to" : "/topics/새로운형식"으로 사용
 /// The API endpoint here accepts a raw FCM payload for demonstration purposes.
-String constructFCMPayload() {
-  _messageCount++;
+String constructFCMPayload(String postId, String imageUrl, String postMain, String userNickname, String title, String userId, int like, String address) {
+  final now = DateTime.now();
+  final timestamp = now.millisecondsSinceEpoch;
   return jsonEncode({
-    "to" : "/topics/fcm_test",
+    "to" : "/topics/hojun",
     'data': {
-      'via': 'FlutterFire Cloud Messaging!!!',
-      'count': _messageCount.toString(),
+      'postId': postId,
+      'imageUrl': imageUrl,
+      'postMain': postMain,
+      'userNickname': userNickname,
+      'postName': title,
+      'userId': userId,
+      'timestamp': timestamp,
+      'like': like,
+      'address': address,
     },
     'notification': {
-      'title': 'Hello FlutterFire!',
-      'body': 'This notification (#$_messageCount) was created via FCM!',
+      'title': 'LIVE Accident!!',
+      'body': title,
     },
   });
 }
@@ -111,7 +120,7 @@ class Application extends StatefulWidget {
 }
 
 class _Application extends State<Application> {
-  String _token = "ecL8Aaa6S1q-cPqlRddnNJ:APA91bHlm1Dh5v7YBcK9KzgKcF_7R0Vof_9DN6aY-oEX2au3VsxQpKhuzFYVGggfAxWFtiYD7u04qfFA98JL2avf62iBhGiXSKqSjc6BtME4Wcy405LIO2Nefszv9rRO9bvSkZa5_xLq";
+  String _token = "";
   final String _serverKey = "AAAA2i-SWXA:APA91bEWfVsJxukDj9b7cJgMezjRl_SBNj3ey55SiYdhwH1mOxNfNjTSIkgPfOF0rlPyPDfI-DRDIr0UAw1YqG32wRUFSZ38CVnYO6AeA-qZGZLVMF7izh19n9oDHhmwqYdZa1WpCVoW";
   @override
   void initState() {
@@ -155,11 +164,6 @@ class _Application extends State<Application> {
   }
 
   Future<void> sendPushMessage() async {
-    if (_token == null) {
-      print('Unable to send FCM message, no token exists.');
-      return;
-    }
-
     try {
       await http.post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),
@@ -167,7 +171,16 @@ class _Application extends State<Application> {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'key=$_serverKey'
         },
-        body: constructFCMPayload(),
+        body: constructFCMPayload(
+          'i0ycGkQl94dWeUG0YC1nTimLEP131685096361619653',
+          'https://firebasestorage.googleapis.com/v0/b/live-accident.appspot.com/o/images%2F42a86e9b-c843-425c-aa2a-2469f6a20a25?alt=media&token=3ebfe1a1-2bf2-4fc9-9bc1-d02a93c345ef,https://firebasestorage.googleapis.com/v0/b/live-accident.appspot.com/o/images%2F105c6fec-56ee-444d-8bc2-77dbdb815637?alt=media&token=8ad6b3b4-7197-4908-a1ff-a3640ef57664',
+          '판쵸우비상!!!!!!!!!!',
+          'hojun',
+          '비상!!!!!!!',
+          'i0ycGkQl94dWeUG0YC1nTimLEP13',
+          0,
+          '대한민국 경상북도 경산시 진량읍 내리리 108-5번지 KR'
+        ),
       );
       print('FCM request for device sent!');
     } catch (e) {
@@ -175,13 +188,15 @@ class _Application extends State<Application> {
     }
   }
 
+
+  //구독자 버튼에 들어갈 내용
   Future<void> onActionSelected(String value) async {
     switch (value) {
       case 'subscribe':
         {
           print(
               'FlutterFire Messaging Example: Subscribing to topic "fcm_test".');
-          await FirebaseMessaging.instance.subscribeToTopic('fcm_test');
+          await FirebaseMessaging.instance.subscribeToTopic('hojun');
           print(
               'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.');
         }
@@ -190,7 +205,7 @@ class _Application extends State<Application> {
         {
           print(
               'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".');
-          await FirebaseMessaging.instance.unsubscribeFromTopic('fcm_test');
+          await FirebaseMessaging.instance.unsubscribeFromTopic('hojun');
           print(
               'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.');
         }
@@ -211,6 +226,20 @@ class _Application extends State<Application> {
       default:
         break;
     }
+  }
+
+  Future<void> subscribe(String uid) async {
+    print('FlutterFire Messaging Example: Subscribing to topic "fcm_test".');
+    await FirebaseMessaging.instance.subscribeToTopic(uid);
+    print('FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.');
+
+  }
+
+  Future<void> unSubscribe(String uid) async {
+    print('FlutterFire Messaging Example: Subscribing to topic "fcm_test".');
+    await FirebaseMessaging.instance.unsubscribeFromTopic(uid);
+    print('FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.');
+
   }
 
   @override

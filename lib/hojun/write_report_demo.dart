@@ -214,6 +214,7 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                         List<String> strList = await uploadImages(_pickedImages);
                         String str = strList.join(","); // 리스트를 쉼표로 구분된 문자열로 변환
                         _uploadPost(UserImfomation.uid, str, context.read<Store>().postType);
+
                         widget.onReportSubmitted();
 
                         setState(() {
@@ -494,23 +495,23 @@ class _ReportScreenState extends State<ReportWriteScreen> {
   void _uploadPost(String userId, String url, int postType) async {
     String title = _titleController.text;
     String main = _mainController.text;
-
+    String postId = '${userId}${DateTime.now().microsecondsSinceEpoch}';
+    final timestamp = FieldValue.serverTimestamp();
     if (title.isNotEmpty) {
 
       //GeoFirePoint mygeo = geo.point(latitude: currentPosition!.latitude, longitude: currentPosition!.longitude);
       var geohash = geoHasher.encode(currentPosition!.longitude, currentPosition!.latitude, precision: 4);
       //
-
       _firestore.collection('posts').add({
         'user_id': userId,
-        'post_id': '${userId}${DateTime.now().microsecondsSinceEpoch}',
+        'post_id': postId,
         'title': title,
         'post_content': main,
         'post_type': postType,
         'images': url,
         'address_name': address,
         'is_visible': true,
-        'timestamp': FieldValue.serverTimestamp(),
+        'timestamp': timestamp,
         'latitude' : currentPosition!.latitude,
         'longitude' : currentPosition!.longitude,
         'geohash': geohash, // Geohash 필드 추가
@@ -528,10 +529,25 @@ class _ReportScreenState extends State<ReportWriteScreen> {
       });
       // 해찬 추가 여기까지
 
+      try {
+        await http.post(
+          Uri.parse('https://fcm.googleapis.com/fcm/send'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'key="AAAA2i-SWXA:APA91bEWfVsJxukDj9b7cJgMezjRl_SBNj3ey55SiYdhwH1mOxNfNjTSIkgPfOF0rlPyPDfI-DRDIr0UAw1YqG32wRUFSZ38CVnYO6AeA-qZGZLVMF7izh19n9oDHhmwqYdZa1WpCVoW"'
+          },
+          body: messageConstruct(postId, url, main, UserImfomation.nickname, title, userId, timestamp, 0, address),
+        );
+        print('FCM request for device sent!');
+      } catch (e) {
+        print(e);
+      }
+
       _titleController.clear();
       _mainController.clear();
     }
   }
+
 
 
   Future<void> getCurrentLocation() async {
@@ -570,6 +586,30 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     return '주소 변환 실패';
   }
 }
+
+//message형식 지정, 사용위치530번대
+String messageConstruct(String postId, String imageUrl, String postMain, String userNickname, String title, String userId, FieldValue timestamp, int like, String address) {
+  return jsonEncode({
+    "to" : "/topics/hojun",
+    'data': {
+      'via': 'FlutterFire Cloud Messaging!!!',
+      'postId': postId,
+      'imageUrl': imageUrl,
+      'postMain': postMain,
+      'userNickname': userNickname,
+      'postName': title,
+      'userId': userId,
+      'timestamp': timestamp,
+      'like': like,
+      'address': address,
+    },
+    'notification': {
+      'title': 'LIVE Accident!!',
+      'body': title,
+    },
+  });
+}
+//
 
 class MyButton extends StatefulWidget {
   const MyButton({Key? key}) : super(key: key);

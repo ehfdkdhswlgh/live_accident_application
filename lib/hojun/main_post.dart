@@ -44,7 +44,6 @@ class _MainPostState extends State<MainPost> {
 
   void handleLikePost() {
     var user = FirebaseAuth.instance.currentUser;
-
     if (isLiked) {
       // Already liked, so we need to unlike
       FirebaseFirestore.instance
@@ -133,8 +132,8 @@ class _MainPostState extends State<MainPost> {
                 ),
               ],
             ),
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              await Navigator.push(
                 context,
                 PageRouteBuilder(
                   pageBuilder: (c, a1, a2) => PostDocument(
@@ -152,6 +151,9 @@ class _MainPostState extends State<MainPost> {
                       FadeTransition(opacity: a1, child: child),
                 ),
               );
+              setState(() {
+                // 새로고침 로직 실행
+              });
             },
           ),
           Padding(
