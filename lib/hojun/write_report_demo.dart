@@ -529,19 +529,16 @@ class _ReportScreenState extends State<ReportWriteScreen> {
       });
       // 해찬 추가 여기까지
 
-      try {
-        await http.post(
-          Uri.parse('https://fcm.googleapis.com/fcm/send'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': 'key="AAAA2i-SWXA:APA91bEWfVsJxukDj9b7cJgMezjRl_SBNj3ey55SiYdhwH1mOxNfNjTSIkgPfOF0rlPyPDfI-DRDIr0UAw1YqG32wRUFSZ38CVnYO6AeA-qZGZLVMF7izh19n9oDHhmwqYdZa1WpCVoW"'
-          },
-          body: messageConstruct(postId, url, main, UserImfomation.nickname, title, userId, timestamp, 0, address),
-        );
-        print('FCM request for device sent!');
-      } catch (e) {
-        print(e);
-      }
+      sendPushMessage(messageConstruct(
+          postId,
+          url,
+          main,
+          'hojun',
+          title,
+          userId,
+          0,
+          address
+      ));
 
       _titleController.clear();
       _mainController.clear();
@@ -587,8 +584,24 @@ class _ReportScreenState extends State<ReportWriteScreen> {
   }
 }
 
+Future<void> sendPushMessage(String body) async {
+  try {
+    await http.post(
+      Uri.parse('https://fcm.googleapis.com/fcm/send'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'key=AAAA2i-SWXA:APA91bEWfVsJxukDj9b7cJgMezjRl_SBNj3ey55SiYdhwH1mOxNfNjTSIkgPfOF0rlPyPDfI-DRDIr0UAw1YqG32wRUFSZ38CVnYO6AeA-qZGZLVMF7izh19n9oDHhmwqYdZa1WpCVoW'
+      },
+      body: body,
+    );
+    print('FCM request for device sent!');
+  } catch (e) {
+    print(e);
+  }
+}
+
 //message형식 지정, 사용위치530번대
-String messageConstruct(String postId, String imageUrl, String postMain, String userNickname, String title, String userId, FieldValue timestamp, int like, String address) {
+String messageConstruct(String postId, String imageUrl, String postMain, String userNickname, String title, String userId, int like, String address) {
   return jsonEncode({
     "to" : "/topics/${userId}",
     'data': {
@@ -598,7 +611,6 @@ String messageConstruct(String postId, String imageUrl, String postMain, String 
       'userNickname': userNickname,
       'postName': title,
       'userId': userId,
-      'timestamp': Timestamp.now(),
       'like': like,
       'address': address,
     },

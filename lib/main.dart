@@ -9,9 +9,9 @@ import 'hojun/post.dart' as post;
 import 'hojun/store.dart';
 import 'hojun/top_rank.dart';
 import 'hojun/write_report_demo.dart' as test;
-import 'jihwan/news.dart';
 import 'jihwan/post_report_management.dart';
 import 'jihoon/map_sample.dart';
+import 'jihwan/yh_news.dart';
 
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -48,6 +48,11 @@ void main() async{
       .resolvePlatformSpecificImplementation<
       AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
   runApp(
       MultiProvider( // privider를 위해 추가함 - 호준 4/16
         providers: [
@@ -63,10 +68,14 @@ void main() async{
 
   );
 }
+
 class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
+
+
+
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
@@ -155,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(),News()][_currentIndex],
+      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(), YHNews()][_currentIndex], //
       floatingActionButton: UserImfomation.athority == 'manager'
           ? FloatingActionButton(
             onPressed: () {
