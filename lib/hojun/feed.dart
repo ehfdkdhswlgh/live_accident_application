@@ -293,14 +293,41 @@ class _FeedState extends State<Feed> {
       final _postName = doc.get('title').toString();
       final _timestamp = doc.get('timestamp');
       final _address = doc.get('address_name').toString();
+      var _profile = "";
+
       var _like = doc.get('like');
       String _userNickname = '';
       try {
         final _nickname = await getNickname(_userId);
         _userNickname = _nickname;
       } catch (error) {}
-      return Post(postId: _postId, imageLinks: _imageLinks, postMain: _postMain, userId: _userId, userNickname: _userNickname, postName: _postName, timestamp: _timestamp, like: _like, address: _address);
+
+      // Retrieve profile field from Firestore
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('user')
+          .where('uid', isEqualTo: _userId)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.size > 0) {
+        final documentSnapshot = querySnapshot.docs.first;
+        _profile = documentSnapshot.get('profile');
+      }
+
+      return Post(
+        postId: _postId,
+        imageLinks: _imageLinks,
+        postMain: _postMain,
+        userId: _userId,
+        userNickname: _userNickname,
+        postName: _postName,
+        timestamp: _timestamp,
+        like: _like,
+        address: _address,
+        profile: _profile, // Assign the retrieved profile value
+      );
     }).toList());
+
 
     setState(() {
       _isLoading = false;
@@ -347,6 +374,7 @@ class Post {
   final String postName;
   final Timestamp timestamp;
   final String address;
+  var profile;
   var like;
-  Post({required this.postId, required this.imageLinks, required this.postMain, required this.userId, required this.userNickname, required this.postName, required this.timestamp, required this.like, required this.address});
+  Post({required this.postId, required this.imageLinks, required this.postMain, required this.userId, required this.userNickname, required this.postName, required this.timestamp, required this.like, required this.address, required this.profile});
 }

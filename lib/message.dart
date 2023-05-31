@@ -40,6 +40,7 @@ class _MessageViewState extends State<MessageView> {
       timestamp: Timestamp.now(),
       like: 0,
       address: message.data['address'],
+      profile: "",
     );
   }
 }

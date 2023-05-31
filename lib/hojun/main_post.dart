@@ -101,7 +101,7 @@ class _MainPostState extends State<MainPost> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
-              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like, address: widget.postContent.address, timestamp: widget.postContent.timestamp),
+              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like, address: widget.postContent.address, timestamp: widget.postContent.timestamp, profile: widget.postContent.profile,),
               onTap: () {
                 Navigator.push(
                   context,
@@ -146,6 +146,7 @@ class _MainPostState extends State<MainPost> {
                     timestamp: widget.postContent.timestamp,
                     like: widget.postContent.like,
                     address: widget.postContent.address,
+                    profile: widget.postContent.profile,
                   ),
                   transitionsBuilder: (c, a1, a2, child) =>
                       FadeTransition(opacity: a1, child: child),
@@ -186,6 +187,7 @@ class _MainPostState extends State<MainPost> {
                           timestamp: widget.postContent.timestamp,
                           like: widget.postContent.like,
                           address: widget.postContent.address,
+                          profile: widget.postContent.profile,
                         ),
                         transitionsBuilder: (c, a1, a2, child) =>
                             FadeTransition(opacity: a1, child: child),
@@ -211,7 +213,7 @@ class _MainPostState extends State<MainPost> {
 }
 
 class Profile extends StatelessWidget {
-  Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId, required this.like, required this.address, required this.timestamp}) : super(key: key);
+  Profile({Key? key, required this.userNickname, required this.postId, required this.postName, required this.userId, required this.like, required this.address, required this.timestamp, required this.profile}) : super(key: key);
   final userNickname;
   final postId;
   final postName;
@@ -219,6 +221,7 @@ class Profile extends StatelessWidget {
   final address;
   final timestamp;
   var like;
+  final profile;
 
   @override
   Widget build(BuildContext context) {
@@ -228,8 +231,10 @@ class Profile extends StatelessWidget {
         Row(
           children: [
             CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.grey, // 프사를 넣을 경우 backgroundImage
+              radius: 30.0,
+              backgroundImage: profile == null || profile.isEmpty
+                  ? null
+                  : NetworkImage(profile),
             ),
             SizedBox(width: 8.0), // Add some spacing between the avatar and text
             Column(

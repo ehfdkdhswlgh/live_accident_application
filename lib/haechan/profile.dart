@@ -387,6 +387,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             timestamp: dataList[index]['timestamp'],
                             like: dataList[index]['like'],
                             address: dataList[index]['address_name'],
+                            profile: dataList[index]['profile'],
                           ),
                           transitionsBuilder: (c, a1, a2, child) =>
                               FadeTransition(opacity: a1, child: child),
