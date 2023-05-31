@@ -12,7 +12,6 @@ import 'tags.dart' as tag;
 import '../haechan/profile.dart' as profile;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import '../hojun/feed.dart';
 
 
 
@@ -32,7 +31,8 @@ class _MapSampleState extends State<MapSample> {
 
   List<Map<String, String>> items = [];
   List<Map<String, dynamic>> post_items = [];
-
+  List<Map<String, String>> earthquake_items = [];
+  List<Map<String, String>> wildfire_items = [];
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
@@ -51,10 +51,10 @@ class _MapSampleState extends State<MapSample> {
   @override
   void initState() {
     super.initState();
-
-
     getCurrentLocation();
     _fetchData();
+    _fetchWildFireItems();
+    _fetchEarthquakeItems();
   }
 
   @override
@@ -70,6 +70,68 @@ class _MapSampleState extends State<MapSample> {
       _fetchData();
     }
   }
+
+
+  Future<void> _fetchWildFireItems() async {
+    List<Map<String, String>> wildItems = [];
+
+    QuerySnapshot querySnapshot = await _firestore.collection('wildfire').get();
+    querySnapshot.docs.forEach((doc) {
+      wildItems.add({
+        'FRFR_FRNG_DTM': doc['FRFR_FRNG_DTM'],
+        'FRFR_INFO_ID': doc['FRFR_INFO_ID'],
+        'FRFR_LCTN_XCRD': doc['FRFR_LCTN_XCRD'],
+        'FRFR_LCTN_YCRD': doc['FRFR_LCTN_YCRD'],
+        'FRFR_OCCRR_ADDR': doc['FRFR_OCCRR_ADDR'],
+        'FRFR_OCCRR_TPCD': doc['FRFR_OCCRR_TPCD'],
+        'FRFR_PRGRS_STCD': doc['FRFR_PRGRS_STCD'],
+        'FRFR_STTMN_ADDR': doc['FRFR_STTMN_ADDR'],
+        'FRFR_STTMN_DT': doc['FRFR_STTMN_DT'],
+        'FRFR_STTMN_HMS': doc['FRFR_STTMN_HMS'],
+        'FRST_RGSTN_DTM': doc['FRST_RGSTN_DTM'],
+        'LAST_UPDT_DTM': doc['LAST_UPDT_DTM'],
+        'RNO': doc['RNO'],
+      });
+    });
+
+    setState(() {
+      wildfire_items = wildItems;
+    });
+
+    print('산불 정보 데이터 개수  : : ${wildfire_items.length}');
+
+  }
+
+
+  Future<void> _fetchEarthquakeItems() async {
+    List<Map<String, String>> eqItems = [];
+
+    QuerySnapshot querySnapshot = await _firestore.collection('earthquake').get();
+    querySnapshot.docs.forEach((doc) {
+      eqItems.add({
+        'CD_STN': doc['CD_STN'],
+        'CORD_LAT': doc['CORD_LAT'],
+        'CORD_LON': doc['CORD_LON'],
+        'DT_REGT': doc['DT_REGT'],
+        'DT_STFC': doc['DT_STFC'],
+        'DT_TM_FC': doc['DT_TM_FC'],
+        'LOC_LOC': doc['LOC_LOC'],
+        'NO_ORD': doc['NO_ORD'],
+        'NO_REF': doc['NO_REF'],
+        'SECT_SCLE': doc['SECT_SCLE'],
+        'STAT_OTHER': doc['STAT_OTHER'],
+      });
+    });
+
+    setState(() {
+      earthquake_items = eqItems;
+    });
+
+    print('지진 정보 데이터 개수  : : ${earthquake_items.length}');
+
+  }
+
+
 
   Future<void> _fetchData() async {
     if (_isLoading) return;
@@ -91,7 +153,6 @@ class _MapSampleState extends State<MapSample> {
       }
     }
       else{
-        print("하이");
         print(context.read<Store>().selectedPostType.toString());
         if (items.isEmpty && post_items.isEmpty) {
 
@@ -157,6 +218,9 @@ class _MapSampleState extends State<MapSample> {
 
 
     }
+
+
+
 
 
 
