@@ -13,6 +13,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import '../jihwan/post_report_management.dart';
+import 'dart:math';
+import 'package:firebase_storage/firebase_storage.dart';
 
 
 
@@ -370,6 +372,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
         CollectionReference users = FirebaseFirestore.instance.collection('user');
 
+
+        FirebaseStorage storage = await FirebaseStorage.instance;
+        // Generate a random number between 1 and 200
+        var rng = new Random();
+        int iconNumber = rng.nextInt(200) + 1;
+
+        // Create a reference to the file
+        Reference ref = storage.ref('profiles/icon$iconNumber.png');
+
+        // Get the download URL
+        String downloadURL = await ref.getDownloadURL();
+
+
         // Firestore에 사용자 정보 저장
         await users.doc(uid).set({
           'name': _nameController.text,
@@ -378,6 +393,7 @@ class _MyHomePageState extends State<MyHomePage> {
           'following' : 0,
           'follow' : 0,
           'post_count' : 0,
+          'profile' : downloadURL,
         });
 
         result.user?.updateDisplayName(_nameController.text);
