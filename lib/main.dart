@@ -158,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(), YHNews()][_currentIndex],
+      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(), YHNews()][_currentIndex], //
       floatingActionButton: UserImfomation.athority == 'manager'
           ? FloatingActionButton(
             onPressed: () {
