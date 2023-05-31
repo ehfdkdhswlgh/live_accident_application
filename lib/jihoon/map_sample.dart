@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
@@ -23,6 +24,12 @@ class MapSample extends StatefulWidget {
 
 
 class _MapSampleState extends State<MapSample> {
+  BitmapDescriptor markerCarIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor markerUserIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor markerFireIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor markerEarthQuakeIcon = BitmapDescriptor.defaultMarker;
+
+
 
   bool _isLoading = false;
 
@@ -38,14 +45,11 @@ class _MapSampleState extends State<MapSample> {
   TextEditingController _searchController = TextEditingController();
 
   LatLng? currentPosition;
-
-
   var selectedPostType = 1;
-
-
-
   int i = 0;
   Set<Marker> markers = {};
+
+
 
 
   @override
@@ -55,8 +59,39 @@ class _MapSampleState extends State<MapSample> {
     _fetchData();
     _fetchWildFireItems();
     _fetchEarthquakeItems();
+    // addCustomIcon();
   }
 
+  //
+  // void addCustomIcon() {
+  //   BitmapDescriptor.fromAssetImage(const ImageConfiguration(), "images/MarkerIcons/car_icon.png").then((icon) {
+  //     setState(() {
+  //       markerCarIcon = icon;
+  //     });
+  //
+  //   });
+  //
+  //   BitmapDescriptor.fromAssetImage(const ImageConfiguration(), "images/MarkerIcons/earthquake_icon.png").then((icon) {
+  //     setState(() {
+  //       markerEarthQuakeIcon = icon;
+  //     });
+  //
+  //   });
+  //
+  //   BitmapDescriptor.fromAssetImage(const ImageConfiguration(), "images/MarkerIcons/human_icon.png").then((icon) {
+  //     setState(() {
+  //       markerUserIcon = icon;
+  //     });
+  //
+  //   });
+  //
+  //   BitmapDescriptor.fromAssetImage(const ImageConfiguration(), "images/MarkerIcons/wildfire_icon.png").then((icon) {
+  //     setState(() {
+  //       markerFireIcon = icon;
+  //     });
+  //
+  //   });
+  // }
   @override
   void didUpdateWidget(MapSample oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -65,6 +100,8 @@ class _MapSampleState extends State<MapSample> {
       setState(() {
         items = [];
         post_items = [];
+        earthquake_items = [];
+        wildfire_items = [];
         markers = {};
       });
       _fetchData();
@@ -72,64 +109,7 @@ class _MapSampleState extends State<MapSample> {
   }
 
 
-  Future<void> _fetchWildFireItems() async {
-    List<Map<String, String>> wildItems = [];
 
-    QuerySnapshot querySnapshot = await _firestore.collection('wildfire').get();
-    querySnapshot.docs.forEach((doc) {
-      wildItems.add({
-        'FRFR_FRNG_DTM': doc['FRFR_FRNG_DTM'],
-        'FRFR_INFO_ID': doc['FRFR_INFO_ID'],
-        'FRFR_LCTN_XCRD': doc['FRFR_LCTN_XCRD'],
-        'FRFR_LCTN_YCRD': doc['FRFR_LCTN_YCRD'],
-        'FRFR_OCCRR_ADDR': doc['FRFR_OCCRR_ADDR'],
-        'FRFR_OCCRR_TPCD': doc['FRFR_OCCRR_TPCD'],
-        'FRFR_PRGRS_STCD': doc['FRFR_PRGRS_STCD'],
-        'FRFR_STTMN_ADDR': doc['FRFR_STTMN_ADDR'],
-        'FRFR_STTMN_DT': doc['FRFR_STTMN_DT'],
-        'FRFR_STTMN_HMS': doc['FRFR_STTMN_HMS'],
-        'FRST_RGSTN_DTM': doc['FRST_RGSTN_DTM'],
-        'LAST_UPDT_DTM': doc['LAST_UPDT_DTM'],
-        'RNO': doc['RNO'],
-      });
-    });
-
-    setState(() {
-      wildfire_items = wildItems;
-    });
-
-    print('산불 정보 데이터 개수  : : ${wildfire_items.length}');
-
-  }
-
-
-  Future<void> _fetchEarthquakeItems() async {
-    List<Map<String, String>> eqItems = [];
-
-    QuerySnapshot querySnapshot = await _firestore.collection('earthquake').get();
-    querySnapshot.docs.forEach((doc) {
-      eqItems.add({
-        'CD_STN': doc['CD_STN'],
-        'CORD_LAT': doc['CORD_LAT'],
-        'CORD_LON': doc['CORD_LON'],
-        'DT_REGT': doc['DT_REGT'],
-        'DT_STFC': doc['DT_STFC'],
-        'DT_TM_FC': doc['DT_TM_FC'],
-        'LOC_LOC': doc['LOC_LOC'],
-        'NO_ORD': doc['NO_ORD'],
-        'NO_REF': doc['NO_REF'],
-        'SECT_SCLE': doc['SECT_SCLE'],
-        'STAT_OTHER': doc['STAT_OTHER'],
-      });
-    });
-
-    setState(() {
-      earthquake_items = eqItems;
-    });
-
-    print('지진 정보 데이터 개수  : : ${earthquake_items.length}');
-
-  }
 
 
 
@@ -144,18 +124,26 @@ class _MapSampleState extends State<MapSample> {
     QuerySnapshot querySnapshotPost;
     List<Map<String, dynamic>> postItems = [];
     List<Map<String, String>> opendatasItems = [];
+    List<Map<String, String>> earthquakeItems = [];
+    List<Map<String, String>> wildfireItems = [];
 
 
     if (context.read<Store>().selectedPostType == 0) {
       if (items.isEmpty && post_items.isEmpty) {
         _fetchOpendatasItems();
         _fetchPostItems();
+        _fetchWildFireItems();
+        _fetchEarthquakeItems();
       }
     }
       else{
-        print(context.read<Store>().selectedPostType.toString());
         if (items.isEmpty && post_items.isEmpty) {
 
+
+          if(context.read<Store>().selectedPostType.toString() == "4") {
+            _fetchWildFireItems();
+            _fetchEarthquakeItems();
+          }
 
           querySnapshotPost = await _firestore
               .collection('posts')
@@ -226,9 +214,10 @@ class _MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
-    
     _createPostMarkers(); // 제보글데이터
     _createOpendatasMarkers(); //공공데이터
+    _createEarthQuackWMarkers();
+    _createWildFireMarkers();
 
     if (currentPosition == null) {
       // 위치 정보가 아직 가져와지지 않았을 경우에 대한 처리
@@ -260,6 +249,7 @@ class _MapSampleState extends State<MapSample> {
     else {
       print("로딩 완료...");
       return Scaffold(
+        resizeToAvoidBottomInset : false,
         appBar: AppBar(
           backgroundColor: Colors.white,
           title: RichText(
@@ -292,56 +282,54 @@ class _MapSampleState extends State<MapSample> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => profile.ProfileScreen(UserImfomation.uid),
+                    builder: (context) =>
+                        profile.ProfileScreen(UserImfomation.uid),
                   ),
                 );
               },
             ),
           ],
         ),
-        body:
-        Column(
-          children: [
-            tag.Tags(),
-            Row(
-              children: [
-                Expanded(child: TextFormField(
-                  controller: _searchController,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(hintText: "장소를 입력하세요."),
-                )),
-                IconButton(onPressed: () async {
-                  var place = await LocationService().getPlace(
-                      _searchController.text);
-                  _goToPlace(place);
-                },
-                  icon: Icon(Icons.search),)
-              ],
-            ),
-            Expanded(
-              child: GoogleMap(
-                mapType: MapType.normal,
-
-                initialCameraPosition: CameraPosition(
-                  target: currentPosition!,
-                  zoom: 15,
-                ),
-                markers: markers,
-
-
-                onMapCreated: (GoogleMapController controller) {
-                  _controller.complete(controller);
-                },
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
+        body: Column(
+            children: [
+              tag.Tags(),
+              Row(
+                children: [
+                  Expanded(
+                      child: TextFormField(
+                    controller: _searchController,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: InputDecoration(hintText: "장소를 입력하세요."),
+                  )),
+                  IconButton(onPressed: () async {
+                    var place = await LocationService().getPlace(
+                        _searchController.text);
+                    _goToPlace(place);
+                  },
+                    icon: Icon(Icons.search),)
+                ],
               ),
-            ),
+              Expanded(
+                child: GoogleMap(
+                  mapType: MapType.normal,
 
-          ],
+                  initialCameraPosition: CameraPosition(
+                    target: currentPosition!,
+                    zoom: 15,
+                  ),
+                  markers: markers,
 
-        ),
 
-      );
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                ),
+              ),
+            ],
+          ),
+        );
     }
   }
 
@@ -411,6 +399,66 @@ class _MapSampleState extends State<MapSample> {
 
   }
 
+
+  Future<void> _fetchWildFireItems() async {
+    List<Map<String, String>> wildItems = [];
+
+    QuerySnapshot querySnapshot = await _firestore.collection('wildfire').get();
+    querySnapshot.docs.forEach((doc) {
+      wildItems.add({
+        'FRFR_FRNG_DTM': doc['FRFR_FRNG_DTM'],
+        'FRFR_INFO_ID': doc['FRFR_INFO_ID'],
+        'FRFR_LCTN_XCRD': doc['FRFR_LCTN_XCRD'],
+        'FRFR_LCTN_YCRD': doc['FRFR_LCTN_YCRD'],
+        'FRFR_OCCRR_ADDR': doc['FRFR_OCCRR_ADDR'],
+        'FRFR_OCCRR_TPCD': doc['FRFR_OCCRR_TPCD'],
+        'FRFR_PRGRS_STCD': doc['FRFR_PRGRS_STCD'],
+        'FRFR_STTMN_ADDR': doc['FRFR_STTMN_ADDR'],
+        'FRFR_STTMN_DT': doc['FRFR_STTMN_DT'],
+        'FRFR_STTMN_HMS': doc['FRFR_STTMN_HMS'],
+        'FRST_RGSTN_DTM': doc['FRST_RGSTN_DTM'],
+        'LAST_UPDT_DTM': doc['LAST_UPDT_DTM'],
+        'RNO': doc['RNO'],
+      });
+    });
+
+    setState(() {
+      wildfire_items = wildItems;
+    });
+
+    print('산불 정보 데이터 개수  : : ${wildfire_items.length}');
+
+  }
+
+
+  Future<void> _fetchEarthquakeItems() async {
+    List<Map<String, String>> eqItems = [];
+
+    QuerySnapshot querySnapshot = await _firestore.collection('earthquake').get();
+    querySnapshot.docs.forEach((doc) {
+      eqItems.add({
+        'CD_STN': doc['CD_STN'],
+        'CORD_LAT': doc['CORD_LAT'],
+        'CORD_LON': doc['CORD_LON'],
+        'DT_REGT': doc['DT_REGT'],
+        'DT_STFC': doc['DT_STFC'],
+        'DT_TM_FC': doc['DT_TM_FC'],
+        'LOC_LOC': doc['LOC_LOC'],
+        'NO_ORD': doc['NO_ORD'],
+        'NO_REF': doc['NO_REF'],
+        'SECT_SCLE': doc['SECT_SCLE'],
+        'STAT_OTHER': doc['STAT_OTHER'],
+      });
+    });
+
+    setState(() {
+      earthquake_items = eqItems;
+    });
+
+    print('지진 정보 데이터 개수  : : ${earthquake_items.length}');
+
+  }
+
   Future<String> getNickname(String user_id) async{
     QuerySnapshot userquery = await _firestore
         .collection('user')
@@ -453,7 +501,7 @@ class _MapSampleState extends State<MapSample> {
     return true;
   }
 
-  void _createPostMarkers() {
+  Future<void> _createPostMarkers() async {
     List<MarkerData> markerDataList = [];
 
     for (var item in post_items) {
@@ -494,6 +542,7 @@ class _MapSampleState extends State<MapSample> {
         onTap: () {
           _showListDialog(markerData.dataList);
         },
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       );
 
       markers.add(marker);
@@ -525,6 +574,15 @@ class _MapSampleState extends State<MapSample> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("[경찰청_교통돌발정보]",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 15, // 원하는 폰트 크기로 조정
+                            )),
+                      ),
+                      Divider(),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("주소 : " + title,
@@ -570,12 +628,214 @@ class _MapSampleState extends State<MapSample> {
             },
           );
         },
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       );
 
       markers.add(marker);
     }
   }
+
+
+
+   void _createWildFireMarkers(){
+    DateTime now = DateTime.now();
+    for (var data in wildfire_items) {
+      String latitude = data['FRFR_LCTN_XCRD']!;
+      String longitude = data['FRFR_LCTN_YCRD']!;
+      String address = data['FRFR_STTMN_ADDR']!;
+      String startDate = data['FRFR_STTMN_DT']!;
+      String startHMS = data['FRFR_STTMN_HMS']!;
+      int i = markers.length + 1;
+
+      String formattedStartDate = '${startDate.substring(0, 4)}년 ${startDate.substring(4, 6)}월 ${startDate.substring(6, 8)}일 ';
+      String formattedStartHMS = '${startHMS.substring(0, 2)}시 ${startHMS.substring(2, 4)}분';
+
+
+      String formattedDateTime = '$formattedStartDate $formattedStartHMS';
+
+      DateTime markerStartDate = DateTime(int.parse(startDate.substring(0, 4)), int.parse(startDate.substring(4, 6)), int.parse(startDate.substring(6, 8)));
+
+
+      if (markerStartDate.difference(now).inDays >= -7) {
+        Marker marker = Marker(
+          markerId: MarkerId(i.toString()),
+          position: LatLng(double.parse(longitude), double.parse(latitude)),
+          infoWindow: InfoWindow(title: '', snippet: ''), // 비어있는 InfoWindow
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                  child: Container(
+                    width: 300, // 원하는 너비로 조정
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "[산림청_금일산불발생현황]",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15, // 원하는 폰트 크기로 조정
+                            ),
+                          ),
+                        ),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "주소 : " + address,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 15, // 원하는 폰트 크기로 조정
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("시작일: $formattedDateTime", style: TextStyle(fontSize: 13)),
+                        ),
+                        Align(
+                          alignment: Alignment.center,
+                          child: TextButton(
+                            child: Text("닫기"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        );
+
+        markers.add(marker);
+      }
+    }
+  }
+
+
+
+  void _createEarthQuackWMarkers() {
+    DateTime now = DateTime.now();
+    for (var data in earthquake_items) {
+      String latitude = data['CORD_LON']!;
+      String longitude = data['CORD_LAT']!;
+      String address = data['LOC_LOC']!;
+      String scale = data['SECT_SCLE']!;
+      String startDate = data['DT_STFC']!;
+      String description = data['STAT_OTHER']!;
+
+
+      int i = markers.length + 1;
+
+      String year = startDate.substring(0, 4);
+      String month = startDate.substring(4, 6);
+      String day = startDate.substring(6, 8);
+      String hour = startDate.substring(8, 10);
+      String minute = startDate.substring(10, 12);
+
+      String ymd = startDate.substring(0, 8);
+
+
+      String formattedDate = '$year년 $month월 $day일 $hour시 $minute분';
+
+      DateTime markerStartDate = DateTime(
+          int.parse(ymd.substring(0, 4)), int.parse(ymd.substring(4, 6)),
+          int.parse(ymd.substring(6, 8)));
+
+
+      if (markerStartDate.difference(now).inDays >= -30) {
+        Marker marker = Marker(
+          markerId: MarkerId(i.toString()),
+          position: LatLng(double.parse(longitude), double.parse(latitude)),
+          infoWindow: InfoWindow(title: '', snippet: ''),
+          // 비어있는 InfoWiddow
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                  child: Container(
+                    width: 500, // 원하는 너비로 조정
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("[기상청_지진통보]",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15, // 원하는 폰트 크기로 조정
+                              )),
+                        ),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("주소 : " + address,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 15, // 원하는 폰트 크기로 조정
+                              )),
+                        ),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("규모 : " + scale, style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16, // 원하는 폰트 크기로 조정
+                          )),
+                        ),
+                        SizedBox(height: 10),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("발표시각: $formattedDate",
+                              style: TextStyle(fontSize: 13)),
+                        ),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("참고사항: $description",
+                              style: TextStyle(fontSize: 13)),
+                        ),
+                        SizedBox(height: 10),
+
+                        Align(
+                          alignment: Alignment.center,
+                          child: TextButton(
+                            child: Text("닫기"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+        );
+
+        markers.add(marker);
+      }
+    }
+  }
+
+
 
 
 
@@ -608,7 +868,7 @@ class _MapSampleState extends State<MapSample> {
                               Navigator.pop(buildContext);
                             },
                           ),
-                          Text('제보현황', style: TextStyle(fontSize: 20,color: Colors.red,fontWeight: FontWeight.w400)), // This is the new line for your text
+                          Text('제보현황', style: TextStyle(fontSize: 20,color: Colors.red,fontWeight: FontWeight.bold)), // This is the new line for your text
                           SizedBox(width: 40), // This is just a placeholder to keep the balance
                         ],
                       ),
