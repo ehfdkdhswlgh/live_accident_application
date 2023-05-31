@@ -24,9 +24,10 @@
     </queries>
 
     <application
-        android:label="live_accident_application"
+        android:label="Live돌발사고"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/android_icon">
+<!--        android:roundIcon="@drawable/ic_launcher_round">-->
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDWq89VaEKZdEWpv6VoHQ8EVM5JSqE4JJs"/>
         <meta-data
