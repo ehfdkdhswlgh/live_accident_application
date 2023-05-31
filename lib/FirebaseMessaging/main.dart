@@ -94,7 +94,7 @@ String constructFCMPayload(String postId, String imageUrl, String postMain, Stri
   final now = DateTime.now();
   final timestamp = now.millisecondsSinceEpoch;
   return jsonEncode({
-    "to" : "/topics/hojun",
+    "to" : "/topics/${userId}",
     'data': {
       'postId': postId,
       'imageUrl': imageUrl,
@@ -196,7 +196,7 @@ class _Application extends State<Application> {
         {
           print(
               'FlutterFire Messaging Example: Subscribing to topic "fcm_test".');
-          await FirebaseMessaging.instance.subscribeToTopic('hojun');
+          await FirebaseMessaging.instance.subscribeToTopic('i0ycGkQl94dWeUG0YC1nTimLEP13');
           print(
               'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.');
         }
@@ -205,7 +205,7 @@ class _Application extends State<Application> {
         {
           print(
               'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".');
-          await FirebaseMessaging.instance.unsubscribeFromTopic('hojun');
+          await FirebaseMessaging.instance.unsubscribeFromTopic('i0ycGkQl94dWeUG0YC1nTimLEP13');
           print(
               'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.');
         }

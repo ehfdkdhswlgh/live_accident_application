@@ -590,16 +590,15 @@ class _ReportScreenState extends State<ReportWriteScreen> {
 //message형식 지정, 사용위치530번대
 String messageConstruct(String postId, String imageUrl, String postMain, String userNickname, String title, String userId, FieldValue timestamp, int like, String address) {
   return jsonEncode({
-    "to" : "/topics/hojun",
+    "to" : "/topics/${userId}",
     'data': {
-      'via': 'FlutterFire Cloud Messaging!!!',
       'postId': postId,
       'imageUrl': imageUrl,
       'postMain': postMain,
       'userNickname': userNickname,
       'postName': title,
       'userId': userId,
-      'timestamp': timestamp,
+      'timestamp': Timestamp.now(),
       'like': like,
       'address': address,
     },
