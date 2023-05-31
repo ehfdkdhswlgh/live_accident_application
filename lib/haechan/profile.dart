@@ -11,6 +11,7 @@ String uid = '';
 String followingCount = '';
 String followCount = '';
 String postCount = '';
+String profile = '';
 
 // String buttonText = '';
 bool followChecer = false;
@@ -56,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    getUserInformation();
     //프로필 사진 가져오기 ===================================================================================================
     getPosts(); // 게시물 이미지를 가져옴
     if (UserImfomation.uid == widget.inputUid) {
@@ -76,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       );
     } else {
-      getUserInformation();
+
       // 'follow' 컬렉션에서 해당 정보 가져오기
       FirebaseFirestore.instance
           .collection('follow')
@@ -228,11 +230,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
 
-  getUserInformation() async {
+  Future<void> getUserInformation() async {
     try {
       QuerySnapshot querySnapshot = await _firestore
           .collection('user')
-      // .where('user_id', isEqualTo: '5n0WBbvJgNO0bqkIgnM6febvPqD3')
           .where('uid', isEqualTo: widget.inputUid)
           .get();
       if (querySnapshot.docs.isNotEmpty) {
@@ -242,6 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           followCount = documentSnapshot.get('follow').toString();
           followingCount = documentSnapshot.get('following').toString();
           postCount = documentSnapshot.get('post_count').toString();
+          profile = documentSnapshot.get('profile');
         });
       }
 
@@ -249,6 +251,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       print('Error: $e');
     }
   }
+
 
 
   Future<String> getNickname(String user_id) async{
@@ -293,7 +296,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 CircleAvatar(
                   radius: 32.0,
-                  backgroundImage: AssetImage('images/profile1.png'), // 프로필 이미지
+                  backgroundImage: profile == null || profile.isEmpty
+                      ? null
+                      : NetworkImage(profile),
                 ),
                 SizedBox(width: 16.0),
                 Expanded(
