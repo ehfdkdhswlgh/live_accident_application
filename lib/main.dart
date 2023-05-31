@@ -18,6 +18,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'message.dart';
+import 'jihwan/sms.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
@@ -164,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //     ),
       //   ],
       // ),
-      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),TopMember(), YHNews()][_currentIndex], //
+      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),Sms(), YHNews()][_currentIndex], //
       floatingActionButton: UserImfomation.athority == 'manager'
           ? FloatingActionButton(
             onPressed: () {
@@ -186,6 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
+        selectedItemColor: Colors.red,  // 선택된 항목의 색상을 빨간색으로 설정
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -196,12 +198,15 @@ class _MyHomePageState extends State<MyHomePage> {
             label: '제보글',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
-            label: '',
+            icon: Icon(
+              Icons.add_box,
+              size: 35.0, // 원하는 크기로 조절
+            ),
+            label: '',  // 라벨 제거
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events),
-            label: '랭킹',
+            icon: Icon(Icons.mail),
+            label: '재난문자',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.article),

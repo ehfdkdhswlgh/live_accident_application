@@ -222,34 +222,6 @@ exports.getWildfire = functions.https.onRequest(async (req, res) => {
 });
 
 
-// rss함수도 유동IP사용시 오류가 자주 발생함 -> 고정IP사용할  것
-exports.rssFeedManual = functions.https.onRequest((request, response) => {
-  const db = admin.firestore();
-  (async () => {
-    await tools.firestore.delete("/rss",
-        {project: process.env.GCLOUD_PROJECT,
-          recursive: true,
-          yes: true,
-          force: true,
-        });
-
-    const feed = await parser.parseURL(RSS);
-
-    feed.items.forEach((item) => {
-      const tem = {
-        title: item.title,
-        link: item.link,
-        pubDate: item.pubDate,
-      };
-      db.collection("rss").add(tem).then(() => {
-        console.log("added order");
-      }, (error) => {
-        console.error("Failed to add order");
-      });
-    });
-  })();
-});
-
 // 안에 request랑 이름이 겹쳐서 이름을 다르게 설정해야함
 // 업데이트마다 vpc 다시 설정해줘야 함
 exports.getOpenDataManual = functions.https.onRequest((req, resp) => {
