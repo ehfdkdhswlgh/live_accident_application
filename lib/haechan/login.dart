@@ -147,7 +147,8 @@ class _MyHomePageState extends State<MyHomePage> {
       FocusScope.of(context).requestFocus(FocusNode());
       // Firebase 사용자 인증, 사용자 등록
       try {
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -176,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
         UserImfomation.checker = true;
 
         Navigator.pushAndRemoveUntil(
-            context, MaterialPageRoute(builder: (context) => main2.MyHomePage()),
+          context, MaterialPageRoute(builder: (context) => main2.MyHomePage()),
               (Route<dynamic> route) => false,
         );
 
@@ -224,10 +225,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      resizeToAvoidBottomInset : false,
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Form(
@@ -235,9 +233,34 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              SizedBox(height: 16),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'images/icon.png', // 이미지 파일 경로
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                    SizedBox(height: 16),
+                    Center(
+                      child: Text(
+                        'Live돌발사고',
+                        style: TextStyle(
+                          fontSize: 48,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
-                // initialValue: 'haesun507@gmail.com',
                 decoration: InputDecoration(
                   labelText: '이메일',
                 ),
@@ -250,7 +273,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               TextFormField(
                 controller: _passwordController,
-                // initialValue: '123456',
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: '비밀번호',
@@ -268,20 +290,30 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.red,
                   ),
                   onPressed: _login,
-                  // _login
                   child: Text('로그인'),
                 ),
               ),
               SizedBox(height: 16.0),
               SizedBox(
                 width: double.infinity,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    primary: Colors.blue,
-                    side: BorderSide(color: Colors.blue),
+                child: TextButton(
+                  onPressed: () {
+                    showEmailInputDialog(context);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                  ),
+                  child: Text("비밀번호를 잊어버리셨나요?"),
+                ),
+              ),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    primary: Colors.black,
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -294,30 +326,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('회원가입'),
                 ),
               ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    showEmailInputDialog(context);
-                    // _launchSMSApp();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.blue,
-                  ),
-                  child: Text("비밀번호 재설정"),
-                ),
-              ),
-
             ],
           ),
         ),
       ),
     );
   }
+
+
+
 }
 
-class RegisterPage extends StatelessWidget {
+  class RegisterPage extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
