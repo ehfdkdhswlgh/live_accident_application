@@ -73,8 +73,8 @@ class _ReportScreenState extends State<ReportWriteScreen> {
                       )),
                   Center(
                       child: Text(
-                        'Loading....',
-                        style: TextStyle(fontSize: 10),
+                        '로딩중',
+                        style: TextStyle(fontSize: 15),
                       )),
                 ],
               )

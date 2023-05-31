@@ -268,9 +268,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> unSubscribe(String uid) async {
-    print('FlutterFire Messaging Example: Subscribing to topic $uid.');
+    print('FlutterFire Messaging Example: UnSubscribing to topic $uid.');
     await FirebaseMessaging.instance.unsubscribeFromTopic(uid);
-    print('FlutterFire Messaging Example: Subscribing to topic $uid successful.');
+    print('FlutterFire Messaging Example: UnSubscribing to topic $uid successful.');
   }
 
 
