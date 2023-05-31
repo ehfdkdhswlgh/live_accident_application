@@ -20,21 +20,45 @@ class _PostState extends State<Post> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Live돌발사고"),
+          backgroundColor: Colors.white,
+          title: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: 'LIVE',
+                  style: TextStyle(
+                    color: Colors.red, // "Live" 텍스트를 빨간색으로 설정
+                    fontSize: 24, // 글자 크기를 24로 설정
+                    fontWeight: FontWeight.bold, // 굵게 설정
+                  ),
+                ),
+                TextSpan(
+                  text: ' 돌발사고',
+                  style: TextStyle(
+                    color: Colors.black, // "돌발사고" 텍스트를 검정색으로 설정
+                    fontSize: 23, // 글자 크기를 16으로 설정
+                    fontWeight: FontWeight.normal, // 폰트 굵기를 일반으로 설정
+                  ),
+                ),
+              ],
+            ),
+          ),
           centerTitle: true,
           actions: [
             IconButton(
-              icon: Icon(Icons.account_circle),
+              icon: Icon(Icons.account_circle, color: Colors.black),
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => profile.ProfileScreen(UserImfomation.uid)),
+                    builder: (context) => profile.ProfileScreen(UserImfomation.uid),
+                  ),
                 );
               },
             ),
           ],
         ),
+
         body:
         Column(
           children: [

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'main_post.dart';
 import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PostDocument extends StatefulWidget {
   PostDocument({required this.postId, required this.imageUrl, required this.postMain, required this.userNickname, required this.postName, required this.userId, required this.timestamp, required this.like, required this.address});
@@ -20,6 +21,75 @@ class PostDocument extends StatefulWidget {
 //
 class _PostDocumentState extends State<PostDocument> {
   final TextEditingController _commentController = TextEditingController();
+  bool isLiked = false;
+
+  void initState() {
+    super.initState();
+    checkIfLikedOrNot();
+  }
+
+  void checkIfLikedOrNot() async {
+    var user = FirebaseAuth.instance.currentUser;
+    var likeRef = FirebaseFirestore.instance.collection('likes');
+    var userLike = await likeRef
+        .where('userId', isEqualTo: user?.uid)
+        .where('postId', isEqualTo: widget.postId)
+        .get();
+
+    if (userLike.docs.length > 0) {
+      setState(() {
+        isLiked = true;
+      });
+    }
+  }
+  void handleLikePost() {
+    var user = FirebaseAuth.instance.currentUser;
+    if (isLiked) {
+      // Already liked, so we need to unlike
+      FirebaseFirestore.instance
+          .collection('likes')
+          .where('userId', isEqualTo: user?.uid)
+          .where('postId', isEqualTo: widget.postId)
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs[0].reference.delete();
+      });
+
+      FirebaseFirestore.instance
+          .collection('posts')
+          .where('post_id', isEqualTo: widget.postId)
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs[0].reference.update({'like': FieldValue.increment(-1)});
+      });
+
+      setState(() {
+        isLiked = false;
+        widget.like -= 1;
+      });
+
+    } else {
+      // Not liked yet, so we need to like
+      FirebaseFirestore.instance.collection('likes').add({
+        'userId': user?.uid,
+        'postId': widget.postId,
+        'timestamp': FieldValue.serverTimestamp(), // added this line
+      });
+
+      FirebaseFirestore.instance
+          .collection('posts')
+          .where('post_id', isEqualTo: widget.postId)
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs[0].reference.update({'like': FieldValue.increment(1)});
+      });
+
+      setState(() {
+        isLiked = true;
+        widget.like += 1;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +128,16 @@ class _PostDocumentState extends State<PostDocument> {
                 );
               },
             ),
+            GestureDetector(
+              onTap: handleLikePost,
+              child: Row(
+                children: [
+                  Icon(isLiked ? Icons.favorite : Icons.favorite_border),
+                  SizedBox(width: 4.0),
+                  Text(widget.like.toString()),
+                ],
+              ),
+            ),
             Divider(thickness: 1.0),
             Row(
               children: [
@@ -91,7 +171,6 @@ class _PostDocumentState extends State<PostDocument> {
         'username': UserImfomation.nickname, // Replace with actual username
         'timestamp': FieldValue.serverTimestamp(),
       });
-
       _commentController.clear();
     }
   }
