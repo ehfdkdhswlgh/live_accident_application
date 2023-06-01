@@ -86,10 +86,6 @@ class _ReportScreenState extends State<ReportWriteScreen> {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.grey),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
           centerTitle: true,
           title: Row(
             mainAxisSize: MainAxisSize.min,
