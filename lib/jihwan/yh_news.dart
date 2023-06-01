@@ -73,7 +73,7 @@ class _YHNewsState extends State<YHNews> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text(
-          '재난뉴스',
+          '재난 뉴스',
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,

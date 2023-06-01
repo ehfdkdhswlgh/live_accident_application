@@ -30,25 +30,13 @@ class ProfileScreen extends StatefulWidget {
 }
 
 
+
 class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  Widget followBtn = SizedBox.shrink();
+  String followBtn = 'hidden';
   Widget settingBtn = SizedBox.shrink();
   bool followChecker = false;
   CarouselController carouselController = CarouselController();
-
-  // if(UserImfomation.uid == widget.inputUid){
-  // followBtn = ElevatedButton(
-  //
-  // child: Text('구독하기'),
-  // onPressed: () {},
-  // );
-  // }
-
-  // String uid = UserImfomation.uid;
-  // String followingCount = UserImfomation.followingCount.toString();
-  // String followCount = UserImfomation.followCount.toString();
-  // String postCount = UserImfomation.postCount.toString();
 
 
   List<Map<String, dynamic>> dataList = [];
@@ -67,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       followingCount = UserImfomation.followingCount.toString();
       followCount = UserImfomation.followCount.toString();
       postCount = UserImfomation.postCount.toString();
-      followBtn = SizedBox.shrink();
+      followBtn = 'hidden';
       settingBtn = IconButton(
         icon: Icon(Icons.settings), color: Colors.black,
         onPressed: () {
@@ -87,26 +75,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .get()
           .then((querySnapshot) {
         if (querySnapshot.size > 0) {
-          // follow == follower이면 구독중으로 설정
           setState(() {
-            followBtn = ElevatedButton(
-              child: Text('구독중'),
-              onPressed: () {handleUnsubscribe();unSubscribe(widget.inputUid);print("구독취소버튼누름");},
-            );
+            followBtn = '구독중';
           });
         } else {
-          // follow != follower이면 구독하기로 설정
           setState(() {
-            followBtn = ElevatedButton(
-              child: Text('구독하기'),
-              onPressed: () {handleSubscribe();subscribe(widget.inputUid); print("구독하기버튼누름");},
-            );
+            followBtn = '구독하기';
           });
         }
       });
     }
     print('hello');
   }
+
+  Widget followButton() {
+    switch (followBtn) {
+      case 'hidden':
+        return SizedBox.shrink();
+      case '구독하기':
+        return ElevatedButton(
+          child: Text('구독하기'),
+          onPressed: handleSubscribe,
+          style: ElevatedButton.styleFrom(
+            primary: Colors.red[800],  // Light red for '구독하기'
+          ),
+        );
+      case '구독중':
+        return ElevatedButton(
+          child: Text('구독 중'),
+          onPressed: handleUnsubscribe,
+          style: ElevatedButton.styleFrom(
+            primary: Colors.red[400],  // Dark red for '구독중'
+          ),
+        );
+      default:
+        return SizedBox.shrink();
+    }
+  }
+
+
+
 
 // 구독하기 버튼을 눌렀을 때
   void handleSubscribe() {
@@ -134,17 +142,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
     }).then((_) {
       setState(() {
-        followBtn = ElevatedButton(
-          child: Text('구독중'),
-          onPressed: handleUnsubscribe, // 구독중 버튼으로 변경되면 handleUnsubscribe 함수 실행
-        );
+        followBtn = '구독중';  // Updated this line
         followCount = (int.parse(followCount) + 1).toString();
       });
     }).catchError((error) {
       // 업데이트 실패 시 에러 처리
       print('구독하기 실패: $error');
     });
-    // UserImfomation.followingCount++;
   }
 
 // 구독중 버튼을 눌렀을 때
@@ -179,17 +183,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
     }).then((_) {
       setState(() {
-        followBtn = ElevatedButton(
-          child: Text('구독하기'),
-          onPressed: handleSubscribe, // 구독하기 버튼으로 변경되면 handleSubscribe 함수 실행
-        );
+        followBtn = '구독하기';  // Updated this line
         followCount = (int.parse(followCount) - 1).toString();
       });
     }).catchError((error) {
       // 업데이트 실패 시 에러 처리
       print('구독 취소 실패: $error');
     });
-    // UserImfomation.followingCount--;
   }
 
   getPosts() async {
@@ -346,31 +346,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             '팔로잉: ' + followingCount + '  ', // 팔로잉 수
                             style: TextStyle(fontSize: 16.0),
                           ),
-                          followBtn,
-                          // ElevatedButton(
-                          //   onPressed: () {
-                          //     // 버튼 누르면 user 테이블도 update
-                          //     // 다른 프로필 누르면 버튼도 바뀌게
-                          //     // 내 프로필은 버튼 안보이게
-                          //     // 함수 만드는게 좋을 듯 ===================================================================================================
-                          //
-                          //     if(followChecer = true){
-                          //       buttonText = '구독하기';
-                          //       followChecer = false;
-                          //       //db 반영
-                          //     }else {
-                          //       buttonText = '구독중';
-                          //       followChecer = true;
-                          //       // db 반영
-                          //     }
-                          //     // 구독하기 버튼 동작 구현
-                          //   },
-                          //   child: Text(buttonText),
-                          //   style: ElevatedButton.styleFrom(
-                          //     padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                          //     textStyle: TextStyle(fontSize: 12.0), // 버튼 텍스트 스타일
-                          //   ),
-                          // ),
+                          followButton(),
                         ],
                       ),
                     ],
