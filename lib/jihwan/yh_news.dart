@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../UserImfomation.dart';
+import '../haechan/profile.dart' as profile;
 
 class YHNews extends StatefulWidget {
   @override
@@ -75,6 +77,19 @@ class _YHNewsState extends State<YHNews> {
           style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.account_circle, color: Colors.black),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => profile.ProfileScreen(UserImfomation.uid),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Container(
         color: Colors.grey[300],
