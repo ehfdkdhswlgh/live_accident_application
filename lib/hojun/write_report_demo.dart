@@ -528,18 +528,6 @@ class _ReportScreenState extends State<ReportWriteScreen> {
         }
       });
       // 해찬 추가 여기까지
-
-      sendPushMessage(messageConstruct(
-          postId,
-          url,
-          main,
-          'hojun',
-          title,
-          userId,
-          0,
-          address
-      ));
-
       _titleController.clear();
       _mainController.clear();
     }
@@ -601,22 +589,37 @@ Future<void> sendPushMessage(String body) async {
 }
 
 //message형식 지정, 사용위치530번대
-String messageConstruct(String postId, String imageUrl, String postMain, String userNickname, String title, String userId, int like, String address) {
+Future<String> messageConstruct(String postId, String imageUrl, String postMain, String userNickname, String title, String userId, int like, String address) async{
+  final now = DateTime.now();
+  final timestamp = now.millisecondsSinceEpoch;
+  final querySnapshot = await FirebaseFirestore.instance
+      .collection('user')
+      .where('uid', isEqualTo: userId)
+      .limit(1)
+      .get();
+  String _profile = "";
+  if (querySnapshot.size > 0) {
+    final documentSnapshot = querySnapshot.docs.first;
+    _profile = documentSnapshot.get('profile');
+  }
+
   return jsonEncode({
-    "to" : "/topics/${userId}",
+    "to" : "/topics/$userId",
     'data': {
-      'postId': postId,
-      'imageUrl': imageUrl,
-      'postMain': postMain,
-      'userNickname': userNickname,
-      'postName': title,
-      'userId': userId,
-      'like': like,
-      'address': address,
+      '\"postId\"': "\"$postId\"",
+      '\"imageUrl\"': "\"$imageUrl\"",
+      '\"postMain\"': "\"$postMain\"",
+      '\"userNickname\"': "\"$userNickname\"",
+      '\"postName\"': "\"$title\"",
+      '\"userId\"': "\"$userId\"",
+      '\"timestamp\"': timestamp,
+      '\"like\"': like,
+      '\"address\"': "\"$address\"",
+      '\"profileUrl\"': "\"$_profile\""
     },
     'notification': {
       'title': 'LIVE Accident!!',
-      'body': title,
+      'body': "$userNickname께서 재보글을 작성하셨습니다.",
     },
   });
 }

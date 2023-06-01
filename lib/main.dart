@@ -152,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
             timestamp: Timestamp.now(),
             like: 0,
             address: map['address'],
-            profile: "",
+            profile: map['profileUrl'],
           ),
         ),
       );
@@ -201,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
             timestamp: Timestamp.now(),
             like: 0,
             address: map['address'],
-            profile: "",
+            profile: map['profileUrl'],
           ),
         ),
       );
