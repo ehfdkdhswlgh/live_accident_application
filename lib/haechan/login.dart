@@ -2,20 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
-import 'package:get/get.dart';
-import '../jihoon/map_sample.dart';
 import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../main.dart' as main2;
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:crypto/crypto.dart';
-import '../jihwan/post_report_management.dart';
 import 'dart:math';
 import 'package:firebase_storage/firebase_storage.dart';
-
 
 
 void main() { // 회원가입 버튼 누르고 회원가입 다시 누르면 됨
@@ -182,16 +174,6 @@ class _MyHomePageState extends State<MyHomePage> {
               (Route<dynamic> route) => false,
         );
 
-        // MapSample 화면에서 뒤로가기 버튼을 처리하는 부분
-        // WillPopScope(
-        //   onWillPop: () async => false, // 뒤로가기 버튼 처리를 위한 콜백 함수. false를 반환하여 뒤로가기 버튼을 무시하도록 설정
-        //   child: Scaffold(
-        //     // ...
-        //   ),
-        // ),
-        //
-
-        // Get.offAll(MapSample());
         //홈으로 넘어가게 하면 됨
       } on FirebaseAuthException catch (e) {
         logger.e(e);
@@ -204,13 +186,6 @@ class _MyHomePageState extends State<MyHomePage> {
         } else if (e.code == 'invalid-email') {
           message = '이메일을 확인하세요.';
         }
-
-        /*final snackBar = SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.deepOrange,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      */
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -457,81 +432,6 @@ class _MyHomePageState extends State<MyHomePage> {
     return querySnapshot.docs.isNotEmpty;
   }
 
-  //=================================================================
-
-  // _postRequest() async {
-  //   try {
-  //   DateTime now = DateTime.now();
-  //   int timestamp = now.millisecondsSinceEpoch;
-  //   String url = 'https://sens.apigw.ntruss.com/sms/v2/services/ncp:sms:kr:308204771431:emergency_report/messages'; // 엔드포인트 URL
-  //   String serviceId = 'ncp:sms:kr:308204771431:emergency_report';
-  //   String timeStamp = timestamp.toString();
-  //   String accessKey = 'Qqqt0HxbM6qrEEhgNgZ1';
-  //   String secretKey = 'LxDG8TbpJNWEL7VnLXmP6MG0XLccXyjH8vN7YUO6';
-  //   String sigbiture = getSignature(serviceId, timeStamp, accessKey, secretKey);
-  //
-  //   http.Response response = await http.post(
-  //     Uri.parse(url),
-  //     headers: <String, String> {
-  //       'Content-Type': 'application/json; charset=utf-8',
-  //       'x-ncp-apigw-timestamp': timeStamp,
-  //       'x-ncp-iam-access-key': accessKey,
-  //       'x-ncp-apigw-signature-v2': sigbiture,
-  //     },
-  //     body: jsonEncode(<String, dynamic> {
-  //       'type': 'SMS',
-  //       'contentType': 'COMM',
-  //       'countryCode': '82',
-  //       'from': '01051186937',
-  //       'content': '입력할 내용',
-  //       'messages': [
-  //         {
-  //           'to': '01051186937', // 112 또는 119
-  //           'content': '이건 뭐지?',
-  //         },
-  //       ],
-  //     }),
-  //   );
-  //   print('=========================='+'실행완료');
-  //   print(response.bodyBytes);
-  //   } catch (error) {
-  //     print('오류 발생: $error');
-  //   }
-  // }
-
-
-
-  // String getSignature(
-  //     String serviceId, String timeStamp, String accessKey, String secretKey) {
-  //   var space = " "; // one space
-  //   var newLine = "\n"; // new line
-  //   var method = "POST"; // method
-  //   var url = "/sms/v2/services/$serviceId/messages";
-  //
-  //   var buffer = new StringBuffer();
-  //   buffer.write(method);
-  //   buffer.write(space);
-  //   buffer.write(url);
-  //   buffer.write(newLine);
-  //   buffer.write(timeStamp);
-  //   buffer.write(newLine);
-  //   buffer.write(accessKey);
-  //   print(buffer.toString());
-  //
-  //   /// signing key
-  //   var key = utf8.encode(secretKey);
-  //   var signingKey = new Hmac(sha256, key);
-  //
-  //   var bytes = utf8.encode(buffer.toString());
-  //   var digest = signingKey.convert(bytes);
-  //   String signatureKey = base64.encode(digest.bytes);
-  //   return signatureKey;
-  // }
-
-
-
-  //========================================================
-
 
   @override
   Widget build(BuildContext context) {
@@ -614,20 +514,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Text('회원가입'),
                 ),
               ),
-              // SizedBox(
-              //   width: double.infinity,
-              //   child:
-              //   ElevatedButton.icon(
-              //
-              //     style: ElevatedButton.styleFrom(
-              //       foregroundColor: Colors.white,
-              //       backgroundColor: Colors.red,
-              //     ),
-              //     icon: Icon(Icons.account_circle_outlined), // 아이콘
-              //     label: Text('구글 회원가입'),
-              //     onPressed: () { signInWithGoogle(); },
-              //   ),
-              // )
+
             ],
           ),
         ),

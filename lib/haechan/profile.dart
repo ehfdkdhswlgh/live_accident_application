@@ -91,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             followBtn = ElevatedButton(
               child: Text('구독중'),
-              onPressed: () {handleUnsubscribe();unSubscribe(widget.inputUid);},
+              onPressed: () {handleUnsubscribe();unSubscribe(widget.inputUid);print("구독취소버튼누름");},
             );
           });
         } else {
@@ -99,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             followBtn = ElevatedButton(
               child: Text('구독하기'),
-              onPressed: () {handleSubscribe();subscribe(widget.inputUid);},
+              onPressed: () {handleSubscribe();subscribe(widget.inputUid); print("구독하기버튼누름");},
             );
           });
         }

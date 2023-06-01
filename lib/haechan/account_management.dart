@@ -193,8 +193,10 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
-                // Add your logout logic here
+              onPressed: () async {
+                // Firebase 로그아웃
+                await FirebaseAuth.instance.signOut();
+
                 print("Logged out");
                 // Navigate to the login screen
                 Navigator.pushAndRemoveUntil(
@@ -202,7 +204,6 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                   MaterialPageRoute(builder: (context) => Login()),
                       (Route<dynamic> route) => false,
                 );
-                // You can navigate to the login screen or perform any other logout actions
               },
               style: ElevatedButton.styleFrom(
                 primary: Colors.red, // Set the button color to red

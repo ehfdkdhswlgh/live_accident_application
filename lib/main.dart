@@ -23,6 +23,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'jihwan/sms.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
@@ -210,85 +211,128 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget checker_widget;
-    Widget bottomNavigationBarWidget;
-
-    if (UserImfomation.checker == false) {
-      checker_widget = login.Login();
-    } else {
-      checker_widget = MapSample(selectedType: context.watch<Store>().selectedPostType,);
-    }
-
-    return Scaffold(
-      // appBar: AppBar(
-      //   title: Text("Live돌발사고"),
-      //   centerTitle: true,
-      //   actions: [
-      //     IconButton(
-      //       icon: Icon(Icons.search),
-      //       onPressed: () {
-      //         // 돋보기 아이콘 클릭 시 동작 정의
-      //       },
-      //     ),
-      //     IconButton(
-      //       icon: Icon(Icons.account_circle),
-      //       onPressed: () {
-      //         // 내정보 아이콘 클릭 시 동작 정의
-      //       },
-      //     ),
-      //   ],
-      // ),
-      body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),Sms(), YHNews()][_currentIndex], //
-      floatingActionButton: UserImfomation.athority == 'manager'
-          ? FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ReportManagementScreen(),
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: SizedBox(
+                height: 50.0,
+                width: 50.0,
+                child: CircularProgressIndicator(),
+              ),
             ),
           );
-        },
-        backgroundColor: Colors.red,
-        child: Icon(
-          Icons.notifications_active,
-          color: Colors.white,
-        ),
-      )
-          : null,
-      bottomNavigationBar: UserImfomation.checker ? BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
-        selectedItemColor: Colors.red,  // 선택된 항목의 색상을 빨간색으로 설정
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment),
-            label: '제보글',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.add_box,
-              size: 35.0, // 원하는 크기로 조절
-            ),
-            label: '',  // 라벨 제거
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.mail),
-            label: '재난문자',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.article),
-            label: '재난뉴스',
-          ),
-        ],
-      ): null,
+        }
+
+        User? user = snapshot.data;
+
+        if (user != null) {
+          return FutureBuilder<QuerySnapshot>(
+            future: FirebaseFirestore.instance
+                .collection('user')
+                .where('uid', isEqualTo: user.uid)
+                .limit(1)
+                .get(),
+            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return Scaffold(
+                  backgroundColor: Colors.white,
+                  body: Center(
+                    child: SizedBox(
+                      height: 50.0,
+                      width: 50.0,
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              }
+
+              if (userSnapshot.hasData && userSnapshot.data!.docs.isNotEmpty) {
+                DocumentSnapshot documentSnapshot = userSnapshot.data!.docs.first;
+                UserImfomation.uid = user.uid;
+                // set other UserImfomation properties...
+                UserImfomation.checker = true;
+                UserImfomation.nickname = documentSnapshot.get('name').toString();
+                UserImfomation.followCount = documentSnapshot.get('follow');
+                UserImfomation.followingCount = documentSnapshot.get('following');
+                UserImfomation.postCount = documentSnapshot.get('post_count');
+                UserImfomation.athority = documentSnapshot.get('authority');
+
+                print("다음 유저의 정보를 불러옴" + UserImfomation.nickname + " " + UserImfomation.athority + " " + UserImfomation.postCount.toString());
+
+
+
+
+                return Scaffold(
+                  body: [MapSample(selectedType: context.watch<Store>().selectedPostType,), post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),Sms(), YHNews()][_currentIndex], //
+                  floatingActionButton: UserImfomation.athority == 'manager'
+                      ? FloatingActionButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReportManagementScreen(),
+                        ),
+                      );
+                    },
+                    backgroundColor: Colors.red,
+                    child: Icon(
+                      Icons.notifications_active,
+                      color: Colors.white,
+                    ),
+                  )
+                      : null,
+                  bottomNavigationBar: BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    currentIndex: _currentIndex,
+                    onTap: _onTabTapped,
+                    selectedItemColor: Colors.red,
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.home),
+                        label: '홈',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.assignment),
+                        label: '제보글',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.add_box,
+                          size: 35.0,
+                        ),
+                        label: '',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.mail),
+                        label: '재난문자',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.article),
+                        label: '재난뉴스',
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                UserImfomation.checker = false;
+                return login.Login();
+              }
+            },
+          );
+        } else {
+          UserImfomation.checker = false;
+          return login.Login();
+        }
+      },
     );
   }
+
+
+
 
 }
 
