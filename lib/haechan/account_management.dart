@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:remedi_kopo/remedi_kopo.dart';
 import 'package:dart_geohash/dart_geohash.dart';
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AccountManagementScreen extends StatefulWidget {
   @override
@@ -25,6 +26,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   var geoHasher = GeoHasher();
   String addressName = '';
+  Map<String, String> addressHash = new Map();
 
   @override
   void initState() {
@@ -100,8 +102,9 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                       icon: Icon(Icons.clear),
                       onPressed: () {
                         setState(() {
-                          _interestAreas.removeAt(index);
-                          addInterestAreaToFirebase(UserImfomation.uid, _interestAreas); // 파이어베이스에서 데이터 삭제
+                          String interestArea = _interestAreas[index]; // 삭제할 관심지역을 저장
+                          _interestAreas.removeAt(index); // 관심지역 삭제
+                          deleteInterestAreaToFirebase(UserImfomation.uid, interestArea); // 파이어베이스에서 데이터 삭제
                         });
                       },
                     ),
@@ -216,30 +219,46 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
     );
   }
 
-  Future<void> addInterestAreaToFirebase(
-      String uid, List<String> interestAreas) async {
+  Future<void> deleteInterestAreaToFirebase(
+      String uid, String interestArea) async {
     try {
-      DocumentReference userRef = _firestore.collection('user').doc(uid);
-      await userRef.update({'interestAreas': interestAreas});
-      print('관심지역이 성공적으로 업데이트되었습니다.');
+      QuerySnapshot querySnapshot = await _firestore
+          .collection("interest_area")
+          .where('uid', isEqualTo: uid)
+          .where('interest_area', isEqualTo: interestArea)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        querySnapshot.docs.forEach((doc) {
+          doc.reference.delete();
+        });
+        _getAddress(interestArea);
+        print('관심지역이 성공적으로 삭제되었습니다.');
+      }
     } catch (error) {
-      print('관심지역 업데이트 오류: $error');
+      print('관심지역 삭제 오류: $error');
     }
   }
 
   Future<void> getInterestAreasFromFirebase(String uid) async {
     try {
-      DocumentSnapshot userSnapshot = await _firestore
-          .collection('interest_area')
-          .doc(uid)
+      QuerySnapshot querySnapshot = await _firestore
+          .collection("interest_area")
+          .where('uid', isEqualTo: uid)
           .get();
 
-      Map<String, dynamic>? userData = userSnapshot.data() as Map<String, dynamic>?;
+      if (querySnapshot.docs.isNotEmpty) {
 
-      if (userData != null && userData.containsKey('interestAreas')) {
-        List<dynamic> interestAreas = userData['interestAreas'];
-        setState(() {
-          _interestAreas = interestAreas.cast<String>().toList();
+        querySnapshot.docs.forEach((doc) {
+          Map<String, dynamic>? userData = doc.data() as Map<String, dynamic>?;
+
+          if (userData != null && userData.containsKey('interest_area')) {
+            List<dynamic> interestAreas = [userData['interest_area']];
+            setState(() {
+              _interestAreas.addAll(interestAreas.cast<String>());
+              // _interestAreas = interestAreas.cast<String>().toList();
+            });
+          }
         });
       }
     } catch (error) {
@@ -249,13 +268,72 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
 
 
   _addressAPI() async {
-    KopoModel model = await Navigator.push(
-      context,
-      CupertinoPageRoute(
-        builder: (context) => RemediKopo(),
-      ),
+    if (_interestAreas.length >= 3) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("경고"),
+            content: Text("관심지역은 최대 3개까지 추가할 수 있습니다."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text("확인"),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      KopoModel model = await Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => RemediKopo(),
+        ),
+      );
+      _searchAddress(model.address.toString());
+    }
+  }
+
+  _getAddress(String addressName) async {
+    final String url =
+        "https://dapi.kakao.com/v2/local/search/address.json";
+    final Map<String, String> headers = {
+      "Authorization": "KakaoAK bbc69e19b84f6c642836ebbbbdf66ad9"
+    };
+
+    final String query =
+        "?query=$addressName&page=1&size=10&analyze_type=similar";
+    final http.Response response = await http.get(
+      Uri.parse(url + query),
+      headers: headers,
     );
-    _searchAddress(model.address.toString());
+
+    final Map<String, dynamic> result = json.decode(response.body);
+
+    if (result.containsKey("documents")) {
+      List<dynamic> documents = result["documents"];
+      if (documents.isNotEmpty) {
+        Map<String, dynamic> firstDocument = documents.first;
+        addressName = firstDocument["address_name"];
+        String x = firstDocument["x"];
+        String y = firstDocument["y"];
+        double double_x = double.parse(x);
+        double double_y = double.parse(y);
+        var geohash = geoHasher.encode(double_x, double_y, precision: 4);
+        print('x : ' + x);
+        print('y : ' + y);
+        print('geohash : ' + geohash);
+
+        setState(() {
+          unSubscribe(geohash);
+        });
+
+
+      }
+    }
   }
 
   _searchAddress(String searchData) async {
@@ -288,6 +366,10 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         print('y : ' + y);
         print('geohash : ' + geohash);
 
+        setState(() {
+          _interestAreas.add(addressName);
+        });
+
         try {
           await _firestore.collection("interest_area").add({
             "geohash": geohash,
@@ -295,12 +377,25 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
             "uid": UserImfomation.uid,
           });
           print('Firestore에 값이 성공적으로 추가되었습니다.');
+          subscribe(geohash);
         } catch (error) {
           print('Firestore에 값 추가 중 오류가 발생했습니다: $error');
         }
 
       }
     }
+  }
+
+  Future<void> subscribe(String geohash) async {
+    print('FlutterFire Messaging Example: Subscribing to topic $geohash.');
+    await FirebaseMessaging.instance.subscribeToTopic(geohash);
+    print('FlutterFire Messaging Example: Subscribing to topic $geohash successful.');
+  }
+
+  Future<void> unSubscribe(String geohash) async {
+    print('FlutterFire Messaging Example: UnSubscribing to topic $geohash.');
+    await FirebaseMessaging.instance.unsubscribeFromTopic(geohash);
+    print('FlutterFire Messaging Example: UnSubscribing to topic $geohash successful.');
   }
 
 
