@@ -32,6 +32,19 @@ class _SmsState extends State<Sms> {
     });
   }
 
+  DateTime parseDateTime(String dateTimeString) {
+    int year = int.parse(dateTimeString.substring(0, 4));
+    int month = int.parse(dateTimeString.substring(4, 6));
+    int day = int.parse(dateTimeString.substring(6, 8));
+    int hour = int.parse(dateTimeString.substring(8, 10));
+    int minute = int.parse(dateTimeString.substring(10, 12));
+    int second = int.parse(dateTimeString.substring(12, 14));
+
+    return DateTime(year, month, day, hour, minute, second);
+
+  }
+
+
   Future<void> _fetchItems() async {
     List<Map<String, dynamic>> smsItems = [];
 
@@ -43,8 +56,11 @@ class _SmsState extends State<Sms> {
         'RCV_AREA_NM': doc['RCV_AREA_NM'],
         'EMRGNCY_STEP_NM': doc['EMRGNCY_STEP_NM'],
         'DSSTR_SE_NM': doc['DSSTR_SE_NM'],
+        'REGIST_DT' : parseDateTime(doc['REGIST_DT'])
       });
     });
+
+    smsItems.sort((a, b) => b['REGIST_DT'].compareTo(a['REGIST_DT'])); // 최신순으로 정렬
 
     setState(() {
       items = smsItems;
@@ -63,9 +79,13 @@ class _SmsState extends State<Sms> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text("생성일시: ${filteredItems[index]['CREAT_DT'] ?? ''}"),
+              Divider(),
               Text("메시지 내용: ${filteredItems[index]['MSG_CN'] ?? ''}"),
+              Divider(),
               Text("수신지역명: ${filteredItems[index]['RCV_AREA_NM'] ?? ''}"),
+              Divider(),
               Text("긴급단계 명: ${filteredItems[index]['EMRGNCY_STEP_NM'] ?? ''}"),
+              Divider(),
               Text("재해구분 명: ${filteredItems[index]['DSSTR_SE_NM'] ?? ''}"),
             ],
           ),

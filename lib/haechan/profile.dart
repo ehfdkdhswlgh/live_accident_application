@@ -69,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       postCount = UserImfomation.postCount.toString();
       followBtn = SizedBox.shrink();
       settingBtn = IconButton(
-        icon: Icon(Icons.settings),
+        icon: Icon(Icons.settings), color: Colors.black,
         onPressed: () {
           Navigator.push(
             context,
@@ -281,10 +281,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("회원 정보"),
+        backgroundColor: Colors.white,
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: '회원정보',
+                style: TextStyle(
+                  color: Colors.black, // "Live" 텍스트를 빨간색으로 설정
+                  fontSize: 24, // 글자 크기를 24로 설정
+                  fontWeight: FontWeight.bold, // 굵게 설정
+                ),
+              ),
+            ],
+          ),
+        ),
+        centerTitle: true,
         actions: [
           settingBtn
         ],
+        iconTheme: IconThemeData(
+          color: Colors.black, // 뒤로가기 버튼의 색상을 검은색으로 설정
+        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -387,7 +405,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             timestamp: dataList[index]['timestamp'],
                             like: dataList[index]['like'],
                             address: dataList[index]['address_name'],
-                            profile: dataList[index]['profile'],
+                            profile: "",
                           ),
                           transitionsBuilder: (c, a1, a2, child) =>
                               FadeTransition(opacity: a1, child: child),

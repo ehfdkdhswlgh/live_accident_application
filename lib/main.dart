@@ -210,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.article),
-            label: '보도자료',
+            label: '재난뉴스',
           ),
         ],
       ): null,

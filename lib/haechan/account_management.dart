@@ -30,7 +30,25 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("계정 관리"),
+        backgroundColor: Colors.white,
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: '계정관리',
+                style: TextStyle(
+                  color: Colors.black, // "Live" 텍스트를 빨간색으로 설정
+                  fontSize: 24, // 글자 크기를 24로 설정
+                  fontWeight: FontWeight.bold, // 굵게 설정
+                ),
+              ),
+            ],
+          ),
+        ),
+        centerTitle: true,
+        iconTheme: IconThemeData(
+          color: Colors.black, // 뒤로가기 버튼의 색상을 검은색으로 설정
+        ),
       ),
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(

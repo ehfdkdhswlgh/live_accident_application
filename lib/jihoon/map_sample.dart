@@ -57,8 +57,6 @@ class _MapSampleState extends State<MapSample> {
     super.initState();
     getCurrentLocation();
     _fetchData();
-    _fetchWildFireItems();
-    _fetchEarthquakeItems();
     // addCustomIcon();
   }
 
@@ -124,12 +122,11 @@ class _MapSampleState extends State<MapSample> {
     QuerySnapshot querySnapshotPost;
     List<Map<String, dynamic>> postItems = [];
     List<Map<String, String>> opendatasItems = [];
-    List<Map<String, String>> earthquakeItems = [];
-    List<Map<String, String>> wildfireItems = [];
+
 
 
     if (context.read<Store>().selectedPostType == 0) {
-      if (items.isEmpty && post_items.isEmpty) {
+      if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty && wildfire_items.isEmpty) {
         _fetchOpendatasItems();
         _fetchPostItems();
         _fetchWildFireItems();
@@ -137,13 +134,7 @@ class _MapSampleState extends State<MapSample> {
       }
     }
       else{
-        if (items.isEmpty && post_items.isEmpty) {
-
-
-          if(context.read<Store>().selectedPostType.toString() == "4") {
-            _fetchWildFireItems();
-            _fetchEarthquakeItems();
-          }
+        if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty && wildfire_items.isEmpty) {
 
           querySnapshotPost = await _firestore
               .collection('posts')
@@ -172,10 +163,12 @@ class _MapSampleState extends State<MapSample> {
               'user_id': doc['user_id'],
               'latitude': doc['latitude'].toString(),
               'longitude': doc['longitude'].toString(),
-              'like': doc['like'].toString()
+              'like': doc['like'].toString(),
+              'fastTimeStamp': doc['timestamp'].toDate()
             });
           });
 
+          postItems.sort((a, b) => b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
 
           querySnapshotOD.docs.forEach((doc) {
             opendatasItems.add({
@@ -195,7 +188,14 @@ class _MapSampleState extends State<MapSample> {
             post_items = postItems;
             items = opendatasItems;
           });
-         }
+
+
+          if(context.read<Store>().selectedPostType.toString() == "4") {
+            _fetchWildFireItems();
+            _fetchEarthquakeItems();
+          }
+
+        }
 
 
         print('post_items: $post_items');
@@ -389,9 +389,12 @@ class _MapSampleState extends State<MapSample> {
         'user_id': doc['user_id'],
         'latitude': doc['latitude'].toString(),
         'longitude': doc['longitude'].toString(),
-        'like': doc['like'].toString()
+        'like': doc['like'].toString(),
+        'fastTimeStamp': doc['timestamp'].toDate()
       });
     });
+
+    postItems.sort((a, b) => b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
 
     setState(() {
       post_items = postItems;
@@ -906,7 +909,7 @@ class _MapSampleState extends State<MapSample> {
                                         timestamp: dataList[index]['timestamp'],
                                         like: dataList[index]['like'],
                                         address: dataList[index]['address_name'],
-                                        profile: dataList[index]['profile']
+                                        profile: ""
                                       ),
                                       transitionsBuilder: (c, a1, a2, child) =>
                                           FadeTransition(opacity: a1, child: child),
