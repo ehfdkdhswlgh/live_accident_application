@@ -26,10 +26,7 @@ import 'token_monitor.dart';
 ///
 /// To verify things are working, check out the native platform logs.
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp();
-  print('Handling a background message ${message.messageId}');
 }
 
 /// Create a [AndroidNotificationChannel] for heads up notifications
@@ -51,10 +48,6 @@ Future<void> main() async {
   // Set the background messaging handler early on, as a named top-level function
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  /// Create an Android Notification Channel.
-  ///
-  /// We use this channel in the `AndroidManifest.xml` file to override the
-  /// default FCM channel to enable heads up notifications.
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
       AndroidFlutterLocalNotificationsPlugin>()
@@ -80,7 +73,6 @@ class MessagingExampleApp extends StatelessWidget {
       theme: ThemeData.dark(),
       routes: {
         '/': (context) => Application(),
-        '/message': (context) => MessageView(),
       },
     );
 
@@ -98,19 +90,19 @@ String constructFCMPayload(String postId, String imageUrl, String postMain, Stri
   return jsonEncode({
     "to" : "/topics/asd",
     'data': {
-      'postId': postId,
-      'imageUrl': imageUrl,
-      'postMain': postMain,
-      'userNickname': userNickname,
-      'postName': title,
-      'userId': userId,
-      'timestamp': timestamp,
-      'like': like,
-      'address': address,
+      '\"postId\"': "\"$postId\"",
+      '\"imageUrl\"': "\"$imageUrl\"",
+      '\"postMain\"': "\"$postMain\"",
+      '\"userNickname\"': "\"$userNickname\"",
+      '\"postName\"': "\"$title\"",
+      '\"userId\"': "\"$userId\"",
+      '\"timestamp\"': timestamp,
+      '\"like\"': like,
+      '\"address\"': "\"$address\"",
     },
     'notification': {
       'title': 'LIVE Accident!!',
-      'body': title,
+      'body': "$userNickname께서 재보글을 작성하셨습니다.",
     },
   });
 }
@@ -124,19 +116,18 @@ class Application extends StatefulWidget {
 class _Application extends State<Application> {
   String _token = "";
   final String _serverKey = "AAAA2i-SWXA:APA91bEWfVsJxukDj9b7cJgMezjRl_SBNj3ey55SiYdhwH1mOxNfNjTSIkgPfOF0rlPyPDfI-DRDIr0UAw1YqG32wRUFSZ38CVnYO6AeA-qZGZLVMF7izh19n9oDHhmwqYdZa1WpCVoW";
+  FlutterLocalNotificationsPlugin  _flutterLocalNotificationsPlugin;
   @override
   void initState() {
     super.initState();
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage message) {
-      if (message != null) {
-        Navigator.pushNamed(context, '/message',
-            arguments: MessageArguments(message, true));
-      }
-    });
+    var initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    _flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: onSelectNotification);
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+
+    //포그라운드 상태일 때
+    FirebaseMessaging.onMessage.listen((RemoteMessage message)  async {
       RemoteNotification notification = message.notification;
       AndroidNotification android = message.notification?.android;
       if (notification != null && android != null) {
@@ -153,10 +144,14 @@ class _Application extends State<Application> {
                 //      one that already exists in example app.
                 icon: 'launch_background',
               ),
-            ));
+            ),
+            payload: message.data.toString()
+        );
+
       }
     });
 
+    //백그라운드 상태일 때
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       final MessageArguments args =
       ModalRoute
@@ -164,8 +159,73 @@ class _Application extends State<Application> {
           .settings
           .arguments as MessageArguments;
       RemoteMessage message = args.message;
-      Navigator.pushNamed(context, '/message', arguments: MessageArguments(message, true));
+      Map<String, dynamic> map = jsonDecode(message.data.toString());
+      Navigator.push(
+        context,
+        MaterialPageRoute (
+          builder: (BuildContext context) => PostDocument(
+            postId: map['postId'],
+            imageUrl: map['imageUrl'],
+            postMain: map['postMain'],
+            userNickname: map['userNickname'],
+            postName: map['postName'],
+            userId: map['userId'],
+            timestamp: Timestamp.now(),
+            like: 0,
+            address: map['address'],
+            profile: "",
+          ),
+        ),
+      );
     });
+
+    //종료된 상태일 때
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage message) {
+      Map<String, dynamic> map = jsonDecode(message.data.toString());
+      Navigator.push(
+        context,
+        MaterialPageRoute (
+          builder: (BuildContext context) => PostDocument(
+            postId: map['postId'],
+            imageUrl: map['imageUrl'],
+            postMain: map['postMain'],
+            userNickname: map['userNickname'],
+            postName: map['postName'],
+            userId: map['userId'],
+            timestamp: Timestamp.now(),
+            like: 0,
+            address: map['address'],
+            profile: "",
+          ),
+        ),
+      );
+    });
+  }
+
+  Future onSelectNotification(String payload) async {
+    if (payload != null) {
+      Map<String, dynamic> map = jsonDecode(payload);
+      print(map);
+      Navigator.push(
+        context,
+        MaterialPageRoute (
+          builder: (BuildContext context) => PostDocument(
+            postId: map['postId'],
+            imageUrl: map['imageUrl'],
+            postMain: map['postMain'],
+            userNickname: map['userNickname'],
+            postName: map['postName'],
+            userId: map['userId'],
+            timestamp: Timestamp.now(),
+            like: 0,
+            address: map['address'],
+            profile: "",
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> sendPushMessage() async {

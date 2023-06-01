@@ -14,8 +14,7 @@ import '../hojun/post_main_document.dart';
 /// Message route arguments.
 class MessageArguments {
   final RemoteMessage message;
-  final bool openedApplication;
-  MessageArguments(this.message, this.openedApplication);
+  MessageArguments(this.message);
 }
 
 /// Displays information about a [RemoteMessage].
@@ -30,7 +29,9 @@ class _MessageViewState extends State<MessageView> {
     final MessageArguments args =
     ModalRoute.of(context)!.settings.arguments! as MessageArguments;
     RemoteMessage message = args.message;
-    return PostDocument(
+
+    return
+    PostDocument(
       postId: message.data['postId'],
       imageUrl: message.data['imageUrl'],
       postMain: message.data['postMain'],

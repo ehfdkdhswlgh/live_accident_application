@@ -5,7 +5,6 @@ import 'store.dart';
 import 'package:provider/provider.dart';
 import 'main_post.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:dart_geohash/dart_geohash.dart';
 
 class Feed extends StatefulWidget {
