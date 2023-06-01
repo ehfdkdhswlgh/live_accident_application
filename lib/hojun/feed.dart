@@ -74,7 +74,7 @@ class _FeedState extends State<Feed> {
 
   @override
   Future<void> _fetchData() async {
-
+    print("패치 실행함");
 
     Position currentPosition = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.medium,

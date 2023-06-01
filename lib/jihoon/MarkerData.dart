@@ -5,4 +5,5 @@ class MarkerData {
   List<Map<String, dynamic>> dataList;
 
   MarkerData({required this.position, required this.dataList});
+
 }

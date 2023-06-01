@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart';
 import 'package:live_accident_application/UserImfomation.dart';
 import '../hojun/post_main_document.dart';
 import '../hojun/store.dart';
@@ -24,12 +25,6 @@ class MapSample extends StatefulWidget {
 
 
 class _MapSampleState extends State<MapSample> {
-  BitmapDescriptor markerCarIcon = BitmapDescriptor.defaultMarker;
-  BitmapDescriptor markerUserIcon = BitmapDescriptor.defaultMarker;
-  BitmapDescriptor markerFireIcon = BitmapDescriptor.defaultMarker;
-  BitmapDescriptor markerEarthQuakeIcon = BitmapDescriptor.defaultMarker;
-
-
 
   bool _isLoading = false;
 
@@ -58,41 +53,12 @@ class _MapSampleState extends State<MapSample> {
     super.initState();
     getCurrentLocation();
     _fetchData();
-    // addCustomIcon();
+
   }
 
-  //
-  // void addCustomIcon() {
-  //   BitmapDescriptor.fromAssetImage(const ImageConfiguration(), "images/MarkerIcons/car_icon.png").then((icon) {
-  //     setState(() {
-  //       markerCarIcon = icon;
-  //     });
-  //
-  //   });
-  //
-  //   BitmapDescriptor.fromAssetImage(const ImageConfiguration(), "images/MarkerIcons/earthquake_icon.png").then((icon) {
-  //     setState(() {
-  //       markerEarthQuakeIcon = icon;
-  //     });
-  //
-  //   });
-  //
-  //   BitmapDescriptor.fromAssetImage(const ImageConfiguration(), "images/MarkerIcons/human_icon.png").then((icon) {
-  //     setState(() {
-  //       markerUserIcon = icon;
-  //     });
-  //
-  //   });
-  //
-  //   BitmapDescriptor.fromAssetImage(const ImageConfiguration(), "images/MarkerIcons/wildfire_icon.png").then((icon) {
-  //     setState(() {
-  //       markerFireIcon = icon;
-  //     });
-  //
-  //   });
-  // }
   @override
   void didUpdateWidget(MapSample oldWidget) {
+
     super.didUpdateWidget(oldWidget);
     if (widget.selectedType != oldWidget.selectedType) {
       _isLoading = false;
@@ -104,8 +70,9 @@ class _MapSampleState extends State<MapSample> {
         markerDataList = [];
         markers.clear();
       });
-      _fetchData();
     }
+    _fetchData();
+    print("데이터 정보 가운데 로딩완료");
   }
 
 
@@ -124,19 +91,111 @@ class _MapSampleState extends State<MapSample> {
     QuerySnapshot querySnapshotPost;
     List<Map<String, dynamic>> postItems = [];
     List<Map<String, String>> opendatasItems = [];
+    List<Map<String, String>> wildItems = [];
+    List<Map<String, String>> eqItems = [];
 
 
 
-    if (context.read<Store>().selectedPostType == 0) {
-      if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty && wildfire_items.isEmpty) {
-        _fetchOpendatasItems();
-        _fetchPostItems();
-        _fetchWildFireItems();
-        _fetchEarthquakeItems();
-      }
-    }
-      else{
+      if (context.read<Store>().selectedPostType == 0) {
         if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty && wildfire_items.isEmpty) {
+          _fetchAllData();
+        }
+      }
+      else if(context.read<Store>().selectedPostType == 4){
+        if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty && wildfire_items.isEmpty) {
+          querySnapshotPost = await _firestore
+              .collection('posts')
+              .where('is_visible', isEqualTo: true)
+              .where('post_type', isEqualTo: context
+              .read<Store>()
+              .selectedPostType)
+              .get();
+
+
+          querySnapshotOD = await _firestore
+              .collection('opendatas')
+              .where('incidenteTypeCd', isEqualTo: context.read<Store>().selectedPostType.toString()).get();
+
+
+          querySnapshotPost.docs.forEach((doc) {
+            postItems.add({
+              'address_name': doc['address_name'],
+              'images': doc['images'],
+              'is_visible': doc['is_visible'].toString(),
+              'post_content': doc['post_content'],
+              'post_id': doc['post_id'],
+              'post_type': doc['post_type'].toString(),
+              'timestamp': doc['timestamp'],
+              'title': doc['title'],
+              'user_id': doc['user_id'],
+              'latitude': doc['latitude'].toString(),
+              'longitude': doc['longitude'].toString(),
+              'like': doc['like'].toString(),
+              'fastTimeStamp': doc['timestamp'].toDate()
+            });
+          });
+
+          postItems.sort((a, b) => b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
+
+          querySnapshotOD.docs.forEach((doc) {
+            opendatasItems.add({
+              'incidenteTypeCd': doc['incidenteTypeCd'],
+              'incidenteSubTypeCd': doc['incidenteSubTypeCd'],
+              'addressJibun': doc['addressJibun'],
+              'locationDataX': doc['locationDataX'],
+              'locationDataY': doc['locationDataY'],
+              'incidentTitle': doc['incidentTitle'],
+              'startDate': doc['startDate'],
+              'endDate': doc['endDate'],
+              'roadName': doc['roadName'],
+            });
+          });
+
+          QuerySnapshot querySnapFire = await _firestore.collection('wildfire').get();
+          querySnapFire.docs.forEach((doc) {
+            wildItems.add({
+              'FRFR_FRNG_DTM': doc['FRFR_FRNG_DTM'],
+              'FRFR_INFO_ID': doc['FRFR_INFO_ID'],
+              'FRFR_LCTN_XCRD': doc['FRFR_LCTN_XCRD'],
+              'FRFR_LCTN_YCRD': doc['FRFR_LCTN_YCRD'],
+              'FRFR_OCCRR_ADDR': doc['FRFR_OCCRR_ADDR'],
+              'FRFR_OCCRR_TPCD': doc['FRFR_OCCRR_TPCD'],
+              'FRFR_PRGRS_STCD': doc['FRFR_PRGRS_STCD'],
+              'FRFR_STTMN_ADDR': doc['FRFR_STTMN_ADDR'],
+              'FRFR_STTMN_DT': doc['FRFR_STTMN_DT'],
+              'FRFR_STTMN_HMS': doc['FRFR_STTMN_HMS'],
+              'FRST_RGSTN_DTM': doc['FRST_RGSTN_DTM'],
+              'LAST_UPDT_DTM': doc['LAST_UPDT_DTM'],
+              'RNO': doc['RNO'],
+            });
+          });
+
+          QuerySnapshot querySnapEQ = await _firestore.collection('earthquake').get();
+          querySnapEQ.docs.forEach((doc) {
+            eqItems.add({
+              'CD_STN': doc['CD_STN'],
+              'CORD_LAT': doc['CORD_LAT'],
+              'CORD_LON': doc['CORD_LON'],
+              'DT_REGT': doc['DT_REGT'],
+              'DT_STFC': doc['DT_STFC'],
+              'DT_TM_FC': doc['DT_TM_FC'],
+              'LOC_LOC': doc['LOC_LOC'],
+              'NO_ORD': doc['NO_ORD'],
+              'NO_REF': doc['NO_REF'],
+              'SECT_SCLE': doc['SECT_SCLE'],
+              'STAT_OTHER': doc['STAT_OTHER'],
+            });
+          });
+
+          setState(() {
+            post_items = postItems;
+            items = opendatasItems;
+            wildfire_items = wildItems;
+            earthquake_items = eqItems;
+          });
+        }
+      } else {
+        if (items.isEmpty && post_items.isEmpty) {
 
           querySnapshotPost = await _firestore
               .collection('posts')
@@ -192,16 +251,9 @@ class _MapSampleState extends State<MapSample> {
           });
 
 
-          if(context.read<Store>().selectedPostType.toString() == "4") {
-            _fetchWildFireItems();
-            _fetchEarthquakeItems();
-          }
+
 
         }
-
-
-        print('post_items: $post_items');
-        print('items: $items');
 
 
         }
@@ -216,10 +268,7 @@ class _MapSampleState extends State<MapSample> {
 
   @override
   Widget build(BuildContext context) {
-    _createPostMarkers(); // 제보글데이터
-    _createOpendatasMarkers(); //공공데이터
-    _createEarthQuackWMarkers();
-    _createWildFireMarkers();
+
 
     if (currentPosition == null) {
       // 위치 정보가 아직 가져와지지 않았을 경우에 대한 처리
@@ -249,7 +298,14 @@ class _MapSampleState extends State<MapSample> {
       );
     }
     else {
-      print("로딩 완료...");
+      _createPostMarkers(); // 제보글데이터
+      _createOpendatasMarkers(); //공공데이터
+      _createEarthQuackWMarkers();
+      _createWildFireMarkers();
+      print("데이터 정보 : ${post_items.length}");
+
+      print("로딩 완료"
+          "...");
       return Scaffold(
         resizeToAvoidBottomInset : false,
         appBar: AppBar(
@@ -339,9 +395,6 @@ class _MapSampleState extends State<MapSample> {
     final double lat = place['geometry']['location']['lat'];
     final double lng = place['geometry']['location']['lng'];
 
-    // print(lat);
-    // print(lng);
-
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(target: LatLng(lat, lng),
@@ -350,12 +403,17 @@ class _MapSampleState extends State<MapSample> {
   }
 
 
-  Future<void> _fetchOpendatasItems() async {
-    List<Map<String, String>> opendatasItems = [];
 
-    QuerySnapshot querySnapshot = await _firestore.collection('opendatas')
+
+  Future<void> _fetchAllData() async {
+    List<Map<String, String>> opendatasItems = [];
+    List<Map<String, dynamic>> postItems = [];
+    List<Map<String, String>> wildItems = [];
+    List<Map<String, String>> eqItems = [];
+
+    QuerySnapshot querySnapOD = await _firestore.collection('opendatas')
         .get();
-    querySnapshot.docs.forEach((doc) {
+    querySnapOD.docs.forEach((doc) {
       opendatasItems.add({
         'incidenteTypeCd': doc['incidenteTypeCd'],
         'incidenteSubTypeCd': doc['incidenteSubTypeCd'],
@@ -369,16 +427,9 @@ class _MapSampleState extends State<MapSample> {
       });
     });
 
-    setState(() {
-      items = opendatasItems;
-    });
-  }
+    QuerySnapshot querySnapPost = await _firestore.collection('posts').where('is_visible', isEqualTo: true).get();
 
-  Future<void> _fetchPostItems() async {
-    List<Map<String, dynamic>> postItems = [];
-    QuerySnapshot querySnapshot = await _firestore.collection('posts').where('is_visible', isEqualTo: true).get();
-
-    querySnapshot.docs.forEach((doc) {
+    querySnapPost.docs.forEach((doc) {
       postItems.add({
         'address_name': doc['address_name'],
         'images': doc['images'],
@@ -398,18 +449,8 @@ class _MapSampleState extends State<MapSample> {
 
     postItems.sort((a, b) => b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
 
-    setState(() {
-      post_items = postItems;
-    });
-
-  }
-
-
-  Future<void> _fetchWildFireItems() async {
-    List<Map<String, String>> wildItems = [];
-
-    QuerySnapshot querySnapshot = await _firestore.collection('wildfire').get();
-    querySnapshot.docs.forEach((doc) {
+    QuerySnapshot querySnapFire = await _firestore.collection('wildfire').get();
+    querySnapFire.docs.forEach((doc) {
       wildItems.add({
         'FRFR_FRNG_DTM': doc['FRFR_FRNG_DTM'],
         'FRFR_INFO_ID': doc['FRFR_INFO_ID'],
@@ -427,20 +468,8 @@ class _MapSampleState extends State<MapSample> {
       });
     });
 
-    setState(() {
-      wildfire_items = wildItems;
-    });
-
-    print('산불 정보 데이터 개수  : : ${wildfire_items.length}');
-
-  }
-
-
-  Future<void> _fetchEarthquakeItems() async {
-    List<Map<String, String>> eqItems = [];
-
-    QuerySnapshot querySnapshot = await _firestore.collection('earthquake').get();
-    querySnapshot.docs.forEach((doc) {
+    QuerySnapshot querySnapEQ = await _firestore.collection('earthquake').get();
+    querySnapEQ.docs.forEach((doc) {
       eqItems.add({
         'CD_STN': doc['CD_STN'],
         'CORD_LAT': doc['CORD_LAT'],
@@ -456,12 +485,13 @@ class _MapSampleState extends State<MapSample> {
       });
     });
 
+
     setState(() {
+      items = opendatasItems;
+      post_items = postItems;
+      wildfire_items = wildItems;
       earthquake_items = eqItems;
     });
-
-    print('지진 정보 데이터 개수  : : ${earthquake_items.length}');
-
   }
 
   Future<String> getNickname(String user_id) async{
@@ -506,7 +536,7 @@ class _MapSampleState extends State<MapSample> {
     return true;
   }
 
-  Future<void> _createPostMarkers() async {
+  void _createPostMarkers()  {
     for (var item in post_items) {
       int decimalIndex = item['latitude']!.indexOf('.') + 4;
       int decimalIndex2 = item['longitude']!.indexOf('.') + 4;
