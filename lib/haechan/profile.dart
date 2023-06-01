@@ -217,7 +217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Map<String, dynamic> postData = doc.data() as Map<String, dynamic>; // 문서의 데이터를 가져옴
 
           if (postData['images'] == '') {
-            urls.add('https://firebasestorage.googleapis.com/v0/b/live-accident.appspot.com/o/images%2F%ED%9A%8C%EC%83%89%20%ED%99%94%EB%A9%B4.png?alt=media&token=61af4d54-33f7-4f13-9335-00b6040b3f6e');
+            urls.add('https://firebasestorage.googleapis.com/v0/b/live-accident.appspot.com/o/images%2F%EA%B8%B0%EB%B3%B8%20%ED%99%94%EB%A9%B4.png?alt=media&token=6941cc14-9e63-4f0c-9560-bdc68eff4923');
           } else {
             urls.add(postData['images']);
           }
