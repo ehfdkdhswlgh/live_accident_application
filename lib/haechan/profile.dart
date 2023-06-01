@@ -88,14 +88,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     print('hello');
   }
 
-  Widget followButton() {
+  Widget followButton(String inputUid) {
     switch (followBtn) {
       case 'hidden':
         return SizedBox.shrink();
       case '구독하기':
         return ElevatedButton(
           child: Text('구독하기'),
-          onPressed: handleSubscribe,
+          onPressed: () {
+            handleSubscribe();
+            subscribe(inputUid);
+            print("구독하기버튼누름");
+          },
           style: ElevatedButton.styleFrom(
             primary: Colors.red[800],  // Light red for '구독하기'
           ),
@@ -103,9 +107,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case '구독중':
         return ElevatedButton(
           child: Text('구독 중'),
-          onPressed: handleUnsubscribe,
+          onPressed: () {
+            handleUnsubscribe();
+            unSubscribe(inputUid);
+            print("구독취소버튼누름");
+          },
           style: ElevatedButton.styleFrom(
-            primary: Colors.red[400],  // Dark red for '구독중'
+            primary: Colors.grey[400],  // Dark red for '구독중'
           ),
         );
       default:
@@ -267,7 +275,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     print('FlutterFire Messaging Example: Subscribing to topic $uid.');
     await FirebaseMessaging.instance.subscribeToTopic(uid);
     print('FlutterFire Messaging Example: Subscribing to topic $uid successful.');
-
   }
 
   Future<void> unSubscribe(String uid) async {
@@ -346,7 +353,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             '팔로잉: ' + followingCount + '  ', // 팔로잉 수
                             style: TextStyle(fontSize: 16.0),
                           ),
-                          followButton(),
+                          followButton(widget.inputUid),
                         ],
                       ),
                     ],
