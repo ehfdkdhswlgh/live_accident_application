@@ -40,6 +40,7 @@ class _MapSampleState extends State<MapSample> {
   List<Map<String, dynamic>> post_items = [];
   List<Map<String, String>> earthquake_items = [];
   List<Map<String, String>> wildfire_items = [];
+  List<MarkerData> markerDataList = [];
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
@@ -100,7 +101,8 @@ class _MapSampleState extends State<MapSample> {
         post_items = [];
         earthquake_items = [];
         wildfire_items = [];
-        markers = {};
+        markerDataList = [];
+        markers.clear();
       });
       _fetchData();
     }
@@ -505,8 +507,6 @@ class _MapSampleState extends State<MapSample> {
   }
 
   Future<void> _createPostMarkers() async {
-    List<MarkerData> markerDataList = [];
-
     for (var item in post_items) {
       int decimalIndex = item['latitude']!.indexOf('.') + 4;
       int decimalIndex2 = item['longitude']!.indexOf('.') + 4;
