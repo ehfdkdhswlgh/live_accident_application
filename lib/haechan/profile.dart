@@ -353,9 +353,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             '팔로잉: ' + followingCount + '  ', // 팔로잉 수
                             style: TextStyle(fontSize: 16.0),
                           ),
-                          followButton(widget.inputUid),
                         ],
                       ),
+                      followButton(widget.inputUid),
                     ],
                   ),
                 ),
