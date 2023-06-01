@@ -1,13 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:live_accident_application/UserImfomation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'FirebaseMessaging/message.dart';
 import 'firebase_options.dart';
 
 import 'haechan/login.dart' as login;
 import 'hojun/post.dart' as post;
+import 'hojun/post_main_document.dart';
 import 'hojun/store.dart';
-import 'hojun/top_rank.dart';
 import 'hojun/write_report_demo.dart' as test;
 import 'jihwan/post_report_management.dart';
 import 'jihoon/map_sample.dart';
@@ -18,6 +21,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'jihwan/sms.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // If you're going to use other Firebase services in the background, such as Firestore,
@@ -59,9 +64,9 @@ void main() async{
           ChangeNotifierProvider(create: (c) => Store()),
         ],
         child: MaterialApp(
-          routes: {
-            '/': (context) => MyHomePage(),
-          }
+            routes: {
+              '/': (context) => MyHomePage(),
+            }
         ),
       )
 
@@ -72,9 +77,6 @@ class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
-
-
-
 
 class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
@@ -92,16 +94,19 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  late FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message) {
-    });
+    var initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    _flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: onSelectNotification);
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+
+    //포그라운드 상태일 때
+    FirebaseMessaging.onMessage.listen((RemoteMessage message)  async {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
       if (notification != null && android != null) {
@@ -118,13 +123,89 @@ class _MyHomePageState extends State<MyHomePage> {
                 //      one that already exists in example app.
                 icon: 'launch_background',
               ),
-            ));
+            ),
+            payload: message.data.toString()
+        );
+
       }
     });
 
+    //백그라운드 상태일 때
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
+      final MessageArguments args =
+      ModalRoute
+          .of(context)
+          ?.settings
+          .arguments as MessageArguments;
+      RemoteMessage message = args.message;
+      Map<String, dynamic> map = jsonDecode(message.data.toString());
+      Navigator.push(
+        context,
+        MaterialPageRoute (
+          builder: (BuildContext context) => PostDocument(
+            postId: map['postId'],
+            imageUrl: map['imageUrl'],
+            postMain: map['postMain'],
+            userNickname: map['userNickname'],
+            postName: map['postName'],
+            userId: map['userId'],
+            timestamp: Timestamp.now(),
+            like: 0,
+            address: map['address'],
+            profile: "",
+          ),
+        ),
+      );
     });
+
+    //종료된 상태일 때
+    // FirebaseMessaging.instance
+    //     .getInitialMessage()
+    //     .then((RemoteMessage message) async {
+    //   Map<String, dynamic> map = jsonDecode(message.data.toString());
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute (
+    //       builder: (BuildContext context) => PostDocument(
+    //         postId: map['postId'],
+    //         imageUrl: map['imageUrl'],
+    //         postMain: map['postMain'],
+    //         userNickname: map['userNickname'],
+    //         postName: map['postName'],
+    //         userId: map['userId'],
+    //         timestamp: Timestamp.now(),
+    //         like: 0,
+    //         address: map['address'],
+    //         profile: "",
+    //       ),
+    //     ),
+    //   );
+    // });
+
+  }
+
+  void onSelectNotification(String? payload) async {
+    if (payload != null) {
+      Map<String, dynamic> map = jsonDecode(payload);
+      print(map);
+      Navigator.push(
+        context,
+        MaterialPageRoute (
+          builder: (BuildContext context) => PostDocument(
+            postId: map['postId'],
+            imageUrl: map['imageUrl'],
+            postMain: map['postMain'],
+            userNickname: map['userNickname'],
+            postName: map['postName'],
+            userId: map['userId'],
+            timestamp: Timestamp.now(),
+            like: 0,
+            address: map['address'],
+            profile: "",
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -160,21 +241,21 @@ class _MyHomePageState extends State<MyHomePage> {
       body: [checker_widget, post.Post(),test.ReportWriteScreen(onReportSubmitted: _goToPostScreen),Sms(), YHNews()][_currentIndex], //
       floatingActionButton: UserImfomation.athority == 'manager'
           ? FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ReportManagementScreen(),
-                ),
-              );
-            },
-            backgroundColor: Colors.red,
-            child: Icon(
-              Icons.notifications_active,
-              color: Colors.white,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReportManagementScreen(),
             ),
-          )
-        : null,
+          );
+        },
+        backgroundColor: Colors.red,
+        child: Icon(
+          Icons.notifications_active,
+          color: Colors.white,
+        ),
+      )
+          : null,
       bottomNavigationBar: UserImfomation.checker ? BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
@@ -208,8 +289,6 @@ class _MyHomePageState extends State<MyHomePage> {
       ): null,
     );
   }
-
-
 
 }
 

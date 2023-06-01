@@ -202,6 +202,7 @@ class _Application extends State<Application> {
         ),
       );
     });
+
   }
 
   Future onSelectNotification(String payload) async {
