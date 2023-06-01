@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../haechan/login.dart';
 import '../UserImfomation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:remedi_kopo/remedi_kopo.dart';
+import 'package:dart_geohash/dart_geohash.dart';
+import 'dart:convert';
 
 class AccountManagementScreen extends StatefulWidget {
   @override
@@ -18,6 +23,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   String _errorMessage = "";
   TextEditingController _nicknameController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  var geoHasher = GeoHasher();
+  String addressName = '';
 
   @override
   void initState() {
@@ -74,65 +81,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text("관심지역 추가"),
-                      content: TextField(
-                        controller: _interestAreaController,
-                        decoration: InputDecoration(labelText: "관심지역"),
-                        onSubmitted: (value) {
-                          setState(() {
-                            if (_interestAreas.length < 3) {
-                              if (_interestAreas.contains(value)) {
-                                _errorMessage = "이미 있는 지역입니다";
-                              } else {
-                                _interestAreas.add(value);
-                                _errorMessage = "";
-                                Navigator.pop(context);
-                                _interestAreaController.clear();
-                                addInterestAreaToFirebase(UserImfomation.uid, _interestAreas); // 파이어베이스에 데이터 추가
-                              }
-                            } else {
-                              Navigator.pop(context);
-                            }
-                          });
-                        },
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text("취소"),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              if (_interestAreas.length < 3) {
-                                if (_interestAreas.contains(
-                                    _interestAreaController.text)) {
-                                  _errorMessage = "이미 있는 지역입니다";
-                                } else {
-                                  _interestAreas.add(
-                                      _interestAreaController.text);
-                                  _errorMessage = "";
-                                  Navigator.pop(context);
-                                  _interestAreaController.clear();
-                                  addInterestAreaToFirebase(UserImfomation.uid, _interestAreas); // 파이어베이스에 데이터 추가
-                                }
-                              } else {
-                                Navigator.pop(context);
-                              }
-                            });
-                          },
-                          child: Text("추가"),
-                        ),
-                      ],
-                    );
-                  },
-                );
+                _addressAPI();
               },
               child: Text("관심지역 추가"),
             ),
@@ -280,7 +229,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
   Future<void> getInterestAreasFromFirebase(String uid) async {
     try {
       DocumentSnapshot userSnapshot = await _firestore
-          .collection('user')
+          .collection('interest_area')
           .doc(uid)
           .get();
 
@@ -296,6 +245,63 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
       print('관심지역 가져오기 오류: $error');
     }
   }
+
+
+  _addressAPI() async {
+    KopoModel model = await Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => RemediKopo(),
+      ),
+    );
+    _searchAddress(model.address.toString());
+  }
+
+  _searchAddress(String searchData) async {
+    final String url =
+        "https://dapi.kakao.com/v2/local/search/address.json";
+    final Map<String, String> headers = {
+      "Authorization": "KakaoAK bbc69e19b84f6c642836ebbbbdf66ad9"
+    };
+
+    final String query =
+        "?query=$searchData&page=1&size=10&analyze_type=similar";
+    final http.Response response = await http.get(
+      Uri.parse(url + query),
+      headers: headers,
+    );
+
+    final Map<String, dynamic> result = json.decode(response.body);
+
+    if (result.containsKey("documents")) {
+      List<dynamic> documents = result["documents"];
+      if (documents.isNotEmpty) {
+        Map<String, dynamic> firstDocument = documents.first;
+        addressName = firstDocument["address_name"];
+        String x = firstDocument["x"];
+        String y = firstDocument["y"];
+        double double_x = double.parse(x);
+        double double_y = double.parse(y);
+        var geohash = geoHasher.encode(double_x, double_y, precision: 4);
+        print('x : ' + x);
+        print('y : ' + y);
+        print('geohash : ' + geohash);
+
+        try {
+          await _firestore.collection("interest_area").add({
+            "geohash": geohash,
+            "interest_area": addressName,
+            "uid": UserImfomation.uid,
+          });
+          print('Firestore에 값이 성공적으로 추가되었습니다.');
+        } catch (error) {
+          print('Firestore에 값 추가 중 오류가 발생했습니다: $error');
+        }
+
+      }
+    }
+  }
+
 
 }
 

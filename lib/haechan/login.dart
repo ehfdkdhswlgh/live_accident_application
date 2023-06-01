@@ -22,7 +22,6 @@ void main() { // 회원가입 버튼 누르고 회원가입 다시 누르면 됨
   // Firebase 초기화 코드
   WidgetsFlutterBinding.ensureInitialized();
   Firebase.initializeApp();
-
   runApp(Login());
 }
 

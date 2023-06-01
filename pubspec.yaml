@@ -58,6 +58,7 @@ dependencies:
   firebase_storage: ^10.3.11
   flutter_local_notifications: ^9.2.0
   dart_geohash: ^2.0.2
+  remedi_kopo: ^0.0.1
 
 dev_dependencies:
   flutter_test:
