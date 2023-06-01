@@ -226,8 +226,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeyboard = MediaQuery.of(context).viewInsets.bottom != 0;
     return Scaffold(
       resizeToAvoidBottomInset: false,
+
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Form(
@@ -236,6 +238,7 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               SizedBox(height: 16),
+              if(!isKeyboard)
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
