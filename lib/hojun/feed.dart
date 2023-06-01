@@ -21,34 +21,25 @@ class _FeedState extends State<Feed> {
   bool _hasMoreData = true;
   var scroll = ScrollController();
   List<Post> posts = [];
-  var post2;
   var geoHasher = GeoHasher();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _fetchData();
     scroll.addListener(() {
       if(scroll.position.pixels > scroll.position.maxScrollExtent - 50){
         _fetchData();
       }
     });
     listenForDataChanges();
+    _fetchData();
   }
 
   @override
   void didUpdateWidget(Feed oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectedType != oldWidget.selectedType) {
-      _isLoading = false;
-      _hasMoreData = true;
-      setState(() {
-        posts = [];
-      });
-      _fetchData();
-    }
-    if (widget.selectedOrder != oldWidget.selectedOrder) {
+    if (widget.selectedType != oldWidget.selectedType || widget.selectedOrder != oldWidget.selectedOrder) {
       _isLoading = false;
       _hasMoreData = true;
       setState(() {
@@ -59,10 +50,12 @@ class _FeedState extends State<Feed> {
   }
 
   void refreshUI() {
-    _isLoading = false;
-    _hasMoreData = true;
-    if (mounted) setState(() {posts = [];});
-    _fetchData();
+    if(posts.isNotEmpty){
+      _isLoading = false;
+      _hasMoreData = true;
+      if (mounted) setState(() {posts = [];});
+      _fetchData();
+    }
   }
 
   void listenForDataChanges() {
@@ -85,11 +78,9 @@ class _FeedState extends State<Feed> {
 
     if (_isLoading || !_hasMoreData) return;
 
-    if(mounted){setState(() {_isLoading = true;});}
+    setState(() {_isLoading = true;});
 
     QuerySnapshot querySnapshot;
-    List<DocumentSnapshot> documentList;
-
 
     if (context.read<Store>().selectedPostType == 0) {
       if(context.read<Store>().selectedPostOrder == 0) {
@@ -302,14 +293,14 @@ class _FeedState extends State<Feed> {
       } catch (error) {}
 
       // Retrieve profile field from Firestore
-      final querySnapshot = await FirebaseFirestore.instance
+      final profileQuerySnapshot = await FirebaseFirestore.instance
           .collection('user')
           .where('uid', isEqualTo: _userId)
           .limit(1)
           .get();
 
-      if (querySnapshot.size > 0) {
-        final documentSnapshot = querySnapshot.docs.first;
+      if (profileQuerySnapshot.size > 0) {
+        final documentSnapshot = profileQuerySnapshot.docs.first;
         _profile = documentSnapshot.get('profile');
       }
 

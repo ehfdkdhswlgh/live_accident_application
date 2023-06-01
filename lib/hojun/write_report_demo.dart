@@ -533,7 +533,9 @@ class _ReportScreenState extends State<ReportWriteScreen> {
       _mainController.clear();
 
       String message = await messageConstruct(postId, url, main, UserImfomation.nickname, title, userId, 0, address);
+      String geoMessage = await geoMessageConstruct(postId, url, main, UserImfomation.nickname, title, userId, 0, address, geohash);
       sendPushMessage(message);
+      sendPushMessage(geoMessage);
 
     }
   }
@@ -625,6 +627,41 @@ Future<String> messageConstruct(String postId, String imageUrl, String postMain,
     'notification': {
       'title': 'LIVE Accident!!',
       'body': "$userNickname께서 재보글을 작성하셨습니다.",
+    },
+  });
+}
+
+Future<String> geoMessageConstruct(String postId, String imageUrl, String postMain, String userNickname, String title, String userId, int like, String address, String geoHash) async{
+  final now = DateTime.now();
+  final timestamp = now.millisecondsSinceEpoch;
+  final querySnapshot = await FirebaseFirestore.instance
+      .collection('user')
+      .where('uid', isEqualTo: userId)
+      .limit(1)
+      .get();
+  String _profile = "";
+  if (querySnapshot.size > 0) {
+    final documentSnapshot = querySnapshot.docs.first;
+    _profile = documentSnapshot.get('profile');
+  }
+
+  return jsonEncode({
+    "to" : "/topics/$userId",
+    'data': {
+      '\"postId\"': "\"$postId\"",
+      '\"imageUrl\"': "\"$imageUrl\"",
+      '\"postMain\"': "\"$postMain\"",
+      '\"userNickname\"': "\"$userNickname\"",
+      '\"postName\"': "\"$title\"",
+      '\"userId\"': "\"$userId\"",
+      '\"timestamp\"': timestamp,
+      '\"like\"': like,
+      '\"address\"': "\"$address\"",
+      '\"profileUrl\"': "\"$_profile\""
+    },
+    'notification': {
+      'title': 'LIVE Accident!!',
+      'body': "관심지역에서 재보글이 작성되었습니다.",
     },
   });
 }
