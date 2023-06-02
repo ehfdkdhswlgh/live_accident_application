@@ -315,6 +315,28 @@ class _ReportScreenState extends State<ReportWriteScreen> {
     }
   }
 
+  void _launchSMSApp(String message) async {
+    final String recipient = '01051186937'; // 받는이 전화번호
+    // String message = '안녕하세요!'; // 내용
+
+
+    // 주소 위치 정보 추가
+    var lon = currentPosition!.longitude;
+    var lat = currentPosition!.latitude;
+    var addr = await getAddress(lat, lon);
+
+    message  += ("\n주소 : " + addr + "\n위도 : " + lat.toString() + "\n경도 : " + lon.toString());
+
+
+    final String encodedMessage = Uri.encodeComponent(message);
+    final url = 'sms:$recipient?body=$encodedMessage';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Failed to launch SMS app.';
+    }
+  }
+
   // 카메라, 갤러리에서 이미지 1개 불러오기
   // ImageSource.galley , ImageSource.camera
   void getImage(ImageSource source) async {
@@ -853,18 +875,7 @@ class _SwitchButtonState extends State<SwitchButton> {
 //   }
 // }
 
-void _launchSMSApp(String message) async {
-  final String recipient = '01051186937'; // 받는이 전화번호
-  // String message = '안녕하세요!'; // 내용
 
-  final String encodedMessage = Uri.encodeComponent(message);
-  final url = 'sms:$recipient?body=$encodedMessage';
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
-    throw 'Failed to launch SMS app.';
-  }
-}
 
 String getSignature(
     String serviceId, String timeStamp, String accessKey, String secretKey) {
