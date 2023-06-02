@@ -27,11 +27,7 @@ class _FeedState extends State<Feed> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    scroll.addListener(() {
-      if(scroll.position.pixels > scroll.position.maxScrollExtent - 50){
-        _fetchData();
-      }
-    });
+    scroll.addListener(() { if(scroll.position.pixels > scroll.position.maxScrollExtent - 50){_fetchData();} });
     listenForDataChanges();
     _fetchData();
   }
@@ -42,9 +38,7 @@ class _FeedState extends State<Feed> {
     if (widget.selectedType != oldWidget.selectedType || widget.selectedOrder != oldWidget.selectedOrder) {
       _isLoading = false;
       _hasMoreData = true;
-      setState(() {
-        posts = [];
-      });
+      setState(() {posts = [];});
       _fetchData();
     }
   }
@@ -60,14 +54,12 @@ class _FeedState extends State<Feed> {
 
   void listenForDataChanges() {
     _db.collection('posts').where('user_id', isEqualTo: UserImfomation.uid).snapshots().listen((snapshot) {refreshUI();});
-    print("refreshed");
   }
 
 
 
   @override
   Future<void> _fetchData() async {
-    print("패치 실행함");
 
     Position currentPosition = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.medium,

@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
     //포그라운드 상태일 때
-    FirebaseMessaging.onMessage.listen((RemoteMessage message)  async {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
       if (notification != null && android != null) {
@@ -159,33 +159,33 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     });
 
-    //종료된 상태일 때
-    // FirebaseMessaging.instance
-    //     .getInitialMessage()
-    //     .then((RemoteMessage message) async {
-    //   Map<String, dynamic> map = jsonDecode(message.data.toString());
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute (
-    //       builder: (BuildContext context) => PostDocument(
-    //         postId: map['postId'],
-    //         imageUrl: map['imageUrl'],
-    //         postMain: map['postMain'],
-    //         userNickname: map['userNickname'],
-    //         postName: map['postName'],
-    //         userId: map['userId'],
-    //         timestamp: Timestamp.now(),
-    //         like: 0,
-    //         address: map['address'],
-    //         profile: "",
-    //       ),
-    //     ),
-    //   );
-    // });
+    //터미네이트 상태일 때
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message) {
+      Map<String, dynamic> map = jsonDecode(message!.data.toString());
+      Navigator.push(
+        context,
+        MaterialPageRoute (
+          builder: (BuildContext context) => PostDocument(
+            postId: map['postId'],
+            imageUrl: map['imageUrl'],
+            postMain: map['postMain'],
+            userNickname: map['userNickname'],
+            postName: map['postName'],
+            userId: map['userId'],
+            timestamp: Timestamp.now(),
+            like: 0,
+            address: map['address'],
+            profile: "",
+          ),
+        ),
+      );
+    });
 
   }
 
-  void onSelectNotification(String? payload) async {
+  void onSelectNotification(String? payload) {
     if (payload != null) {
       Map<String, dynamic> map = jsonDecode(payload);
       print(map);
