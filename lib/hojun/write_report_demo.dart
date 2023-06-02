@@ -664,7 +664,7 @@ Future<String> geoMessageConstruct(String postId, String imageUrl, String postMa
   }
 
   return jsonEncode({
-    "to" : "/topics/$userId",
+    "to" : "/topics/$geoHash",
     'data': {
       '\"postId\"': "\"$postId\"",
       '\"imageUrl\"': "\"$imageUrl\"",
