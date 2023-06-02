@@ -72,23 +72,18 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
               },
               decoration: InputDecoration(labelText: "닉네임"),
             ),
-            // TextField(
-            //   onChanged: (value) {
-            //     setState(() {
-            //       _password = value;
-            //     });
-            //   },
-            //   decoration: InputDecoration(labelText: "비밀번호 수정"),
-            // ),
             SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
                 _addressAPI();
               },
               child: Text("관심지역 추가"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
             ),
             SizedBox(height: 16.0),
-            Text("관심지역"),
+            Text("관심지역 (3개까지 가능)"),
             ListView.builder(
               shrinkWrap: true,
               itemCount: _interestAreas.length,
@@ -150,6 +145,9 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                     userData['name'] = _nickname;
 
                     transaction.update(userRef, userData);
+                    setState(() {
+                      UserImfomation.nickname = _nickname;
+                    });
                   });
 
                   print('here22222222222222222222222222222');
@@ -192,7 +190,11 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                   print("오류 발생: $error");
                 }
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+              ),
               child: Text("수정하기"),
+
             ),
             SizedBox(height: 16.0),
             ElevatedButton(
@@ -209,7 +211,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                primary: Colors.red, // Set the button color to red
+                backgroundColor: Colors.grey, // Set the button color to red
               ),
               child: Text("로그아웃"),
             ),
