@@ -101,7 +101,7 @@ class _MainPostState extends State<MainPost> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: GestureDetector(
-              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like, address: widget.postContent.address, timestamp: widget.postContent.timestamp, profile: widget.postContent.profile,),
+              child: Profile(userNickname: widget.postContent.userNickname, postId: widget.postContent.postId, postName: widget.postContent.postName, userId: widget.postContent.userId, like: widget.postContent.like, address: widget.postContent.address, timestamp: widget.postContent.timestamp, profile: widget.postContent.profile),
               onTap: () {
                 Navigator.push(
                   context,
@@ -152,9 +152,6 @@ class _MainPostState extends State<MainPost> {
                       FadeTransition(opacity: a1, child: child),
                 ),
               );
-              setState(() {
-                // 새로고침 로직 실행
-              });
             },
           ),
           Padding(

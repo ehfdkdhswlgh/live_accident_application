@@ -261,9 +261,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 UserImfomation.postCount = documentSnapshot.get('post_count');
                 UserImfomation.athority = documentSnapshot.get('authority');
 
-                print("다음 유저의 정보를 불러옴" + UserImfomation.nickname + " " + UserImfomation.athority + " " + UserImfomation.postCount.toString());
-
-
 
 
                 return Scaffold(

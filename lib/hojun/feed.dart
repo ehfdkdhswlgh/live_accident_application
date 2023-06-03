@@ -27,9 +27,8 @@ class _FeedState extends State<Feed> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    scroll.addListener(() { if(scroll.position.pixels > scroll.position.maxScrollExtent - 50){_fetchData();} });
-    listenForDataChanges();
-    _fetchData();
+    scroll.addListener(() { if(scroll.position.pixels > scroll.position.maxScrollExtent - 50){_fetchData(5);} });
+    _fetchData(5);
   }
 
   @override
@@ -39,7 +38,7 @@ class _FeedState extends State<Feed> {
       _isLoading = false;
       _hasMoreData = true;
       setState(() {posts = [];});
-      _fetchData();
+      _fetchData(5);
     }
   }
 
@@ -48,25 +47,24 @@ class _FeedState extends State<Feed> {
       _isLoading = false;
       _hasMoreData = true;
       if (mounted) setState(() {posts = [];});
-      _fetchData();
+      _fetchData(5);
     }
   }
 
-  void listenForDataChanges() {
-    _db.collection('posts').where('user_id', isEqualTo: UserImfomation.uid).snapshots().listen((snapshot) {refreshUI();});
-  }
-
-
+  // void listenForDataChanges() {
+  //   _db.collection('posts').where('user_id', isEqualTo: UserImfomation.uid).snapshots().listen((snapshot) {
+  //     refreshUI();
+  //   });
+  // }
 
   @override
-  Future<void> _fetchData() async {
+  Future<void> _fetchData(int itemCapacity) async {
 
     Position currentPosition = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.medium,
     );
 
     var mygeohash = GeoHash(geoHasher.encode(currentPosition!.longitude, currentPosition!.latitude, precision: 4));
-
 
     if (_isLoading || !_hasMoreData) return;
 
@@ -81,7 +79,7 @@ class _FeedState extends State<Feed> {
               .collection('posts')
               .where('is_visible', isEqualTo: true)
               .orderBy('timestamp', descending: true)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         } else {
           final lastPostId = posts.last.postId;
@@ -97,7 +95,7 @@ class _FeedState extends State<Feed> {
               .where('is_visible', isEqualTo: true)
               .orderBy('timestamp', descending: true)
               .startAfterDocument(lastDocSnapshot)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         }
       } else if(context.read<Store>().selectedPostOrder == 1) {
@@ -111,7 +109,7 @@ class _FeedState extends State<Feed> {
               .where('is_visible', isEqualTo: true)
               .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         } else {
           final lastPostId = posts.last.postId;
@@ -129,7 +127,7 @@ class _FeedState extends State<Feed> {
               .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
               .startAfterDocument(lastDocSnapshot)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         }
       } else if(context.read<Store>().selectedPostOrder == 2){
@@ -138,7 +136,7 @@ class _FeedState extends State<Feed> {
               .collection('posts')
               .where('is_visible', isEqualTo: true)
               .orderBy('like', descending: true)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         } else {
           final lastPostId = posts.last.postId;
@@ -154,7 +152,7 @@ class _FeedState extends State<Feed> {
               .where('is_visible', isEqualTo: true)
               .orderBy('like', descending: true)
               .startAfterDocument(lastDocSnapshot)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         }
       } else {
@@ -168,7 +166,7 @@ class _FeedState extends State<Feed> {
               .where('is_visible', isEqualTo: true)
               .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
               .orderBy('timestamp', descending: true)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         } else {
           final lastPostId = posts.last.postId;
@@ -186,7 +184,7 @@ class _FeedState extends State<Feed> {
               .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
               .orderBy('timestamp', descending: true)
               .startAfterDocument(lastDocSnapshot)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         }
       }
@@ -201,7 +199,7 @@ class _FeedState extends State<Feed> {
               .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
               .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         } else {
           final lastPostId = posts.last.postId;
@@ -221,7 +219,7 @@ class _FeedState extends State<Feed> {
               .where('geohash', isEqualTo: mygeo)  // 추가된 부분
               .orderBy('timestamp', descending: true)
               .startAfterDocument(lastDocSnapshot)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         }
       }
@@ -232,7 +230,7 @@ class _FeedState extends State<Feed> {
               .where('is_visible', isEqualTo: true)
               .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
               .orderBy('like', descending: true)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         } else {
           final lastPostId = posts.last.postId;
@@ -250,7 +248,7 @@ class _FeedState extends State<Feed> {
               .where('post_type', isEqualTo: context.read<Store>().selectedPostType)
               .orderBy('like', descending: true)
               .startAfterDocument(lastDocSnapshot)
-              .limit(5)
+              .limit(itemCapacity)
               .get();
         }
       }
@@ -332,13 +330,15 @@ class _FeedState extends State<Feed> {
   @override
   Widget build(BuildContext context) {
     if (posts.isNotEmpty) {
-      return ListView.builder(itemCount: posts.length, controller: scroll, itemBuilder: (c, i) {
-        return Column(
-          children: [
-            MainPost(postContent: posts[i]),
-          ],
-        );
-      },
+      return RefreshIndicator(
+        onRefresh: () async { refreshUI();},
+        child: ListView.builder(itemCount: posts.length, controller: scroll, itemBuilder: (c, i) {
+          return Column(
+            children: [
+              MainPost(postContent: posts[i]),
+            ],
+          );
+        }),
       );
     } else {
       return Text("로딩중");

@@ -129,16 +129,16 @@ class _PostDocumentState extends State<PostDocument> {
                 );
               },
             ),
-            GestureDetector(
-              onTap: handleLikePost,
-              child: Row(
-                children: [
-                  Icon(isLiked ? Icons.favorite : Icons.favorite_border),
-                  SizedBox(width: 4.0),
-                  Text(widget.like.toString()),
-                ],
-              ),
-            ),
+            // GestureDetector(
+            //   onTap: handleLikePost,
+            //   child: Row(
+            //     children: [
+            //       Icon(isLiked ? Icons.favorite : Icons.favorite_border),
+            //       SizedBox(width: 4.0),
+            //       Text(widget.like.toString()),
+            //     ],
+            //   ),
+            // ),
             Divider(thickness: 1.0),
             Row(
               children: [
