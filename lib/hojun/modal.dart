@@ -55,7 +55,7 @@ class _ModalState extends State<Modal> {
     } else {
       if(UserImfomation.uid == widget.userId){
         return Container(
-          height: 200,
+          height: 140,
           child: ListView(
             children: [
               ListTile(
@@ -65,7 +65,7 @@ class _ModalState extends State<Modal> {
                   _deletePost();
                 },
               )
-              ,
+              ,  Divider(),
               ListTile(
                 title: Text('수정하기'),
                 onTap: () {
@@ -87,7 +87,7 @@ class _ModalState extends State<Modal> {
         );
       } else {
         return Container(
-          height: 200,
+          height: 100,
           child: ListView(
             children: [
               ListTile(

@@ -643,8 +643,8 @@ Future<String> messageConstruct(String postId, String imageUrl, String postMain,
       '\"profileUrl\"': "\"$_profile\""
     },
     'notification': {
-      'title': 'LIVE Accident!!',
-      'body': "$userNickname께서 재보글을 작성하셨습니다.",
+      'title': 'Live돌발사고',
+      'body': "$userNickname님이 제보글을 작성하셨습니다.",
     },
   });
 }
@@ -678,8 +678,8 @@ Future<String> geoMessageConstruct(String postId, String imageUrl, String postMa
       '\"profileUrl\"': "\"$_profile\""
     },
     'notification': {
-      'title': 'LIVE Accident!!',
-      'body': "관심지역에서 재보글이 작성되었습니다.",
+      'title': 'Live돌발사고',
+      'body': "관심지역에서 제보글이 작성되었습니다.",
     },
   });
 }

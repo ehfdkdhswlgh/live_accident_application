@@ -280,7 +280,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       Icons.notifications_active,
                       color: Colors.white,
                     ),
+
                   )
+
                       : null,
                   bottomNavigationBar: BottomNavigationBar(
                     type: BottomNavigationBarType.fixed,

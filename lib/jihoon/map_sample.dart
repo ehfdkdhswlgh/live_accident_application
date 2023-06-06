@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart';
 import 'package:live_accident_application/UserImfomation.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../hojun/post_main_document.dart';
 import '../hojun/store.dart';
 import 'MarkerData.dart';
@@ -14,7 +16,7 @@ import 'tags.dart' as tag;
 import '../haechan/profile.dart' as profile;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-
+import 'package:dart_geohash/dart_geohash.dart';
 
 
 class MapSample extends StatefulWidget {
@@ -27,7 +29,7 @@ class MapSample extends StatefulWidget {
 class _MapSampleState extends State<MapSample> {
 
   bool _isLoading = false;
-
+  var geoHasher = GeoHasher();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -36,6 +38,8 @@ class _MapSampleState extends State<MapSample> {
   List<Map<String, String>> earthquake_items = [];
   List<Map<String, String>> wildfire_items = [];
   List<MarkerData> markerDataList = [];
+
+  List<Map<String, dynamic>> shelter_items = [];
 
   Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   TextEditingController _searchController = TextEditingController();
@@ -46,19 +50,15 @@ class _MapSampleState extends State<MapSample> {
   Set<Marker> markers = {};
 
 
-
-
   @override
   void initState() {
     super.initState();
     getCurrentLocation();
     _fetchData();
-
   }
 
   @override
   void didUpdateWidget(MapSample oldWidget) {
-
     super.didUpdateWidget(oldWidget);
     if (widget.selectedType != oldWidget.selectedType) {
       _isLoading = false;
@@ -69,15 +69,12 @@ class _MapSampleState extends State<MapSample> {
         wildfire_items = [];
         markerDataList = [];
         markers.clear();
+        shelter_items = [];
       });
     }
     _fetchData();
     print("데이터 정보 가운데 로딩완료");
   }
-
-
-
-
 
 
   Future<void> _fetchData() async {
@@ -93,183 +90,226 @@ class _MapSampleState extends State<MapSample> {
     List<Map<String, String>> opendatasItems = [];
     List<Map<String, String>> wildItems = [];
     List<Map<String, String>> eqItems = [];
+    List<Map<String, dynamic>> shelterItem = [];
 
 
 
-      if (context.read<Store>().selectedPostType == 0) {
-        if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty && wildfire_items.isEmpty) {
-          _fetchAllData();
-        }
+
+    if (context
+        .read<Store>()
+        .selectedPostType == 0) {
+      if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty &&
+          wildfire_items.isEmpty) {
+        _fetchAllData();
       }
-      else if(context.read<Store>().selectedPostType == 4){
-        if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty && wildfire_items.isEmpty) {
-          querySnapshotPost = await _firestore
-              .collection('posts')
-              .where('is_visible', isEqualTo: true)
-              .where('post_type', isEqualTo: context
-              .read<Store>()
-              .selectedPostType)
-              .get();
-
-
-          querySnapshotOD = await _firestore
-              .collection('opendatas')
-              .where('incidenteTypeCd', isEqualTo: context.read<Store>().selectedPostType.toString()).get();
-
-
-          querySnapshotPost.docs.forEach((doc) {
-            postItems.add({
-              'address_name': doc['address_name'],
-              'images': doc['images'],
-              'is_visible': doc['is_visible'].toString(),
-              'post_content': doc['post_content'],
-              'post_id': doc['post_id'],
-              'post_type': doc['post_type'].toString(),
-              'timestamp': doc['timestamp'],
-              'title': doc['title'],
-              'user_id': doc['user_id'],
-              'latitude': doc['latitude'].toString(),
-              'longitude': doc['longitude'].toString(),
-              'like': doc['like'].toString(),
-              'fastTimeStamp': doc['timestamp'].toDate()
-            });
-          });
-
-          postItems.sort((a, b) => b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
-
-          querySnapshotOD.docs.forEach((doc) {
-            opendatasItems.add({
-              'incidenteTypeCd': doc['incidenteTypeCd'],
-              'incidenteSubTypeCd': doc['incidenteSubTypeCd'],
-              'addressJibun': doc['addressJibun'],
-              'locationDataX': doc['locationDataX'],
-              'locationDataY': doc['locationDataY'],
-              'incidentTitle': doc['incidentTitle'],
-              'startDate': doc['startDate'],
-              'endDate': doc['endDate'],
-              'roadName': doc['roadName'],
-            });
-          });
-
-          QuerySnapshot querySnapFire = await _firestore.collection('wildfire').get();
-          querySnapFire.docs.forEach((doc) {
-            wildItems.add({
-              'FRFR_FRNG_DTM': doc['FRFR_FRNG_DTM'],
-              'FRFR_INFO_ID': doc['FRFR_INFO_ID'],
-              'FRFR_LCTN_XCRD': doc['FRFR_LCTN_XCRD'],
-              'FRFR_LCTN_YCRD': doc['FRFR_LCTN_YCRD'],
-              'FRFR_OCCRR_ADDR': doc['FRFR_OCCRR_ADDR'],
-              'FRFR_OCCRR_TPCD': doc['FRFR_OCCRR_TPCD'],
-              'FRFR_PRGRS_STCD': doc['FRFR_PRGRS_STCD'],
-              'FRFR_STTMN_ADDR': doc['FRFR_STTMN_ADDR'],
-              'FRFR_STTMN_DT': doc['FRFR_STTMN_DT'],
-              'FRFR_STTMN_HMS': doc['FRFR_STTMN_HMS'],
-              'FRST_RGSTN_DTM': doc['FRST_RGSTN_DTM'],
-              'LAST_UPDT_DTM': doc['LAST_UPDT_DTM'],
-              'RNO': doc['RNO'],
-            });
-          });
-
-          QuerySnapshot querySnapEQ = await _firestore.collection('earthquake').get();
-          querySnapEQ.docs.forEach((doc) {
-            eqItems.add({
-              'CD_STN': doc['CD_STN'],
-              'CORD_LAT': doc['CORD_LAT'],
-              'CORD_LON': doc['CORD_LON'],
-              'DT_REGT': doc['DT_REGT'],
-              'DT_STFC': doc['DT_STFC'],
-              'DT_TM_FC': doc['DT_TM_FC'],
-              'LOC_LOC': doc['LOC_LOC'],
-              'NO_ORD': doc['NO_ORD'],
-              'NO_REF': doc['NO_REF'],
-              'SECT_SCLE': doc['SECT_SCLE'],
-              'STAT_OTHER': doc['STAT_OTHER'],
-            });
-          });
-
-          setState(() {
-            post_items = postItems;
-            items = opendatasItems;
-            wildfire_items = wildItems;
-            earthquake_items = eqItems;
-          });
-        }
-      } else {
-        if (items.isEmpty && post_items.isEmpty) {
-
-          querySnapshotPost = await _firestore
-              .collection('posts')
-              .where('is_visible', isEqualTo: true)
-              .where('post_type', isEqualTo: context
-              .read<Store>()
-              .selectedPostType)
-              .get();
-
-
-          querySnapshotOD = await _firestore
-              .collection('opendatas')
-              .where('incidenteTypeCd', isEqualTo: context.read<Store>().selectedPostType.toString()).get();
-
-
-          querySnapshotPost.docs.forEach((doc) {
-            postItems.add({
-              'address_name': doc['address_name'],
-              'images': doc['images'],
-              'is_visible': doc['is_visible'].toString(),
-              'post_content': doc['post_content'],
-              'post_id': doc['post_id'],
-              'post_type': doc['post_type'].toString(),
-              'timestamp': doc['timestamp'],
-              'title': doc['title'],
-              'user_id': doc['user_id'],
-              'latitude': doc['latitude'].toString(),
-              'longitude': doc['longitude'].toString(),
-              'like': doc['like'].toString(),
-              'fastTimeStamp': doc['timestamp'].toDate()
-            });
-          });
-
-          postItems.sort((a, b) => b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
-
-          querySnapshotOD.docs.forEach((doc) {
-            opendatasItems.add({
-              'incidenteTypeCd': doc['incidenteTypeCd'],
-              'incidenteSubTypeCd': doc['incidenteSubTypeCd'],
-              'addressJibun': doc['addressJibun'],
-              'locationDataX': doc['locationDataX'],
-              'locationDataY': doc['locationDataY'],
-              'incidentTitle': doc['incidentTitle'],
-              'startDate': doc['startDate'],
-              'endDate': doc['endDate'],
-              'roadName': doc['roadName'],
-            });
-          });
-
-          setState(() {
-            post_items = postItems;
-            items = opendatasItems;
-          });
-
-
-
-
-        }
-
-
-        }
-
-
     }
+    else if (context
+        .read<Store>()
+        .selectedPostType == 4) {
+      if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty &&
+          wildfire_items.isEmpty) {
+        querySnapshotPost = await _firestore
+            .collection('posts')
+            .where('is_visible', isEqualTo: true)
+            .where('post_type', isEqualTo: context
+            .read<Store>()
+            .selectedPostType)
+            .get();
 
 
+        querySnapshotOD = await _firestore
+            .collection('opendatas')
+            .where('incidenteTypeCd', isEqualTo: context
+            .read<Store>()
+            .selectedPostType
+            .toString()).get();
 
 
+        querySnapshotPost.docs.forEach((doc) {
+          postItems.add({
+            'address_name': doc['address_name'],
+            'images': doc['images'],
+            'is_visible': doc['is_visible'].toString(),
+            'post_content': doc['post_content'],
+            'post_id': doc['post_id'],
+            'post_type': doc['post_type'].toString(),
+            'timestamp': doc['timestamp'],
+            'title': doc['title'],
+            'user_id': doc['user_id'],
+            'latitude': doc['latitude'].toString(),
+            'longitude': doc['longitude'].toString(),
+            'like': doc['like'].toString(),
+            'fastTimeStamp': doc['timestamp'].toDate()
+          });
+        });
+
+        postItems.sort((a, b) =>
+            b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
+
+        querySnapshotOD.docs.forEach((doc) {
+          opendatasItems.add({
+            'incidenteTypeCd': doc['incidenteTypeCd'],
+            'incidenteSubTypeCd': doc['incidenteSubTypeCd'],
+            'addressJibun': doc['addressJibun'],
+            'locationDataX': doc['locationDataX'],
+            'locationDataY': doc['locationDataY'],
+            'incidentTitle': doc['incidentTitle'],
+            'startDate': doc['startDate'],
+            'endDate': doc['endDate'],
+            'roadName': doc['roadName'],
+          });
+        });
+
+        QuerySnapshot querySnapFire = await _firestore.collection('wildfire')
+            .get();
+        querySnapFire.docs.forEach((doc) {
+          wildItems.add({
+            'FRFR_FRNG_DTM': doc['FRFR_FRNG_DTM'],
+            'FRFR_INFO_ID': doc['FRFR_INFO_ID'],
+            'FRFR_LCTN_XCRD': doc['FRFR_LCTN_XCRD'],
+            'FRFR_LCTN_YCRD': doc['FRFR_LCTN_YCRD'],
+            'FRFR_OCCRR_ADDR': doc['FRFR_OCCRR_ADDR'],
+            'FRFR_OCCRR_TPCD': doc['FRFR_OCCRR_TPCD'],
+            'FRFR_PRGRS_STCD': doc['FRFR_PRGRS_STCD'],
+            'FRFR_STTMN_ADDR': doc['FRFR_STTMN_ADDR'],
+            'FRFR_STTMN_DT': doc['FRFR_STTMN_DT'],
+            'FRFR_STTMN_HMS': doc['FRFR_STTMN_HMS'],
+            'FRST_RGSTN_DTM': doc['FRST_RGSTN_DTM'],
+            'LAST_UPDT_DTM': doc['LAST_UPDT_DTM'],
+            'RNO': doc['RNO'],
+          });
+        });
+
+        QuerySnapshot querySnapEQ = await _firestore.collection('earthquake')
+            .get();
+        querySnapEQ.docs.forEach((doc) {
+          eqItems.add({
+            'CD_STN': doc['CD_STN'],
+            'CORD_LAT': doc['CORD_LAT'],
+            'CORD_LON': doc['CORD_LON'],
+            'DT_REGT': doc['DT_REGT'],
+            'DT_STFC': doc['DT_STFC'],
+            'DT_TM_FC': doc['DT_TM_FC'],
+            'LOC_LOC': doc['LOC_LOC'],
+            'NO_ORD': doc['NO_ORD'],
+            'NO_REF': doc['NO_REF'],
+            'SECT_SCLE': doc['SECT_SCLE'],
+            'STAT_OTHER': doc['STAT_OTHER'],
+          });
+        });
+
+        QuerySnapshot querySnapEP = await _firestore.collection('shelter')
+            .get();
+        querySnapEP.docs.forEach((doc) {
+          shelterItem.add({
+            'longitudeDegree': doc['FACIL_LODE'],
+            'longitudeMinute': doc['FACIL_LOMI'],
+            'longitudeSecond': doc['FACIL_LOSE'],
+            'latitudeDegree': doc['FACIL_LADE'],
+            'latitudeMinute': doc['FACIL_LAMI'],
+            'latitudeSecond': doc['FACIL_LASE'],
+            'FacilityName': doc['FACIL_NM'],
+            'FacilityAddress': doc['FACIL_RD_ADDR'],
+            'FacilityPN': doc['MGT_ORG_TEL_NO'],
+            'FacilityCapacity': doc['USE_CAN_STF_CNT'],
+            'FacilityArea': doc['FACIL_POW'],
+            'FacilityAreaUnit': doc['FACIL_UNIT'],
+          });
+        });
+
+        setState(() {
+          post_items = postItems;
+          items = opendatasItems;
+          wildfire_items = wildItems;
+          earthquake_items = eqItems;
+          shelter_items = shelterItem;
+        });
+      }
+    } else {
+      if (items.isEmpty && post_items.isEmpty) {
+        querySnapshotPost = await _firestore
+            .collection('posts')
+            .where('is_visible', isEqualTo: true)
+            .where('post_type', isEqualTo: context
+            .read<Store>()
+            .selectedPostType)
+            .get();
+
+
+        querySnapshotOD = await _firestore
+            .collection('opendatas')
+            .where('incidenteTypeCd', isEqualTo: context
+            .read<Store>()
+            .selectedPostType
+            .toString()).get();
+
+
+        querySnapshotPost.docs.forEach((doc) {
+          postItems.add({
+            'address_name': doc['address_name'],
+            'images': doc['images'],
+            'is_visible': doc['is_visible'].toString(),
+            'post_content': doc['post_content'],
+            'post_id': doc['post_id'],
+            'post_type': doc['post_type'].toString(),
+            'timestamp': doc['timestamp'],
+            'title': doc['title'],
+            'user_id': doc['user_id'],
+            'latitude': doc['latitude'].toString(),
+            'longitude': doc['longitude'].toString(),
+            'like': doc['like'].toString(),
+            'fastTimeStamp': doc['timestamp'].toDate()
+          });
+        });
+
+        postItems.sort((a, b) =>
+            b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
+
+        querySnapshotOD.docs.forEach((doc) {
+          opendatasItems.add({
+            'incidenteTypeCd': doc['incidenteTypeCd'],
+            'incidenteSubTypeCd': doc['incidenteSubTypeCd'],
+            'addressJibun': doc['addressJibun'],
+            'locationDataX': doc['locationDataX'],
+            'locationDataY': doc['locationDataY'],
+            'incidentTitle': doc['incidentTitle'],
+            'startDate': doc['startDate'],
+            'endDate': doc['endDate'],
+            'roadName': doc['roadName'],
+          });
+        });
+
+        QuerySnapshot querySnapEP = await _firestore.collection('shelter')
+            .get();
+        querySnapEP.docs.forEach((doc) {
+          shelterItem.add({
+            'longitudeDegree': doc['FACIL_LODE'],
+            'longitudeMinute': doc['FACIL_LOMI'],
+            'longitudeSecond': doc['FACIL_LOSE'],
+            'latitudeDegree': doc['FACIL_LADE'],
+            'latitudeMinute': doc['FACIL_LAMI'],
+            'latitudeSecond': doc['FACIL_LASE'],
+            'FacilityName': doc['FACIL_NM'],
+            'FacilityAddress': doc['FACIL_RD_ADDR'],
+            'FacilityPN': doc['MGT_ORG_TEL_NO'],
+            'FacilityCapacity': doc['USE_CAN_STF_CNT'],
+            'FacilityArea': doc['FACIL_POW'],
+            'FacilityAreaUnit': doc['FACIL_UNIT'],
+          });
+        });
+
+        setState(() {
+          post_items = postItems;
+          items = opendatasItems;
+          shelter_items = shelterItem;
+        });
+      }
+    }
+  }
 
 
   @override
   Widget build(BuildContext context) {
-
-
     if (currentPosition == null) {
       // 위치 정보가 아직 가져와지지 않았을 경우에 대한 처리
       print("로딩중...");
@@ -302,12 +342,13 @@ class _MapSampleState extends State<MapSample> {
       _createOpendatasMarkers(); //공공데이터
       _createEarthQuackWMarkers();
       _createWildFireMarkers();
+      _createShelterMarker();
       print("데이터 정보 : ${post_items.length}");
 
       print("로딩 완료"
           "...");
       return Scaffold(
-        resizeToAvoidBottomInset : false,
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           backgroundColor: Colors.white,
           title: RichText(
@@ -349,45 +390,57 @@ class _MapSampleState extends State<MapSample> {
           ],
         ),
         body: Column(
-            children: [
-              tag.Tags(),
-              Row(
-                children: [
-                  Expanded(
-                      child: TextFormField(
-                    controller: _searchController,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(hintText: "장소를 입력하세요."),
-                  )),
-                  IconButton(onPressed: () async {
-                    var place = await LocationService().getPlace(
-                        _searchController.text);
-                    _goToPlace(place);
-                  },
-                    icon: Icon(Icons.search),)
-                ],
-              ),
-              Expanded(
-                child: GoogleMap(
-                  mapType: MapType.normal,
+          children: [
+            tag.Tags(),
+            Row(
+              children: [
+                Expanded(
+                    child: TextFormField(
+                      controller: _searchController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(hintText: "장소를 입력하세요."),
+                    )),
+                IconButton(onPressed: () async {
+                  var place = await LocationService().getPlace(
+                      _searchController.text);
+                  _goToPlace(place);
+                },
+                  icon: Icon(Icons.search),)
+              ],
+            ),
+            Expanded(
+              child: GoogleMap(
+                mapType: MapType.normal,
 
-                  initialCameraPosition: CameraPosition(
-                    target: currentPosition!,
-                    zoom: 15,
-                  ),
-                  markers: markers,
-
-
-                  onMapCreated: (GoogleMapController controller) {
-                    _controller.complete(controller);
-                  },
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
+                initialCameraPosition: CameraPosition(
+                  target: currentPosition!,
+                  zoom: 15,
                 ),
+                markers: markers,
+
+
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+                },
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+
+
               ),
-            ],
-          ),
-        );
+
+
+            ),
+
+          ],
+        ),
+          floatingActionButton: FloatingActionButton.extended(
+            backgroundColor: Colors.red,
+          onPressed: _goToShelter,
+          label: const Text('내 주변 대피소'),
+          icon: const Icon(Icons.home_filled,color: Colors.white),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      );
     }
   }
 
@@ -403,13 +456,12 @@ class _MapSampleState extends State<MapSample> {
   }
 
 
-
-
   Future<void> _fetchAllData() async {
     List<Map<String, String>> opendatasItems = [];
     List<Map<String, dynamic>> postItems = [];
     List<Map<String, String>> wildItems = [];
     List<Map<String, String>> eqItems = [];
+    List<Map<String, dynamic>> shelterItem = [];
 
     QuerySnapshot querySnapOD = await _firestore.collection('opendatas')
         .get();
@@ -427,7 +479,8 @@ class _MapSampleState extends State<MapSample> {
       });
     });
 
-    QuerySnapshot querySnapPost = await _firestore.collection('posts').where('is_visible', isEqualTo: true).get();
+    QuerySnapshot querySnapPost = await _firestore.collection('posts').where(
+        'is_visible', isEqualTo: true).get();
 
     querySnapPost.docs.forEach((doc) {
       postItems.add({
@@ -485,16 +538,35 @@ class _MapSampleState extends State<MapSample> {
       });
     });
 
+    QuerySnapshot querySnapEP = await _firestore.collection('shelter').get();
+    querySnapEP.docs.forEach((doc) {
+      shelterItem.add({
+        'longitudeDegree': doc['FACIL_LODE'],
+        'longitudeMinute': doc['FACIL_LOMI'],
+        'longitudeSecond': doc['FACIL_LOSE'],
+        'latitudeDegree': doc['FACIL_LADE'],
+        'latitudeMinute': doc['FACIL_LAMI'],
+        'latitudeSecond': doc['FACIL_LASE'],
+        'FacilityName': doc['FACIL_NM'],
+        'FacilityAddress': doc['FACIL_RD_ADDR'],
+        'FacilityPN': doc['MGT_ORG_TEL_NO'],
+        'FacilityCapacity': doc['USE_CAN_STF_CNT'],
+        'FacilityArea': doc['FACIL_POW'],
+        'FacilityAreaUnit': doc['FACIL_UNIT'],
+      });
+    });
+
 
     setState(() {
       items = opendatasItems;
       post_items = postItems;
       wildfire_items = wildItems;
       earthquake_items = eqItems;
+      shelter_items = shelterItem;
     });
   }
 
-  Future<String> getNickname(String user_id) async{
+  Future<String> getNickname(String user_id) async {
     QuerySnapshot userquery = await _firestore
         .collection('user')
         .where('uid', isEqualTo: user_id)
@@ -536,7 +608,7 @@ class _MapSampleState extends State<MapSample> {
     return true;
   }
 
-  void _createPostMarkers()  {
+  void _createPostMarkers() {
     for (var item in post_items) {
       int decimalIndex = item['latitude']!.indexOf('.') + 4;
       int decimalIndex2 = item['longitude']!.indexOf('.') + 4;
@@ -550,7 +622,6 @@ class _MapSampleState extends State<MapSample> {
       bool isDuplicate = false;
 
       for (var markerData in markerDataList) {
-
         if (markerData.position == position) {
           markerData.dataList.add(item);
           isDuplicate = true;
@@ -560,11 +631,11 @@ class _MapSampleState extends State<MapSample> {
 
       // 중복된 위치가 아니면 새로운 MarkerData 객체 생성
       if (!isDuplicate) {
-        MarkerData markerData = MarkerData(position: position, dataList: [item]);
+        MarkerData markerData = MarkerData(
+            position: position, dataList: [item]);
         markerDataList.add(markerData);
       }
     }
-
 
 
     // 마커 생성
@@ -595,7 +666,8 @@ class _MapSampleState extends State<MapSample> {
       Marker marker = Marker(
         markerId: MarkerId(i.toString()),
         position: LatLng(double.parse(longitude), double.parse(latitude)),
-        infoWindow: InfoWindow(title: '', snippet: ''), // 비어있는 InfoWindow
+        infoWindow: InfoWindow(title: '', snippet: ''),
+        // 비어있는 InfoWindow
         onTap: () {
           showDialog(
             context: context,
@@ -620,14 +692,14 @@ class _MapSampleState extends State<MapSample> {
                         padding: const EdgeInsets.all(8.0),
                         child: Text("주소 : " + title,
                             style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 15, // 원하는 폰트 크기로 조정
-                        )),
+                              fontWeight: FontWeight.w400,
+                              fontSize: 15, // 원하는 폰트 크기로 조정
+                            )),
                       ),
                       Divider(),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(description , style: TextStyle(
+                        child: Text(description, style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 16, // 원하는 폰트 크기로 조정
                         )),
@@ -636,12 +708,14 @@ class _MapSampleState extends State<MapSample> {
                       Divider(),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("시작일: $startDate", style: TextStyle(fontSize: 13)),
+                        child: Text("시작일: $startDate", style: TextStyle(
+                            fontSize: 13)),
                       ),
                       Divider(),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("종료일: $endDate", style: TextStyle(fontSize: 13)),
+                        child: Text("종료일: $endDate", style: TextStyle(
+                            fontSize: 13)),
                       ),
                       SizedBox(height: 10),
 
@@ -661,7 +735,7 @@ class _MapSampleState extends State<MapSample> {
             },
           );
         },
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       );
 
       markers.add(marker);
@@ -669,8 +743,7 @@ class _MapSampleState extends State<MapSample> {
   }
 
 
-
-   void _createWildFireMarkers(){
+  void _createWildFireMarkers() {
     DateTime now = DateTime.now();
     for (var data in wildfire_items) {
       String latitude = data['FRFR_LCTN_XCRD']!;
@@ -680,20 +753,27 @@ class _MapSampleState extends State<MapSample> {
       String startHMS = data['FRFR_STTMN_HMS']!;
       int i = markers.length + 1;
 
-      String formattedStartDate = '${startDate.substring(0, 4)}년 ${startDate.substring(4, 6)}월 ${startDate.substring(6, 8)}일 ';
-      String formattedStartHMS = '${startHMS.substring(0, 2)}시 ${startHMS.substring(2, 4)}분';
+      String formattedStartDate = '${startDate.substring(0, 4)}년 ${startDate
+          .substring(4, 6)}월 ${startDate.substring(6, 8)}일 ';
+      String formattedStartHMS = '${startHMS.substring(0, 2)}시 ${startHMS
+          .substring(2, 4)}분';
 
 
       String formattedDateTime = '$formattedStartDate $formattedStartHMS';
 
-      DateTime markerStartDate = DateTime(int.parse(startDate.substring(0, 4)), int.parse(startDate.substring(4, 6)), int.parse(startDate.substring(6, 8)));
+      DateTime markerStartDate = DateTime(int.parse(startDate.substring(0, 4)),
+          int.parse(startDate.substring(4, 6)),
+          int.parse(startDate.substring(6, 8)));
 
 
-      if (markerStartDate.difference(now).inDays >= -7) {
+      if (markerStartDate
+          .difference(now)
+          .inDays >= -7) {
         Marker marker = Marker(
           markerId: MarkerId(i.toString()),
           position: LatLng(double.parse(longitude), double.parse(latitude)),
-          infoWindow: InfoWindow(title: '', snippet: ''), // 비어있는 InfoWindow
+          infoWindow: InfoWindow(title: '', snippet: ''),
+          // 비어있는 InfoWindow
           onTap: () {
             showDialog(
               context: context,
@@ -730,7 +810,8 @@ class _MapSampleState extends State<MapSample> {
                         Divider(),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text("시작일: $formattedDateTime", style: TextStyle(fontSize: 13)),
+                          child: Text("시작일: $formattedDateTime",
+                              style: TextStyle(fontSize: 13)),
                         ),
                         Align(
                           alignment: Alignment.center,
@@ -748,14 +829,14 @@ class _MapSampleState extends State<MapSample> {
               },
             );
           },
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueGreen),
         );
 
         markers.add(marker);
       }
     }
   }
-
 
 
   void _createEarthQuackWMarkers() {
@@ -787,7 +868,9 @@ class _MapSampleState extends State<MapSample> {
           int.parse(ymd.substring(6, 8)));
 
 
-      if (markerStartDate.difference(now).inDays >= -30) {
+      if (markerStartDate
+          .difference(now)
+          .inDays >= -30) {
         Marker marker = Marker(
           markerId: MarkerId(i.toString()),
           position: LatLng(double.parse(longitude), double.parse(latitude)),
@@ -860,7 +943,8 @@ class _MapSampleState extends State<MapSample> {
               },
             );
           },
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueYellow),
         );
 
         markers.add(marker);
@@ -869,11 +953,11 @@ class _MapSampleState extends State<MapSample> {
   }
 
 
-
-
-
   void _showListDialog(List<Map<String, dynamic>> dataList) {
-    final dialogHeight = MediaQuery.of(context).size.height * 0.95;
+    final dialogHeight = MediaQuery
+        .of(context)
+        .size
+        .height * 0.95;
 
     showGeneralDialog(
       context: context,
@@ -901,13 +985,18 @@ class _MapSampleState extends State<MapSample> {
                               Navigator.pop(buildContext);
                             },
                           ),
-                          Text('제보현황', style: TextStyle(fontSize: 20,color: Colors.red,fontWeight: FontWeight.bold)), // This is the new line for your text
-                          SizedBox(width: 40), // This is just a placeholder to keep the balance
+                          Text('제보현황', style: TextStyle(fontSize: 20,
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold)),
+                          // This is the new line for your text
+                          SizedBox(width: 40),
+                          // This is just a placeholder to keep the balance
                         ],
                       ),
                     ),
                     Container(
-                      height: dialogHeight - 100, // Subtract the height occupied by the title and the button
+                      height: dialogHeight - 100,
+                      // Subtract the height occupied by the title and the button
                       child: dataList.isNotEmpty
                           ? ListView.builder(
                         itemCount: dataList.length,
@@ -922,27 +1011,32 @@ class _MapSampleState extends State<MapSample> {
                                     SizedBox(width: 2),
                                     Text(dataList[index]['like']),
                                   ],),
-                                title: Text("  "+ dataList[index]['title'],style: TextStyle(fontWeight: FontWeight.bold)),
+                                title: Text("  " + dataList[index]['title'],
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold)),
                                 onTap: () async {
-                                  final String nickname = await getNickname(dataList[index]['user_id']);
-                                  if(!mounted) return;
+                                  final String nickname = await getNickname(
+                                      dataList[index]['user_id']);
+                                  if (!mounted) return;
                                   Navigator.push(
                                     context,
                                     PageRouteBuilder(
-                                      pageBuilder: (c, a1, a2) => PostDocument(
-                                        postId: dataList[index]['post_id'],
-                                        imageUrl: dataList[index]['images'],
-                                        postMain: dataList[index]['post_content'],
-                                        userNickname: nickname,
-                                        postName: dataList[index]['title'],
-                                        userId: dataList[index]['user_id'],
-                                        timestamp: dataList[index]['timestamp'],
-                                        like: dataList[index]['like'],
-                                        address: dataList[index]['address_name'],
-                                        profile: ""
-                                      ),
+                                      pageBuilder: (c, a1, a2) =>
+                                          PostDocument(
+                                              postId: dataList[index]['post_id'],
+                                              imageUrl: dataList[index]['images'],
+                                              postMain: dataList[index]['post_content'],
+                                              userNickname: nickname,
+                                              postName: dataList[index]['title'],
+                                              userId: dataList[index]['user_id'],
+                                              timestamp: dataList[index]['timestamp'],
+                                              like: dataList[index]['like'],
+                                              address: dataList[index]['address_name'],
+                                              profile: ""
+                                          ),
                                       transitionsBuilder: (c, a1, a2, child) =>
-                                          FadeTransition(opacity: a1, child: child),
+                                          FadeTransition(
+                                              opacity: a1, child: child),
                                     ),
                                   );
                                 },
@@ -971,7 +1065,9 @@ class _MapSampleState extends State<MapSample> {
         );
       },
       barrierDismissible: true,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierLabel: MaterialLocalizations
+          .of(context)
+          .modalBarrierDismissLabel,
       barrierColor: Colors.black45,
       transitionDuration: const Duration(milliseconds: 400),
       transitionBuilder: (BuildContext context, Animation<double> animation,
@@ -980,7 +1076,8 @@ class _MapSampleState extends State<MapSample> {
         final end = Offset.zero;
         final curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween = Tween(begin: begin, end: end).chain(
+            CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -991,9 +1088,195 @@ class _MapSampleState extends State<MapSample> {
   }
 
 
+Future<void> _goToShelter() async {
+    final GoogleMapController controller = await _controller.future;
+    var mygeohash = GeoHash(geoHasher.encode(currentPosition!.longitude, currentPosition!.latitude, precision: 4));
+
+    // 원하는 위치 좌표
+
+    // 지도 이동 애니메이션
+
+    // 마커 생성
+    for(int i = 0; i < shelter_items.length; i++) {
+      double latitude = convertToCoordinatesFromString(
+          shelter_items[i]['latitudeDegree'] as String,
+          shelter_items[i]['latitudeMinute'] as String,
+          shelter_items[i]['latitudeSecond'] as String);
+      double longitude = convertToCoordinatesFromString(
+          shelter_items[i]['longitudeDegree'] as String,
+          shelter_items[i]['longitudeMinute'] as String,
+          shelter_items[i]['longitudeSecond'] as String);
+
+      var shelterGeohash = GeoHash(
+          geoHasher.encode(longitude, latitude, precision: 4));
+
+
+      print(longitude);
+      print(latitude);
 
 
 
 
+
+      if (mygeohash.geohash == shelterGeohash.geohash) {
+
+        await controller.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(target: LatLng(latitude, longitude), zoom: 13),
+            ),
+        );
+
+        return;
+      }
+    }
+
+
+    }
+
+
+  void _createShelterMarker() {
+    var mygeohash = GeoHash(geoHasher.encode(currentPosition!.longitude, currentPosition!.latitude, precision: 4));
+
+    // 원하는 위치 좌표
+
+    // 지도 이동 애니메이션
+
+    // 마커 생성
+    for(int i = 0; i < shelter_items.length; i++) {
+
+      String name = shelter_items[i]['FacilityName'] as String;
+      String address = shelter_items[i]['FacilityAddress'] as String;
+      String pn = shelter_items[i]['FacilityPN'] as String;
+      String capacity = shelter_items[i]['FacilityCapacity'] as String;
+      String area = shelter_items[i]['FacilityArea'] as String;
+      String areaUnit = shelter_items[i]['FacilityAreaUnit'] as String;
+
+
+      double latitude = convertToCoordinatesFromString(
+          shelter_items[i]['latitudeDegree'] as String,
+          shelter_items[i]['latitudeMinute'] as String,
+          shelter_items[i]['latitudeSecond'] as String);
+      double longitude = convertToCoordinatesFromString(
+          shelter_items[i]['longitudeDegree'] as String,
+          shelter_items[i]['longitudeMinute'] as String,
+          shelter_items[i]['longitudeSecond'] as String);
+
+      var shelterGeohash = GeoHash(
+          geoHasher.encode(longitude, latitude, precision: 4));
+
+
+      print(longitude);
+      print(latitude);
+
+
+
+
+      if (mygeohash.geohash == shelterGeohash.geohash) {
+        Marker marker = Marker(
+          markerId: MarkerId(i.toString()),
+          position: LatLng(latitude, longitude),
+          infoWindow: InfoWindow(title: '', snippet: ''),
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                  child: Container(
+                    width: 500, // 원하는 너비로 조정
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("[대피소 정보]",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15, // 원하는 폰트 크기로 조정
+                              )),
+                        ),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("주소 : " + address,
+                              style: TextStyle(
+                                fontSize: 15, // 원하는 폰트 크기로 조정
+                              )),
+                        ),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("시설명 : ${name}", style: TextStyle(
+                            fontSize: 16, // 원하는 폰트 크기로 조정
+                          )),
+                        ),
+                        SizedBox(height: 10),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: RichText(
+                            text: TextSpan(
+                              text: '전화번호 : ',
+                              style: TextStyle(color: Colors.black),
+                              children: [
+                                TextSpan(
+                                  text: '${pn}',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      launch('tel:${pn}');
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        ),
+                        Divider(),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("수용인원 : ${capacity}명",
+                              style: TextStyle(fontSize: 13)),
+                        ),
+                        SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text("면적 : ${area}${areaUnit}",
+                              style: TextStyle(fontSize: 13)),
+                        ),
+                        SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.center,
+                          child: TextButton(
+                            child: Text("닫기"),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+        );
+
+        markers.add(marker);
+      }
+    }
+  }
+
+  double convertToCoordinatesFromString(String degree, String minute,
+      String second) {
+    double coordinate = double.parse(degree) + (double.parse(minute) / 60) +
+        (double.parse(second) / 3600);
+    return double.parse(coordinate.toStringAsFixed(7));
+  }
 
 }
