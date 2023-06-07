@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +53,14 @@ class _MapSampleState extends State<MapSample> {
 
   @override
   void initState() {
+    items = [];
+    post_items = [];
+    earthquake_items = [];
+    wildfire_items = [];
+    markerDataList = [];
+    markers.clear();
+    shelter_items = [];
+
     super.initState();
     getCurrentLocation();
     _fetchData();
@@ -1088,16 +1097,13 @@ class _MapSampleState extends State<MapSample> {
   }
 
 
-Future<void> _goToShelter() async {
+  Future<void> _goToShelter() async {
     final GoogleMapController controller = await _controller.future;
-    var mygeohash = GeoHash(geoHasher.encode(currentPosition!.longitude, currentPosition!.latitude, precision: 4));
+    double minDistance = double.infinity;
+    LatLng? closestShelter;
 
-    // 원하는 위치 좌표
-
-    // 지도 이동 애니메이션
-
-    // 마커 생성
-    for(int i = 0; i < shelter_items.length; i++) {
+    // 대피소 목록 순회
+    for (int i = 0; i < shelter_items.length; i++) {
       double latitude = convertToCoordinatesFromString(
           shelter_items[i]['latitudeDegree'] as String,
           shelter_items[i]['latitudeMinute'] as String,
@@ -1107,31 +1113,42 @@ Future<void> _goToShelter() async {
           shelter_items[i]['longitudeMinute'] as String,
           shelter_items[i]['longitudeSecond'] as String);
 
-      var shelterGeohash = GeoHash(
-          geoHasher.encode(longitude, latitude, precision: 4));
+      double distance = calculateDistance(currentPosition!.latitude, currentPosition!.longitude, latitude, longitude);
 
-
-      print(longitude);
-      print(latitude);
-
-
-
-
-
-      if (mygeohash.geohash == shelterGeohash.geohash) {
-
-        await controller.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(target: LatLng(latitude, longitude), zoom: 13),
-            ),
-        );
-
-        return;
+      // 가장 가까운 대피소 위치 업데이트
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestShelter = LatLng(latitude, longitude);
       }
-    }
-
 
     }
+
+    // 가장 가까운 대피소로 지도 이동
+    if (closestShelter != null) {
+      await controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: closestShelter, zoom: 15),
+        ),
+      );
+    }
+  }
+
+// 위도 및 경도를 기반으로 두 지점 사이의 거리 계산
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const int radius = 6371; // 지구 반경 (단위: km)
+    double latDiff = degToRad(lat2 - lat1);
+    double lonDiff = degToRad(lon2 - lon1);
+    double a = sin(latDiff / 2) * sin(latDiff / 2) +
+        cos(degToRad(lat1)) * cos(degToRad(lat2)) * sin(lonDiff / 2) * sin(lonDiff / 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    double distance = radius * c;
+    return distance;
+  }
+
+// 도(degree)를 라디안(radian)으로 변환
+  double degToRad(double deg) {
+    return deg * (pi / 180);
+  }
 
 
   void _createShelterMarker() {
