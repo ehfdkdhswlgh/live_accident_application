@@ -316,7 +316,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
 }
 
-  class RegisterPage extends StatelessWidget {
+
+
+
+class RegisterPage extends StatefulWidget {
+  @override
+  _RegisterPageState createState() => _RegisterPageState();
+}
+
+
+
+class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();

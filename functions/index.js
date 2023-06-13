@@ -1,9 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
-const RSS = "https://news.google.com/rss/search?q=%EC%82%AC%EA%B1%B4%EC%82%AC%EA%B3%A0&hl=ko&gl=KR&ceid=KR%3Ako";
-const Parser = require("rss-parser");
-const parser = new Parser();
 const tools = require("firebase-tools");
 // const cors = require("cors")({origin: true});
 const request = require("request");
@@ -113,7 +110,6 @@ exports.getSms = functions.https.onRequest(async (req, res) => {
   })();
 });
 
-
 exports.getEarthquake = functions.https.onRequest(async (req, res) => {
   // Firebase Firestore reference
   const db = admin.firestore();
@@ -210,6 +206,63 @@ exports.getWildfire = functions.https.onRequest(async (req, res) => {
           FRFR_STTMN_ADDR: item.FRFR_STTMN_ADDR,
           FRFR_LCTN_XCRD: item.FRFR_LCTN_XCRD,
           FRFR_LCTN_YCRD: item.FRFR_LCTN_YCRD,
+        });
+      }
+
+      res.send("Data successfully stored in Firestore!");
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Failed to fetch data from the public JSON URL");
+    }
+  })();
+});
+
+
+exports.getShelter = functions.runWith({timeoutSeconds: 540}).https.onRequest(async (req, res) => {
+  // Firebase Firestore reference
+  const db = admin.firestore();
+
+  // URL of the public JSON data
+  const url = "https://www.safetydata.go.kr/openApi/%ED%96%89%EC%A0%95%EC%95%88%EC%A0%84%EB%B6%80_%EB%AF%BC%EB%B0%A9%EC%9C%84_%EB%8C%80%ED%94%BC%EC%86%8C?serviceKey=HKCD282L91W4AP45&returnType=JSON&pageNum=1&numRowsPerPage=180000";
+
+  (async () => {
+    await tools.firestore.delete("/shelter",
+        {project: process.env.GCLOUD_PROJECT,
+          recursive: true,
+          yes: true,
+          force: true,
+        });
+
+    try {
+      const response = await axios.get(url);
+      const data = response.data;
+
+      // Storing data into Firestore
+      const newsData = data.responseData.data;
+      for (const item of newsData) {
+        // If any of the necessary fields are not present in the data, ignore and move to next item.
+        if (!item.FACIL_LODE || !item.FACIL_LOMI || !item.FACIL_LOSE || !item.FACIL_LADE ||
+            !item.FACIL_LAMI || !item.FACIL_LASE || !item.FACIL_NM || !item.FACIL_RD_ADDR ||
+            !item.FACIL_POW || !item.FACIL_UNIT || !item.MGT_ORG_TEL_NO || item.USE_CAN_STF_CNT == "0") {
+          continue;
+        }
+
+        // Automatically generate a document identifier.
+        const docRef = db.collection("shelter").doc();
+
+        await docRef.set({
+          FACIL_LODE: item.FACIL_LODE,
+          FACIL_LOMI: item.FACIL_LOMI,
+          FACIL_LOSE: item.FACIL_LOSE,
+          FACIL_LADE: item.FACIL_LADE,
+          FACIL_LAMI: item.FACIL_LAMI,
+          FACIL_LASE: item.FACIL_LASE,
+          FACIL_NM: item.FACIL_NM,
+          FACIL_RD_ADDR: item.FACIL_RD_ADDR,
+          FACIL_POW: item.FACIL_POW,
+          FACIL_UNIT: item.FACIL_UNIT,
+          USE_CAN_STF_CNT: item.USE_CAN_STF_CNT,
+          MGT_ORG_TEL_NO: item.MGT_ORG_TEL_NO,
         });
       }
 
