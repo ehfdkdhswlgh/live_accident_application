@@ -186,31 +186,12 @@ class _MapSampleState extends State<MapSample> {
           });
         });
 
-        // QuerySnapshot querySnapEP = await _firestore.collection('shelter')
-        //     .get();
-        // querySnapEP.docs.forEach((doc) {
-        //   shelterItem.add({
-        //     'longitudeDegree': doc['FACIL_LODE'],
-        //     'longitudeMinute': doc['FACIL_LOMI'],
-        //     'longitudeSecond': doc['FACIL_LOSE'],
-        //     'latitudeDegree': doc['FACIL_LADE'],
-        //     'latitudeMinute': doc['FACIL_LAMI'],
-        //     'latitudeSecond': doc['FACIL_LASE'],
-        //     'FacilityName': doc['FACIL_NM'],
-        //     'FacilityAddress': doc['FACIL_RD_ADDR'],
-        //     'FacilityPN': doc['MGT_ORG_TEL_NO'],
-        //     'FacilityCapacity': doc['USE_CAN_STF_CNT'],
-        //     'FacilityArea': doc['FACIL_POW'],
-        //     'FacilityAreaUnit': doc['FACIL_UNIT'],
-        //   });
-        // });
-
         setState(() {
           post_items = postItems;
           items = opendatasItems;
           wildfire_items = wildItems;
           earthquake_items = eqItems;
-          // shelter_items = shelterItem;
+
         });
       }
     } else if(context
@@ -219,6 +200,36 @@ class _MapSampleState extends State<MapSample> {
       if (items.isEmpty && post_items.isEmpty && earthquake_items.isEmpty &&
           wildfire_items.isEmpty) {
         List<Map<String, String>> opendatasItems = [];
+
+
+
+        querySnapshotPost = await _firestore
+            .collection('posts')
+            .where('is_visible', isEqualTo: true)
+            .where('post_type', isEqualTo: context
+            .read<Store>()
+            .selectedPostType)
+            .get();
+
+
+        querySnapshotPost.docs.forEach((doc) {
+          postItems.add({
+            'address_name': doc['address_name'],
+            'images': doc['images'],
+            'is_visible': doc['is_visible'].toString(),
+            'post_content': doc['post_content'],
+            'post_id': doc['post_id'],
+            'post_type': doc['post_type'].toString(),
+            'timestamp': doc['timestamp'],
+            'title': doc['title'],
+            'user_id': doc['user_id'],
+            'latitude': doc['latitude'].toString(),
+            'longitude': doc['longitude'].toString(),
+            'like': doc['like'].toString(),
+            'fastTimeStamp': doc['timestamp'].toDate()
+          });
+        });
+
 
         QuerySnapshot querySnapOD = await _firestore.collection('opendatas')
             .get();
@@ -237,8 +248,11 @@ class _MapSampleState extends State<MapSample> {
           });
         });
 
+        postItems.sort((a, b) =>
+            b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
 
         setState(() {
+          post_items = postItems;
           items = opendatasItems;
         });
       }
@@ -275,30 +289,8 @@ class _MapSampleState extends State<MapSample> {
             b['fastTimeStamp'].compareTo(a['fastTimeStamp']));
 
 
-
-        // QuerySnapshot querySnapEP = await _firestore.collection('shelter')
-        //     .get();
-        // querySnapEP.docs.forEach((doc) {
-        //   shelterItem.add({
-        //     'longitudeDegree': doc['FACIL_LODE'],
-        //     'longitudeMinute': doc['FACIL_LOMI'],
-        //     'longitudeSecond': doc['FACIL_LOSE'],
-        //     'latitudeDegree': doc['FACIL_LADE'],
-        //     'latitudeMinute': doc['FACIL_LAMI'],
-        //     'latitudeSecond': doc['FACIL_LASE'],
-        //     'FacilityName': doc['FACIL_NM'],
-        //     'FacilityAddress': doc['FACIL_RD_ADDR'],
-        //     'FacilityPN': doc['MGT_ORG_TEL_NO'],
-        //     'FacilityCapacity': doc['USE_CAN_STF_CNT'],
-        //     'FacilityArea': doc['FACIL_POW'],
-        //     'FacilityAreaUnit': doc['FACIL_UNIT'],
-        //   });
-        // });
-
         setState(() {
           post_items = postItems;
-          items = opendatasItems;
-          // shelter_items = shelterItem;
         });
       }
     }
