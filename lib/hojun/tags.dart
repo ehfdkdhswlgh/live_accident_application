@@ -11,7 +11,7 @@ class Tags extends StatefulWidget {
 
 class _TagsState extends State<Tags> {
 
-  final List<String> _acc = ['전체','사고','공사','행사', '기상', '통제', '교통'];
+  final List<String> _acc = ['전체','사고','공사','행사','기상','통제','교통'];
   final List<String> _ord = ['최신순','주변순','추천순'];
 
 
