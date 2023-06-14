@@ -445,6 +445,7 @@ class _MyButtonState extends State<MyButton> {
                 _buildButton('행사/시위', context),
                 _buildButton('기상', context),
                 _buildButton('통제', context),
+                _buildButton('교통', context),
               ],
             ),
           ),

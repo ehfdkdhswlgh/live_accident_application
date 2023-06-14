@@ -280,28 +280,13 @@ class Profile extends StatelessWidget {
               },
               icon: Icon(Icons.more_horiz),
             ), // 아이콘
-            Text(formatTimestamp(timestamp)), // 업로드 날짜
+            Text(context.read<Store>().formatTimestamp(timestamp)), // 업로드 날짜
           ],
         ),
       ],
     );
   }
-  String formatTimestamp(Timestamp timestamp) {
-    final now = DateTime.now();
-    final time = timestamp.toDate();
 
-    final difference = now.difference(time);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}일 전';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}시간 전';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}분 전';
-    } else {
-      return '방금 전';
-    }
-  }
 }
 
 

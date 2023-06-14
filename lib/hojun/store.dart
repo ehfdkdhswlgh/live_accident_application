@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class Store extends ChangeNotifier{
   // var likeState = false;
@@ -46,5 +48,22 @@ class Store extends ChangeNotifier{
   void _goToPostScreen(int currentIndex) {
     currentIndex = 1;
     notifyListeners();
+  }
+
+  String formatTimestamp(Timestamp timestamp) {
+    final now = DateTime.now();
+    final time = timestamp.toDate();
+
+    final difference = now.difference(time);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}일 전';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}시간 전';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}분 전';
+    } else {
+      return '방금 전';
+    }
   }
 }

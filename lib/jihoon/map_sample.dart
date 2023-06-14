@@ -1008,9 +1008,21 @@ class _MapSampleState extends State<MapSample> {
                                     SizedBox(width: 2),
                                     Text(dataList[index]['like']),
                                   ],),
-                                title: Text("  " + dataList[index]['title'],
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold)),
+                                title: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        "  " + dataList[index]['title'],
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),  // 추가된 부분: 작은 간격을 위한 SizedBox
+                                    Text(
+                                      context.read<Store>().formatTimestamp(dataList[index]['timestamp']),
+                                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
                                 onTap: () async {
                                   final String nickname = await getNickname(
                                       dataList[index]['user_id']);
