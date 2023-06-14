@@ -27,6 +27,8 @@ class Store extends ChangeNotifier{
       postType = 4;
     } else if (text=='통제') {
       postType = 5;
+    } else if (text=='교통') {
+      postType = 6;
     }
     notifyListeners();
   }

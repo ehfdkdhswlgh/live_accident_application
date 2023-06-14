@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -720,6 +719,7 @@ class _MyButtonState extends State<MyButton> {
                 _buildButton('행사/시위', context),
                 _buildButton('기상', context),
                 _buildButton('통제', context),
+                _buildButton('교통', context),
               ],
             ),
           ),
